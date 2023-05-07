@@ -41,11 +41,11 @@ class DenseMatrix {
     protected:
         // Initialize these values to signify an 'empty' matrix
 
-        int _ncols = -1;
-        int _nrows = -1;
+        int _ncols = 0;
+        int _nrows = 0;
         vect_t* data = NULL;
-        int vects_per_row = -1;
-        int total_vects = -1;
+        int vects_per_row = 0;
+        int total_vects = 0;
 
     public:
         // Constructors
@@ -54,8 +54,8 @@ class DenseMatrix {
         DenseMatrix(const DenseMatrix& that);
         DenseMatrix(int rows, int cols);
         DenseMatrix(int rows, int cols, double init_val);
-        // DenseMatrix(int rows, int cols, double* data);
-        // DenseMatrix(int rows, int cols, std::vector<double> data);
+        DenseMatrix(int rows, int cols, double* elems);
+        DenseMatrix(int rows, int cols, std::vector<double> elems);
 
         ~DenseMatrix();
 
@@ -70,19 +70,21 @@ class DenseMatrix {
         DenseMatrix& operator-= (const DenseMatrix& that);
         const DenseMatrix operator* (const DenseMatrix& that) const;
         DenseMatrix& operator*= (const DenseMatrix& that);
-        // DenseMatrix operator* (double that);
+        const DenseMatrix operator* (const double that) const; 
         const DenseMatrix operator/ (const DenseMatrix& that) const;
         DenseMatrix& operator/= (const DenseMatrix& that);
-        // DenseMatrix operator/ (double that);
-        // ...
+        const DenseMatrix operator/ (const double that) const;
+        // ... ?
 
 
         // Overload indexing operators
 
         // NOTE! To access a single element there are two alternatives:
-        // 1. double elem = A[row][col]
+        // 1. double elem = A[num]
         // 2. double elem = A(row, col)
-        // Out of these the () operator is recommended as it doesn't create a temporary column vector
+        // For these to return the same value must hold that:
+        //    num = row * num_rows + col
+        // Thus it is recommended to use () for indexing
 
         // Additionally for slicing there exists a overloaded operator:
         // DenseMatrix B = A(rowStart, rowEnd, colStart, colEnd)
@@ -90,24 +92,30 @@ class DenseMatrix {
         // going out of bounds, but only returns the values that exist. The values *Start
         // understandably must be in bounds
 
-        // DenseMatrix operator[] (int row);
-        // double operator[] (int row);  // For vectors
-        // DenseMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd);
+        double operator[] (int num);
         double operator() (int row, int col);
+        double get(int row, int col);  // Alias for operator()
+        const DenseMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd);
+        const DenseMatrix get(int rowStart, int rowEnd, int colStart, int colEnd); // Alias for operator()
+
+        // Functions for placing values into existing matrices
+
+        void place(int row, int col, double val);
+        void place(int rowStart, int rowEnd, int colStart, int colEnd, DenseMatrix matrix);
 
         
         // Other overloaded operators
 
         DenseMatrix& operator= (const DenseMatrix& that);
-        // bool operator== (const DenseMatrix& that);
-        // bool operator!= (const DenseMatrix& that);
+        bool operator== (const DenseMatrix& that);
+        bool operator!= (const DenseMatrix& that);
 
         // Other methods
 
         int ncols() { return _ncols; }
         int nrows() { return _nrows; }
-        // DenseMatrix transpose();
-        // DenseMatrix T();
+        // const DenseMatrix transpose();
+        // const DenseMatrix T();
         // DenseMatrix inv();
         // DenseMatrix matmul(const DenseMatrix& that);
         // std::vector<double> toVector();
@@ -116,5 +124,10 @@ class DenseMatrix {
         
         friend std::ostream& operator<<(std::ostream& os, DenseMatrix& A);
 };
+
+// To accomplish commutative property for matrix scalar multiplication
+
+const DenseMatrix operator* (double scalar, const DenseMatrix& matrix);
+
 
 #endif
