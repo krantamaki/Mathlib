@@ -59,7 +59,10 @@ DenseMatrix::DenseMatrix(int rows, int cols) {
 
     // Initialize the data values as zeros
 	data = (vect_t*)tmp;
-	const vect_t zeros = {(double)0.0, (double)0.0, (double)0.0, (double)0.0};
+	vect_t zeros;
+    for (int i = 0; i < VECT_ELEMS; i++) {
+        zeros[i] = 0.0;
+    }
 
 	#pragma omp parallel for schedule(dynamic, 1)
 	for (int i = 0; i < rows; i++) {
@@ -90,7 +93,11 @@ DenseMatrix::DenseMatrix(int rows, int cols, double init_val) {
 
     // Initialize the data values as init_val
 	data = (vect_t*)tmp;
-	const vect_t init_vals = {init_val, init_val, init_val, init_val};
+
+	vect_t init_vals;
+    for (int i = 0; i < VECT_ELEMS; i++) {
+        init_vals[i] = init_val;
+    }
 
 	#pragma omp parallel for schedule(dynamic, 1)
 	for (int i = 0; i < rows; i++) {
@@ -244,16 +251,18 @@ const DenseMatrix DenseMatrix::operator* (const double that) const {
         return *this;
     }
 
+    DenseMatrix ret = DenseMatrix(*this);
+
     const vect_t mult = {that, that, that, that};
 
     #pragma omp parallel for schedule(dynamic, 1)
 	for (int row = 0; row < _nrows; row++) {
 		for (int vect = 0; vect < vects_per_row; vect++) {
-			data[vects_per_row * row + vect] = data[vects_per_row * row + vect] * mult;
+			ret.data[vects_per_row * row + vect] = ret.data[vects_per_row * row + vect] * mult;
 		}
 	}
 
-    return *this;
+    return ret;
 }
 
 const DenseMatrix operator* (double scalar, const DenseMatrix& matrix) {
@@ -316,8 +325,21 @@ void DenseMatrix::place(int row, int col, double val) {
 	data[vects_per_row * row + vect][elem] = val;
 }
 
-void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, DenseMatrix matrix) {
+void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, DenseMatrix mat) {
+    // Check that the matrix to be placed fits
+    if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || mat._nrows < rowEnd - rowStart || mat._ncols < colEnd - colStart) {
+        throw std::invalid_argument("Given dimensions out of bounds!");
+    }
 
+    #pragma omp parallel for schedule(dynamic, 1)
+	for (int row0 = 0; row0 < rowEnd - rowStart; row0++) {
+		int row = row0 + rowStart;
+		// Go over the column values
+		for (int col0 = 0; col0 < colEnd - colStart; col0++) {
+			int col = col0 + colStart;
+			this->place(row, col, mat(row0, col0));
+		}
+	}
 }
 
 double DenseMatrix::operator() (int row, int col) {
@@ -358,6 +380,9 @@ const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStar
     if (rowEnd > _nrows || colEnd > _ncols) {
         std::cout << "\nWARNING: End index out of bounds" << "\n\n";
     }
+
+    rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
+    colEnd = colEnd > _ncols ? _ncols : colEnd;
 
     // Allocate memory for a new matrix
     DenseMatrix ret = DenseMatrix(rowEnd - rowStart, colEnd - colStart);
@@ -400,7 +425,6 @@ DenseMatrix& DenseMatrix::operator= (const DenseMatrix& that) {
         throw std::bad_alloc();
     }
 
-    // Initialize the data values as init_val
 	data = (vect_t*)tmp;
 
     // Copy the data from that
@@ -462,5 +486,31 @@ std::ostream& operator<<(std::ostream& os, DenseMatrix& A) {
 }
 
 
+// ----------------------------------MISC----------------------------------------
 
+const DenseMatrix DenseMatrix::transpose() const{
+    // Check that matrix initialized
+    if (_ncols <= 0 || _nrows <= 0) {
+        return *this;  // Maybe changed to fatal error
+    }
 
+    // Allocate memory for needed sized matrix
+    DenseMatrix ret = DenseMatrix(_ncols, _nrows);
+
+    #pragma omp parallel for schedule(dynamic, 1)
+    for (int row = 0; row < _nrows; row++) {
+        for (int col = 0; col < _ncols; col++) {
+
+            const int vect = col / VECT_ELEMS;
+	        const int elem = col % VECT_ELEMS;
+
+            ret.place(col, row, this->data[vects_per_row * row + vect][elem]);
+        }
+    }
+
+    return ret;
+}
+
+const DenseMatrix DenseMatrix::T() const{
+    return this->transpose();
+}

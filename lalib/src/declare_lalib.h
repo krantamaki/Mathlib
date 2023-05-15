@@ -70,7 +70,7 @@ class DenseMatrix {
         DenseMatrix& operator-= (const DenseMatrix& that);
         const DenseMatrix operator* (const DenseMatrix& that) const;
         DenseMatrix& operator*= (const DenseMatrix& that);
-        const DenseMatrix operator* (const double that) const; 
+        const DenseMatrix operator* (const double that) const;
         const DenseMatrix operator/ (const DenseMatrix& that) const;
         DenseMatrix& operator/= (const DenseMatrix& that);
         const DenseMatrix operator/ (const double that) const;
@@ -96,7 +96,7 @@ class DenseMatrix {
         double operator() (int row, int col);
         double get(int row, int col);  // Alias for operator()
         const DenseMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd);
-        const DenseMatrix get(int rowStart, int rowEnd, int colStart, int colEnd); // Alias for operator()
+        const DenseMatrix get(int rowStart, int rowEnd, int colStart, int colEnd);  // Alias for operator()
 
         // Functions for placing values into existing matrices
 
@@ -114,10 +114,10 @@ class DenseMatrix {
 
         int ncols() { return _ncols; }
         int nrows() { return _nrows; }
-        // const DenseMatrix transpose();
-        // const DenseMatrix T();
+        const DenseMatrix transpose() const;
+        const DenseMatrix T() const;  // Alias for transpose()
         // DenseMatrix inv();
-        // DenseMatrix matmul(const DenseMatrix& that);
+        const DenseMatrix matmul(const DenseMatrix& that) const;
         // std::vector<double> toVector();
 
         // Friend methods
