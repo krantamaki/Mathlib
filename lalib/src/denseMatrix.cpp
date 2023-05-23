@@ -42,7 +42,7 @@ DenseMatrix::DenseMatrix(const DenseMatrix& that) {
 // the values as zeros
 DenseMatrix::DenseMatrix(int rows, int cols) {
     if (cols < 1 || rows < 1) {
-        throw std::invalid_argument("Matrix dimensions must be non-negative!");
+        throw std::invalid_argument("Matrix dimensions must be positive!");
     }
 
     _ncols = cols;
@@ -184,7 +184,7 @@ DenseMatrix::~DenseMatrix() {
 }
 
 
-// ------------------OVERLOADED BASIC MATH OPERATORS---------------------------
+// ---------------------OVERLOADED BASIC MATH OPERATORS------------------------
 
 DenseMatrix& DenseMatrix::operator+= (const DenseMatrix& that) {
     // Check that the dimensions match
@@ -317,7 +317,7 @@ const DenseMatrix DenseMatrix::operator/ (const double that) const {
 }
 
 
-// -------------------OVERLOADED INDEXING OPERATORS-----------------------------
+// ----------------------OVERLOADED INDEXING OPERATORS--------------------------
 
 void DenseMatrix::place(int row, int col, double val) {
     if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
@@ -410,7 +410,7 @@ const DenseMatrix DenseMatrix::get(int rowStart, int rowEnd, int colStart, int c
 }
 
 
-// ----------------------OTHER OVERLOADED OPERATORS-----------------------------
+// ------------------------OTHER OVERLOADED OPERATORS---------------------------
 
 DenseMatrix& DenseMatrix::operator= (const DenseMatrix& that) {
     // Check for self-assignment ie. case where a = a is called by comparing the pointers of the objects
@@ -449,12 +449,9 @@ bool DenseMatrix::operator== (const DenseMatrix& that) {
         return false;
     }
 
-    for (int row = 0; row < _nrows; row++) {
-        for (int col = 0; col < _ncols; col++) {
-            int vect = col / VECT_ELEMS;
-            int elem = col % VECT_ELEMS;
-
-            if (data[row * vects_per_row + vect][elem] != that.data[row * vects_per_row + vect][elem]) {
+    for (int vect = 0; vect < total_vects; vect++) {
+        for (int elem = 0; elem < VECT_ELEMS; elem++) {
+            if (data[vect][elem] != that.data[vect][elem]) {
                 return false;
             }
         }
@@ -468,7 +465,7 @@ bool DenseMatrix::operator!= (const DenseMatrix& that) {
 }
 
 std::ostream& operator<<(std::ostream& os, DenseMatrix& A) {
-    if (A.ncols() == -1 || A.nrows() == 1) {
+    if (A.ncols() == 0 || A.nrows() == 0) {
         os << "[]" << std::endl;  // Signifies uninitialized matrix
         
         return os;
@@ -520,3 +517,15 @@ const DenseMatrix DenseMatrix::transpose() const{
 const DenseMatrix DenseMatrix::T() const{
     return this->transpose();
 }
+
+std::vector<double> DenseMatrix::toVector() {}
+
+double DenseMatrix::asDouble() {}
+
+const DenseVector DenseMatrix::asDenseVector() const {}
+
+const DenseVector DenseMatrix::mean(int dim = 0) {}
+
+const DenseVector DenseMatrix::sd(int dim = 0) {}
+
+

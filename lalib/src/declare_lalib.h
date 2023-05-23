@@ -98,8 +98,8 @@ class DenseMatrix {
         double get(int row, int col);  // Alias for operator()
         const DenseMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd);
         const DenseMatrix get(int rowStart, int rowEnd, int colStart, int colEnd);  // Alias for operator()
-        // const DenseVector getCol(int col);
-        // const DenseVector getRow(int row);
+        const DenseVector getCol(int col);
+        const DenseVector getRow(int row);
 
         vect_t getSIMD(int num);  // Allows user to access the SIMD vectors for further parallelization
         const vect_t getSIMD(int num) const; 
@@ -128,19 +128,19 @@ class DenseMatrix {
 
         const DenseMatrix transpose() const;
         const DenseMatrix T() const;  // Alias for transpose()
-        // DenseMatrix inv();
+        DenseMatrix inv();
         const DenseMatrix matmul(const DenseMatrix& that) const;
-        // const DenseMatrix matmulStrassen(const DenseMatrix& that) const;
+        const DenseMatrix matmulStrassen(const DenseMatrix& that) const;
         const DenseMatrix matmulNaive(const DenseMatrix& that) const;
         const DenseVector matmul(const DenseVector& that) const;
-        // std::vector<double> toVector();
+        std::vector<double> toVector();
         double asDouble();
         const DenseVector asDenseVector() const;
 
         // Statistics
 
-        // const DenseVector mean(int dim = 0);
-        // const DenseVector sd(int dim = 0);
+        const DenseVector mean(int dim = 0);
+        const DenseVector sd(int dim = 0);
 
         // Friend methods
         
@@ -165,12 +165,12 @@ class DenseVector {
     public:
         // Constructors
 
-        // DenseVector(void);
-        // DenseVector(const DenseVector& that);
+        DenseVector(void);
+        DenseVector(const DenseVector& that);
         DenseVector(int rows, int cols);
-        // DenseVector(int rows, int cols, double init_val);
-        // DenseVector(int rows, int cols, double* elems);
-        // DenseVector(int rows, int cols, std::vector<double> elems);
+        DenseVector(int rows, int cols, double init_val);
+        DenseVector(int rows, int cols, double* elems);
+        DenseVector(int rows, int cols, std::vector<double> elems);
 
         ~DenseVector();
 
@@ -179,16 +179,16 @@ class DenseVector {
 
         // NOTE! The operators will function as elementwise operators
 
-        // const DenseVector operator+ (const DenseVector& that) const;
-        // DenseVector& operator+= (const DenseVector& that);
-        // const DenseVector operator- (const DenseVector& that) const;
-        // DenseVector& operator-= (const DenseVector& that);
-        // const DenseVector operator* (const DenseVector& that) const;
-        // DenseVector& operator*= (const DenseVector& that);
-        // const DenseVector operator* (const double that) const;
-        // const DenseVector operator/ (const DenseVector& that) const;
-        // DenseVector& operator/= (const DenseVector& that);
-        // const DenseVector operator/ (const double that) const;
+        const DenseVector operator+ (const DenseVector& that) const;
+        DenseVector& operator+= (const DenseVector& that);
+        const DenseVector operator- (const DenseVector& that) const;
+        DenseVector& operator-= (const DenseVector& that);
+        const DenseVector operator* (const DenseVector& that) const;
+        DenseVector& operator*= (const DenseVector& that);
+        const DenseVector operator* (const double that) const;
+        const DenseVector operator/ (const DenseVector& that) const;
+        DenseVector& operator/= (const DenseVector& that);
+        const DenseVector operator/ (const double that) const;
         // ... ?
 
 
@@ -200,11 +200,11 @@ class DenseVector {
         // going out of bounds, but only returns the values that exist. The value start
         // understandably must be in bounds
 
-        // double operator[] (int num);
-        // double operator() (int num);
-        // double get(int num);  // Alias for operator()
-        // const DenseVector operator() (int start, int end);
-        // const DenseVector get(int start, int end);  // Alias for operator()
+        double operator[] (int num);
+        double operator() (int num);
+        double get(int num);  // Alias for operator()
+        const DenseVector operator() (int start, int end);
+        const DenseVector get(int start, int end);  // Alias for operator()
 
         vect_t getSIMD(int num);  // Allows user to access the SIMD vectors for further parallelization
         const vect_t getSIMD(int num) const; 
@@ -213,14 +213,14 @@ class DenseVector {
         // Functions for placing values into existing vectors
 
         void place(int num, double val);
-        // void place(int start, int end, DenseVector vector);
+        void place(int start, int end, DenseVector vector);
 
         
         // Other overloaded operators
 
-        // DenseVector& operator= (const DenseVector& that);
-        // bool operator== (const DenseVector& that);
-        // bool operator!= (const DenseVector& that);
+        DenseVector& operator= (const DenseVector& that);
+        bool operator== (const DenseVector& that);
+        bool operator!= (const DenseVector& that);
 
         // Other methods
 
@@ -232,29 +232,28 @@ class DenseVector {
         const int nrows() const { return _nrows; }
         const std::tuple<int, int> shape() const { return std::make_tuple(_nrows, _ncols); }
 
-        // const DenseVector transpose() const;
-        // const DenseVector T() const;  // Alias for transpose()
-        // DenseMatrix inv();
+        const DenseVector transpose() const;
+        const DenseVector T() const;  // Alias for transpose()
         const DenseVector matmul(const DenseMatrix& that) const;
         const DenseMatrix matmul(const DenseVector& that) const;
         double dot(const DenseVector& that) const;  // Alias for vector vector multiplication which returns double always
-        // std::vector<double> toVector();
+        std::vector<double> toVector();
         const DenseMatrix asDenseMatrix() const;
         double asDouble();
 
         // Statistics
 
-        // double mean();
-        // double sd();
+        double mean();
+        double sd();
 
         // Friend methods
         
-        // friend std::ostream& operator<<(std::ostream& os, DenseVector& A);
+        friend std::ostream& operator<<(std::ostream& os, DenseVector& A);
 };
 
 // To accomplish commutative property for vector scalar multiplication
 
-// const DenseVector operator* (double scalar, const DenseVector& matrix);
+const DenseVector operator* (double scalar, const DenseVector& vector);
 
 
 #endif
