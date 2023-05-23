@@ -447,20 +447,11 @@ std::ostream& operator<<(std::ostream& os, DenseVector& v) {
 // ----------------------------------MISC----------------------------------------
 
 const DenseVector DenseVector::transpose() const {}
-const DenseVector DenseVector::T() const {}  // Alias for transpose()
-const DenseVector DenseVector::matmul(const DenseMatrix& that) const {}
-const DenseMatrix DenseVector::matmul(const DenseVector& that) const {}
-double DenseVector::dot(const DenseVector& that) const {}  // Alias for vector vector multiplication which returns double always
+const DenseVector DenseVector::T() const {}
 std::vector<double> DenseVector::toVector() {}
 const DenseMatrix DenseVector::asDenseMatrix() const {}
 double DenseVector::asDouble() {}
-
-// Statistics
-
 double DenseVector::mean() {}
 double DenseVector::sd() {}
 
-std::ostream& operator<<(std::ostream& os, DenseVector& A) {}
-
-// To accomplish commutative property for vector scalar multiplication
 
