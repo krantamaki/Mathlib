@@ -38,4 +38,7 @@ inline int _ceil(int a, int b) {
 }
 
 
+// STATIONARY SOLVERS
+template<class Matrix> Matrix jacobiSolve(Matrix A, Matrix x_0, Matrix b, int max_iter=MAX_ITER, double tol = BASE_TOL);
+
 #endif
