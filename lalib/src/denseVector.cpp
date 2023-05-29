@@ -502,6 +502,22 @@ double DenseVector::asDouble() const {
     return this->operator() (0);
 }
 
+double DenseVector::norm(double p) const {
+    if (_ncols <= 0 || _nrows <= 0) {
+        throw std::invalid_argument("Vector must be initialized!");
+    }
+
+    double ret = 0;
+
+    for (int row = 0; row < _nrows; row++) {
+        for (int col = 0; col < _ncols; col++) {
+            ret += pow(this->operator() (row * _nrows + col), p);
+        }
+    }
+
+    return pow(ret, 1 / p);
+}
+
 // double DenseVector::mean() {}
 // double DenseVector::sd() {}
 

@@ -556,6 +556,22 @@ const DenseVector DenseMatrix::asDenseVector() const {
     return ret;
 }
 
+double DenseMatrix::norm() const {
+    if (_ncols <= 0 || _nrows <= 0) {
+        throw std::invalid_argument("Matrix must be initialized!");
+    }
+
+    double ret = 0;
+
+    for (int row = 0; row < _nrows; row++) {
+        for (int col = 0; col < _ncols; col++) {
+            ret += pow(this->operator() (row, col), 2.0);
+        }
+    }
+
+    return pow(ret, 1 / 2);
+}
+
 // const DenseVector DenseMatrix::mean(int dim = 0) {}
 
 // const DenseVector DenseMatrix::sd(int dim = 0) {}

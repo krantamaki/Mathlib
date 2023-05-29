@@ -98,6 +98,7 @@ class DenseVector {
         std::vector<double> toVector() const;
         const DenseMatrix asDenseMatrix() const;
         double asDouble() const;
+        double norm(double p=2.0) const;
 
         // Statistics
 
