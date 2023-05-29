@@ -1,4 +1,6 @@
-#include "declare_lalib.h"
+#include "denseVector.hpp"
+#include "denseMatrix.hpp"
+#include "declare_lalib.hpp"
 
 
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
@@ -33,14 +35,14 @@ DenseVector::DenseVector(const DenseVector& that) {
 // Constructor that allocates memory for wanted sized matrix and initializes
 // the values as zeros
 DenseVector::DenseVector(int rows, int cols) {
-    if (!((rows > 0 && cols == 0) || (cols > 0 && rows == 0))) {
+    if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
         throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
     }
 
     _ncols = cols;
     _nrows = rows;
 
-    total_vects = _ceil(cols > 0 ? cols : rows, VECT_ELEMS);
+    total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
 
     // Allocate aligned memory
     void* tmp = 0;
@@ -64,14 +66,14 @@ DenseVector::DenseVector(int rows, int cols) {
 // Constructor that allocates memory for wanted sized matrix and initializes
 // the values as wanted double
 DenseVector::DenseVector(int rows, int cols, double init_val) {
-    if (!((rows > 0 && cols == 0) || (cols > 0 && rows == 0))) {
+    if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
         throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
     }
 
     _ncols = cols;
     _nrows = rows;
 
-    total_vects = _ceil(cols > 0 ? cols : rows, VECT_ELEMS);
+    total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
 
     // Allocate aligned memory
     void* tmp = 0;
@@ -98,7 +100,7 @@ DenseVector::DenseVector(int rows, int cols, double init_val) {
 // the matrix is padded with zeros at the last rows. In either case a 
 // warning is printed.
 DenseVector::DenseVector(int rows, int cols, std::vector<double> elems) {
-    if (!((rows > 0 && cols == 0) || (cols > 0 && rows == 0))) {
+    if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
         throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
     }
     if (rows * cols != (int)elems.size()) {
@@ -108,7 +110,7 @@ DenseVector::DenseVector(int rows, int cols, std::vector<double> elems) {
     _ncols = cols;
     _nrows = rows;
 
-    total_vects = _ceil(cols > 0 ? cols : rows, VECT_ELEMS);
+    total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
 
     // Allocate aligned memory
     void* tmp = 0;
@@ -131,14 +133,16 @@ DenseVector::DenseVector(int rows, int cols, std::vector<double> elems) {
 // read the needed amount of elements from the array independent of the size
 // of the array (which can not be verified) and thus might read unwanted memory.
 DenseVector::DenseVector(int rows, int cols, double* elems) {
-    if (!((rows > 0 && cols == 0) || (cols > 0 && rows == 0))) {
+    std::cout << "\nWARNING: Initializing a vector with double array might lead to undefined behaviour!" << "\n\n";
+  
+    if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
         throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
     }
 
     _ncols = cols;
     _nrows = rows;
 
-    total_vects = _ceil(cols > 0 ? cols : rows, VECT_ELEMS);
+    total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
 
     // Allocate aligned memory
     void* tmp = 0;
@@ -164,7 +168,7 @@ DenseVector::~DenseVector() {
 // ---------------------OVERLOADED BASIC MATH OPERATORS------------------------
 
 DenseVector& DenseVector::operator+= (const DenseVector& that) {
-    if (_ncols > 0 ? _ncols : _nrows != that._ncols > 0 ? that._ncols : that._nrows) {
+  if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
         throw std::invalid_argument("Vectors must have equal amount of elements!");
     } 
 
@@ -181,7 +185,7 @@ const DenseVector DenseVector::operator+ (const DenseVector& that) const {
 }
 
 DenseVector& DenseVector::operator-= (const DenseVector& that) {
-    if (_ncols > 0 ? _ncols : _nrows != that._ncols > 0 ? that._ncols : that._nrows) {
+  if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
         throw std::invalid_argument("Vectors must have equal amount of elements!");
     } 
 
@@ -198,7 +202,7 @@ const DenseVector DenseVector::operator- (const DenseVector& that) const {
 }
 
 DenseVector& DenseVector::operator*= (const DenseVector& that) {
-    if (_ncols > 0 ? _ncols : _nrows != that._ncols > 0 ? that._ncols : that._nrows) {
+  if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
         throw std::invalid_argument("Vectors must have equal amount of elements!");
     } 
 
@@ -239,7 +243,7 @@ const DenseVector operator* (double scalar, const DenseVector& vector) {
 }
 
 DenseVector& DenseVector::operator/= (const DenseVector& that) {
-    if (_ncols > 0 ? _ncols : _nrows != that._ncols > 0 ? that._ncols : that._nrows) {
+  if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
         throw std::invalid_argument("Vectors must have equal amount of elements!");
     } 
 
@@ -282,7 +286,7 @@ const DenseVector DenseVector::operator/ (const double that) const {
 // ---------------------OVERLOADED INDEXING OPERATORS---------------------------
 
 void DenseVector::place(int num, double val) {
-    if ((_ncols > 0 ? _ncols : _nrows) < num) {
+    if ((_ncols > 1 ? _ncols : _nrows) < num) {
         throw std::invalid_argument("Index out of bounds!");
     }
 
@@ -293,7 +297,7 @@ void DenseVector::place(int num, double val) {
 }
 
 void DenseVector::place(int start, int end, DenseVector vector) {
-    if ((_ncols > 0 ? _ncols : _nrows) < end - start) {
+    if ((_ncols > 1 ? _ncols : _nrows) < end - start) {
         throw std::invalid_argument("Given dimensions out of bounds!");
     }
 
@@ -303,8 +307,8 @@ void DenseVector::place(int start, int end, DenseVector vector) {
     }
 }
 
-double DenseVector::operator() (int num) {
-    if (_ncols > 0 ? _ncols : _nrows < num) {
+double DenseVector::operator() (int num) const {
+  if ((_ncols > 1 ? _ncols : _nrows) < num) {
         throw std::invalid_argument("Index out of bounds!");
     }
 
@@ -314,20 +318,20 @@ double DenseVector::operator() (int num) {
 	return data[vect][elem];
 }
 
-double DenseVector::operator[] (int num) {
+double DenseVector::operator[] (int num) const {
     return this->operator() (num);
 }
 
-double DenseVector::get(int num) {
+double DenseVector::get(int num) const {
     return this->operator() (num);
 }
 
-const DenseVector DenseVector::operator() (int start, int end) {
+const DenseVector DenseVector::operator() (int start, int end) const {
     if (start >= end || start < 0) {
         throw std::invalid_argument("Improper dimensions given!");
     }
 
-    int max = (_ncols > 0 ? _ncols : _nrows);
+    int max = (_ncols > 1 ? _ncols : _nrows);
 
     if (end >= max) {
         std::cout << "\nWARNING: End index out of bounds" << "\n\n";
@@ -344,11 +348,11 @@ const DenseVector DenseVector::operator() (int start, int end) {
     return ret;
 }
 
-const DenseVector DenseVector::get(int start, int end) {
+const DenseVector DenseVector::get(int start, int end) const {
     return this->operator() (start, end);
 }
 
-vect_t DenseVector::getSIMD(int num) {
+vect_t DenseVector::getSIMD(int num) const {
     if (num > total_vects) {
         throw std::invalid_argument("Index out of bounds!");
     }
@@ -356,9 +360,6 @@ vect_t DenseVector::getSIMD(int num) {
     return data[num / VECT_ELEMS];
 }
 
-const vect_t DenseVector::getSIMD(int num) const {
-    return this->getSIMD(num);
-} 
 
 
 // ----------------------OTHER OVERLOADED OPERATORS-----------------------------
@@ -433,11 +434,11 @@ std::ostream& operator<<(std::ostream& os, DenseVector& v) {
         os << "[";
         for (int i = 0; i < v.nrows(); i++) {
             if (i > 0) {
-                os << "\n";
+                os << "\n ";
             }
             os << v(i);
         }
-        os << "]";
+        os << "]" << std::endl;
     }
 
     return os;
@@ -446,12 +447,62 @@ std::ostream& operator<<(std::ostream& os, DenseVector& v) {
 
 // ----------------------------------MISC----------------------------------------
 
-const DenseVector DenseVector::transpose() const {}
-const DenseVector DenseVector::T() const {}
-std::vector<double> DenseVector::toVector() {}
-const DenseMatrix DenseVector::asDenseMatrix() const {}
-double DenseVector::asDouble() {}
-double DenseVector::mean() {}
-double DenseVector::sd() {}
+const DenseVector DenseVector::transpose() const {
+  DenseVector ret = DenseVector(*this);
+
+  ret._nrows = _ncols;
+  ret._ncols = _nrows;
+
+  return ret;
+}
+
+const DenseVector DenseVector::T() const {
+  return this->transpose();
+}
+
+std::vector<double> DenseVector::toVector() const {
+    if (_ncols <= 0 || _nrows <= 0) {
+        throw std::invalid_argument("Vector must be initialized!");
+    }
+
+    std::vector<double> ret;
+    ret.reserve(_ncols * _nrows);
+
+    for (int row = 0; row < _nrows; row++) {
+      for (int col = 0; col < _ncols; col++) {
+	ret.push_back(this->operator() (row * _nrows + col));
+      }
+    }
+
+    return ret;
+}
+
+
+const DenseMatrix DenseVector::asDenseMatrix() const {
+    if (_ncols < 1 && _nrows < 1) {
+        throw std::invalid_argument("Vector must be initialized!");
+    }
+    
+    DenseMatrix ret = DenseMatrix(_nrows, _ncols);
+
+    for (int row = 0; row < _nrows; row++) {
+      for (int col = 0; col < _ncols; col++) {
+	ret.place(row, col, this->operator() (row * _nrows + col));
+      }
+    }
+
+    return ret;
+}
+
+double DenseVector::asDouble() const {
+  if (_ncols != 1 || _nrows != 1) {
+        throw std::invalid_argument("Vector must be a 1 x 1 Vector!");
+    }
+
+    return this->operator() (0);
+}
+
+// double DenseVector::mean() {}
+// double DenseVector::sd() {}
 
 

@@ -1,4 +1,6 @@
-#include "declare_lalib.h"
+#include "denseMatrix.hpp"
+#include "denseVector.hpp"
+#include "declare_lalib.hpp"
 
 /*
 TODO: PROPER DESCRIPTION HERE
@@ -116,7 +118,7 @@ const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
     }
 
     // Allocate memory for the resulting vector
-    DenseVector ret = DenseVector(1, that.ncols());
+    DenseVector ret = DenseVector(that.nrows(), 1);
 
     #pragma omp parallel for schedule(dynamic, 1)
 	for (int row = 0; row < _nrows; row++) {

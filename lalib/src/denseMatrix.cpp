@@ -1,10 +1,7 @@
-#include "declare_lalib.h"
+#include "denseMatrix.hpp"
+#include "denseVector.hpp"
+#include "declare_lalib.hpp"
 
-
-// Function for "dividing up" two integers
-int _ceil(int a, int b) {
-    return (a + b - 1) / b;
-}
 
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
@@ -348,7 +345,7 @@ void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, Dens
 	}
 }
 
-double DenseMatrix::operator() (int row, int col) {
+double DenseMatrix::operator() (int row, int col) const {
     if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
         throw std::invalid_argument("Given dimensions out of bounds!");
     }
@@ -360,11 +357,11 @@ double DenseMatrix::operator() (int row, int col) {
 	return data[vects_per_row * row + vect][elem];
 }
 
-double DenseMatrix::get(int row, int col) {
+double DenseMatrix::get(int row, int col) const {
     return this->operator() (row, col);
 }
 
-double DenseMatrix::operator[] (int num) {
+double DenseMatrix::operator[] (int num) const {
     if (num >= _ncols * _nrows) {
         throw std::invalid_argument("Given index out of bounds!");
     }
@@ -378,7 +375,7 @@ double DenseMatrix::operator[] (int num) {
 	return data[vects_per_row * row + vect][elem];
 }
 
-const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStart, int colEnd) {
+const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
     if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
         throw std::invalid_argument("Improper dimensions given!");
     }
@@ -405,7 +402,7 @@ const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStar
     return ret;
 }
 
-const DenseMatrix DenseMatrix::get(int rowStart, int rowEnd, int colStart, int colEnd) {
+const DenseMatrix DenseMatrix::get(int rowStart, int rowEnd, int colStart, int colEnd) const {
     return this->operator() (rowStart, rowEnd, colStart, colEnd);
 }
 
@@ -518,14 +515,49 @@ const DenseMatrix DenseMatrix::T() const{
     return this->transpose();
 }
 
-std::vector<double> DenseMatrix::toVector() {}
+std::vector<double> DenseMatrix::toVector() const {
+    if (_ncols <= 0 || _nrows <= 0) {
+        throw std::invalid_argument("Matrix must be initialized!");
+    }
 
-double DenseMatrix::asDouble() {}
+    std::vector<double> ret;
+    ret.reserve(_ncols * _nrows);
 
-const DenseVector DenseMatrix::asDenseVector() const {}
+    for (int row = 0; row < _nrows; row++) {
+      for (int col = 0; col < _ncols; col++) {
+	ret.push_back(this->operator() (row, col));
+      }
+    }
 
-const DenseVector DenseMatrix::mean(int dim = 0) {}
+    return ret;
+}
 
-const DenseVector DenseMatrix::sd(int dim = 0) {}
+double DenseMatrix::asDouble() const {
+    if (_ncols != 1 || _nrows != 1) {
+        throw std::invalid_argument("Matrix must be a 1 x 1 matrix!");
+    }
+
+    return this->operator() (0, 0);
+}
+
+const DenseVector DenseMatrix::asDenseVector() const {
+    if (_ncols != 1 && _nrows != 1) {
+        throw std::invalid_argument("Matrix must be a 1 x n or n x 1 matrix!");
+    }
+    
+    DenseVector ret = DenseVector(_nrows, _ncols);
+
+    for (int row = 0; row < _nrows; row++) {
+      for (int col = 0; col < _ncols; col++) {
+	ret.place(row * _nrows + col, this->operator() (row, col));
+      }
+    }
+
+    return ret;
+}
+
+// const DenseVector DenseMatrix::mean(int dim = 0) {}
+
+// const DenseVector DenseMatrix::sd(int dim = 0) {}
 
 
