@@ -1,5 +1,4 @@
 #include "crsMatrix.hpp"
-#include "crsVector.hpp"
 #include "declare_lalib.hpp"
 
 
@@ -9,7 +8,7 @@
 CRSMatrix::CRSMatrix(void) {}
 
 // Constructor that copies the contents of a given matrix
-CRSMatrix::DenseMatrix(const CRSMatrix& that) {
+CRSMatrix::CRSMatrix(const CRSMatrix& that) {
   if (that._ncols > 0 && that._nrows > 0) {
      _ncols = that._ncols;
      _nrows = that._nrows;
@@ -30,7 +29,7 @@ CRSMatrix::CRSMatrix(int rows, int cols) {
   _ncols = cols;
   _nrows = rows;
 
-  rowPtrs = std::vector<double>(rows + 1, 0)
+  rowPtrs = std::vector<int>(rows + 1, 0);
 }
 
 // Constructor that allocates memory for wanted sized matrix and initializes
@@ -84,7 +83,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, double* elems) {
 	elems_on_row++;
       }
     }
-    rowPtrs.push_back(elems_on_row);
+    rowPtrs.push_back(rowPtrs.back() + elems_on_row);
   }
 }
 
@@ -116,14 +115,14 @@ CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> elems) {
 	elems_on_row++;
       }
     }
-    rowPtrs.push_back(elems_on_row);
+    rowPtrs.push_back(rowPtrs.back() + elems_on_row);
   }
 }
 
 // Constructor that copies the contents of given std::vectors and assigns them as
 // the value and index arrays
 CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vector<int> new_colInds, std::vector<int> new_rowPtrs) {
-  if (*std::max_element(new_colInds) > cols || *std::max_element(new_rowPtrs) || *std::min_element(new_colInds) <= 0 || *std::min_element(new_rowPtrs) <= 0.0) {
+  if (*std::max_element(new_colInds.begin(), new_colInds.end()) > cols || *std::max_element(new_rowPtrs.begin(), new_rowPtrs.end()) || *std::min_element(new_colInds.begin(), new_colInds.end()) <= 0 || *std::min_element(new_rowPtrs.begin(), new_rowPtrs.end()) <= 0.0) {
     throw std::invalid_argument("Matrix dimensions out of bounds!");
   }
   
@@ -134,7 +133,6 @@ CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vect
   colInds = new_colInds;
   rowPtrs = new_rowPtrs;
 }
-
 
 
 // ---------------------OVERLOADED BASIC MATH OPERATORS-----------------------
@@ -228,6 +226,189 @@ const CRSMatrix CRSMatrix::operator/ (const CRSMatrix& that) const {
 }
 
 
+// ----------------------OVERLOADED INDEXING OPERATORS--------------------------
+
+void CRSMatrix::place(int row, int col, double val) {
+    if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
+        throw std::invalid_argument("Given dimensions out of bounds!");
+    }
+
+    // If value is not zero it needs to be placed into the matrix
+    if (val != 0.0) {
+
+      // If there are no elements yet in the matrix just add the value
+      if (vals.empty()) {
+	vals.push_back(val);
+	colInds.push_back(col);
+      }
+
+      // Otherwise, we need to find the correct location for the value
+      else {
+	
+	int rowPtr = rowPtrs[row];
+	int nextRow = rowPtrs[row + 1];
+
+	// If the row is empty just add to the row pointers position
+	if (rowPtr == nextRow) {
+	  vals.insert(vals.begin() + rowPtr, val);
+	  colInds.insert(colInds.begin() + rowPtr, col);
+	}
+
+	// Otherwise, iterate over the columns to find the correct gap
+	else {
+
+	  int col_i = rowPtr;
+	  for (; col_i < nextRow; col_i++) {
+	    int col0 = colInds[col_i];
+
+	    // If there already is a value at given location replace it
+	    if (col0 == col) {
+	      vals[col_i] = val;
+	      return;
+	    }
+
+	    // If the found row is larger than given column then insert value before it
+	    else if (col0 > col) {
+	      vals.insert(vals.begin() + col_i, val);
+	      colInds.insert(colInds.begin() + col_i, col);
+	      break;
+	    }
+	  }
+
+	  // New column is the largest that has a value in the given row
+	  if (col_i == nextRow) {
+	    vals.insert(vals.begin() + nextRow, val);
+	    colInds.insert(colInds.begin() + nextRow, col);
+	  }
+	}
+      }
+
+      // Increment the row pointers accordingly
+      for (int row_i = row + 1; row_i <= _nrows; row_i++) {
+	rowPtrs[row_i] += 1;
+      }
+
+    }
+
+    // If input is zero we need to check if it replaces some non-zero value
+    else {
+
+      int rowPtr = rowPtrs[row];
+      int nextRow = rowPtrs[row + 1];
+
+      // If the row is empty zero cannot replace a non-zero value
+      if (rowPtr == nextRow) {
+	return;
+      }
+
+      // Otherwise, iterate over the columns to check if there is a non-zero value
+      else {
+
+        int col_i = rowPtr;
+	for (; col_i < nextRow; col_i++) {
+	  int col0 = colInds[col_i];
+
+	  // If there already is a value at given location replace it
+	  if (col0 == col) {
+	    vals.erase(vals.begin() + col_i);
+	    colInds.erase(colInds.begin() + col_i);
+	    break;
+	  }
+
+	  // If the found column is larger than given column then the zero didn't replace a non-zero
+	  else if (col0 > col) {
+	    return;
+	  }
+        }
+
+	// If the new column is the largest then it cannot replace a non-zero element
+	if (col_i == nextRow) {
+	  return;
+	}
+      }
+      
+      // Decrement the row pointers accordingly
+      for (int row_i = row + 1; row_i <= _nrows; row_i++) {
+	rowPtrs[row_i] -= 1;
+      }
+    }
+}
+
+double CRSMatrix::operator() (int row, int col) const {
+  if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
+    throw std::invalid_argument("Given dimensions out of bounds!");
+  }
+
+  int rowPtr = rowPtrs[row];
+  int nextRow = rowPtrs[row + 1];
+
+  if (rowPtr == nextRow) {
+    return 0.0;
+  }
+
+  else {
+    int col_i = rowPtr;
+    for (; col_i < nextRow; col_i++) {
+      int col0 = colInds[col_i];
+      if (col0 == col) {
+        return vals[col_i];
+      }
+      else if (col0 > col) {
+        return 0.0;
+      }
+    }
+  }
+  
+  return 0.0;
+}
+
+double CRSMatrix::operator[] (int num) const {
+  
+  int row = num / _nrows;
+  int col = num % _nrows;
+
+  return this->operator() (row, col);
+}
+
+double CRSMatrix::get(int row, int col) const {
+  return this->operator() (row, col);
+}
 
 
+void CRSMatrix::_printArrays() {
+  std::cout << "vals: [";
+  for (double val: vals) std::cout << val << " ";
+  std::cout << "]\n";
 
+  std::cout << "col_i: [";
+  for (int col: colInds) std::cout << col << " ";
+  std::cout << "]\n";
+  
+  std::cout << "row_p: [";
+  for (int row_p: rowPtrs) std::cout << row_p << " ";
+  std::cout << "]\n";
+}
+
+std::ostream& operator<<(std::ostream& os, CRSMatrix& A) {
+    if (A.ncols() == 0 || A.nrows() == 0) {
+        os << "[]" << std::endl;  // Signifies uninitialized matrix
+        
+        return os;
+    }
+    
+    os << "[";
+    for (int row = 0; row < A.nrows(); row++) {
+        if (row > 0) os << ' ';
+
+        os << "[";
+        for (int col = 0; col < A.ncols() - 1; col++) {
+            os << A(row, col) << ' ';
+        }
+        os << A(row, A.ncols() - 1) << "]";
+
+        if (row < A.nrows() - 1) os << std::endl; 
+    }
+    os << "]" << std::endl;
+
+    return os;
+}

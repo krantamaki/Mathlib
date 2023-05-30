@@ -18,6 +18,7 @@ and SIMD commands as well as making sure memory calls are linear.
 #include <string>
 #include <vector>
 #include <tuple>
+#include <algorithm>
 #include <float.h>
 #include <time.h>
 #include <math.h>

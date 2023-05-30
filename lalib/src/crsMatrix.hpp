@@ -60,6 +60,11 @@ public:
   const CRSVector getCol(int col) const;
   const CRSVector getRow(int row) const;
 
+  // Functions for placing values into existing matrices
+  
+  void place(int row, int col, double val);
+  void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix);
+
   
   // Overload basic math operators
 
@@ -77,8 +82,23 @@ public:
   const CRSMatrix operator/ (const double that) const;
   // ... ?
 
+  // Friend methods
+  
+  friend std::ostream& operator<<(std::ostream& os, CRSMatrix& A);
 
-}
+  // Other methods
+
+  int ncols() { return _ncols; }
+  int nrows() { return _nrows; }
+  std::tuple<int, int> shape() { return std::make_tuple(_nrows, _ncols); }
+
+  const int ncols() const { return _ncols; }
+  const int nrows() const { return _nrows; }
+  const std::tuple<int, int> shape() const { return std::make_tuple(_nrows, _ncols); }
+
+  void _printArrays();
+  
+};
 
 
 
