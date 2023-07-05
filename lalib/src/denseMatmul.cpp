@@ -19,7 +19,7 @@ const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
   // Transpose that for linear memory reads
   DenseMatrix that_T = that.T();
 
-#pragma omp parallel for schedule(dynamic, 1)
+  #pragma omp parallel for schedule(dynamic, 1)
   for (int row = 0; row < _nrows; row++) {
     for (int col = 0; col < that._ncols; col++) {    
 
@@ -95,7 +95,7 @@ double DenseVector::dot(const DenseVector& that) const {
     sum[i] = 0.0;
   }
 
-#pragma omp parallel for schedule(dynamic, 1)
+  #pragma omp parallel for schedule(dynamic, 1)
   for (int vect = 0; vect < total_vects; vect++) {
     sum += data[vect] * that.data[vect];
   }
@@ -120,7 +120,7 @@ const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
   // Allocate memory for the resulting vector
   DenseVector ret = DenseVector(that.nrows(), 1);
 
-#pragma omp parallel for schedule(dynamic, 1)
+  #pragma omp parallel for schedule(dynamic, 1)
   for (int row = 0; row < _nrows; row++) {
 
     vect_t sum;
