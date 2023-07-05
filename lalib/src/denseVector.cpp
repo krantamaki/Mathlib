@@ -428,7 +428,7 @@ std::ostream& operator<<(std::ostream& os, DenseVector& v) {
       }
       os << v(i);
     }
-    os << "]";
+    os << "]" << std::endl;
   }
   else {
     os << "[";
