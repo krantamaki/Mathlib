@@ -3,14 +3,14 @@
 
 
 /*
-This is a general linear algebra library for C++. Main functionality consist of different
-matrix classes (currently only DenseMatrix is implemented) which override the basic math operators
-(+, -, ...) to function as element-wise operations equivalent to Matlab's .* etc and contain methods
-like matmul for computing the common matrix operations. Additionally, there are some general template 
-functions that work independent of the matrix type (currently only DenseMatrix).
+  This is a general linear algebra library for C++. Main functionality consist of different
+  matrix classes (currently only DenseMatrix is implemented) which override the basic math operators
+  (+, -, ...) to function as element-wise operations equivalent to Matlab's .* etc and contain methods
+  like matmul for computing the common matrix operations. Additionally, there are some general template 
+  functions that work independent of the matrix type (currently only DenseMatrix).
 
-The methods and functions are made as optimal as feasible with parallelization utilizing multi-threading
-and SIMD commands as well as making sure memory calls are linear.
+  The methods and functions are made as optimal as feasible with parallelization utilizing multi-threading
+  and SIMD commands as well as making sure memory calls are linear.
 */
 
 
@@ -35,7 +35,7 @@ typedef double vect_t __attribute__ ((__vector_size__ (VECT_ELEMS * sizeof(doubl
 
 // Function for "dividing up" two integers
 inline int _ceil(int a, int b) {
-    return (a + b - 1) / b;
+  return (a + b - 1) / b;
 }
 
 

@@ -2,11 +2,11 @@
 #define CRSMATRIX_HPP
 
 /*
-CRSMatrix is a sparse matrix storage format that allows for constant time 
-access to the rows and linear time access to columns. The elements are stored
-in three std::vectors - one for values themselves, one for row indeces and one 
-for column indeces. Unlike DenseMatrix this implementation doesn't utilize SIMD
-commands.
+  CRSMatrix is a sparse matrix storage format that allows for constant time 
+  access to the rows and linear time access to columns. The elements are stored
+  in three std::vectors - one for values themselves, one for row indeces and one 
+  for column indeces. Unlike DenseMatrix this implementation doesn't utilize SIMD
+  commands.
 */
 
 #include "declare_lalib.hpp"
