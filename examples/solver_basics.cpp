@@ -2,6 +2,9 @@
 #include "../lalib/src/denseVector.hpp"
 #include "../lalib/src/stationarySolvers.hpp"
 
+
+using namespace lalib;
+
 /*
   Compile at root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/denseMatrix.cpp lalib/src/denseVector.cpp lalib/src/denseMatmul.cpp examples/solver_basics.cpp -lm -o solver_basics.o
   Run with: ./solver_basics.o

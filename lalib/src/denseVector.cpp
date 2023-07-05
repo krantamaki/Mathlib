@@ -3,6 +3,8 @@
 #include "declare_lalib.hpp"
 
 
+using namespace lalib;
+
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
 // Constructor that doesn't allocate memory
@@ -413,7 +415,7 @@ bool DenseVector::operator!= (const DenseVector& that) {
   return !(*this == that);
 }
 
-std::ostream& operator<<(std::ostream& os, DenseVector& v) {
+std::ostream& lalib::operator<<(std::ostream& os, DenseVector& v) {
   if (v.ncols() == 0 && v.nrows() == 0) {
     os << "[]" << std::endl;  // Signifies uninitialized vector
         

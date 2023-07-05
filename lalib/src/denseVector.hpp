@@ -9,109 +9,112 @@
 #include "declare_lalib.hpp"
 
 
-class DenseMatrix;  // To avoid circular dependencies
+namespace lalib {
 
-class DenseVector {
+  class DenseMatrix;  // To avoid circular dependencies
 
-protected:
-  // Initialize these values to signify an 'empty' matrix
+  class DenseVector {
 
-  int _ncols = 0;
-  int _nrows = 0;
-  vect_t* data = NULL;
-  int total_vects = 0;
+  protected:
+    // Initialize these values to signify an 'empty' matrix
 
-public:
-  // Constructors
+    int _ncols = 0;
+    int _nrows = 0;
+    vect_t* data = NULL;
+    int total_vects = 0;
 
-  DenseVector(void);
-  DenseVector(const DenseVector& that);
-  DenseVector(int rows, int cols);
-  DenseVector(int rows, int cols, double init_val);
-  DenseVector(int rows, int cols, double* elems);
-  DenseVector(int rows, int cols, std::vector<double> elems);
+  public:
+    // Constructors
 
-  ~DenseVector();
+    DenseVector(void);
+    DenseVector(const DenseVector& that);
+    DenseVector(int rows, int cols);
+    DenseVector(int rows, int cols, double init_val);
+    DenseVector(int rows, int cols, double* elems);
+    DenseVector(int rows, int cols, std::vector<double> elems);
 
-
-  // Overload basic math operators
-
-  // NOTE! The operators will function as elementwise operators
-
-  const DenseVector operator+ (const DenseVector& that) const;
-  DenseVector& operator+= (const DenseVector& that);
-  const DenseVector operator- (const DenseVector& that) const;
-  DenseVector& operator-= (const DenseVector& that);
-  const DenseVector operator* (const DenseVector& that) const;
-  DenseVector& operator*= (const DenseVector& that);
-  const DenseVector operator* (const double that) const;
-  const DenseVector operator/ (const DenseVector& that) const;
-  DenseVector& operator/= (const DenseVector& that);
-  const DenseVector operator/ (const double that) const;
-  // ... ?
+    ~DenseVector();
 
 
-  // Overload indexing operators
+    // Overload basic math operators
 
-  // Additionally for slicing there exists a overloaded operator:
-  // DenseVector y = x(start, end)
-  // Requires that start < end, but does allow having the end 
-  // going out of bounds, but only returns the values that exist. The value start
-  // understandably must be in bounds
+    // NOTE! The operators will function as elementwise operators
 
-  double operator[] (int num) const;
-  double operator() (int num) const;
-  double get(int num) const;  // Alias for operator()
-  const DenseVector operator() (int start, int end) const;
-  const DenseVector get(int start, int end) const;  // Alias for operator()
+    const DenseVector operator+ (const DenseVector& that) const;
+    DenseVector& operator+= (const DenseVector& that);
+    const DenseVector operator- (const DenseVector& that) const;
+    DenseVector& operator-= (const DenseVector& that);
+    const DenseVector operator* (const DenseVector& that) const;
+    DenseVector& operator*= (const DenseVector& that);
+    const DenseVector operator* (const double that) const;
+    const DenseVector operator/ (const DenseVector& that) const;
+    DenseVector& operator/= (const DenseVector& that);
+    const DenseVector operator/ (const double that) const;
+    // ... ?
 
-  vect_t getSIMD(int num) const;  // Allows user to access the SIMD vectors for further parallelization 
+
+    // Overload indexing operators
+
+    // Additionally for slicing there exists a overloaded operator:
+    // DenseVector y = x(start, end)
+    // Requires that start < end, but does allow having the end 
+    // going out of bounds, but only returns the values that exist. The value start
+    // understandably must be in bounds
+
+    double operator[] (int num) const;
+    double operator() (int num) const;
+    double get(int num) const;  // Alias for operator()
+    const DenseVector operator() (int start, int end) const;
+    const DenseVector get(int start, int end) const;  // Alias for operator()
+
+    vect_t getSIMD(int num) const;  // Allows user to access the SIMD vectors for further parallelization 
 
 
-  // Functions for placing values into existing vectors
+    // Functions for placing values into existing vectors
 
-  void place(int num, double val);
-  void place(int start, int end, DenseVector vector);
+    void place(int num, double val);
+    void place(int start, int end, DenseVector vector);
 
         
-  // Other overloaded operators
+    // Other overloaded operators
 
-  DenseVector& operator= (const DenseVector& that);
-  bool operator== (const DenseVector& that);
-  bool operator!= (const DenseVector& that);
+    DenseVector& operator= (const DenseVector& that);
+    bool operator== (const DenseVector& that);
+    bool operator!= (const DenseVector& that);
 
-  // Other methods
+    // Other methods
 
-  int ncols() { return _ncols; }
-  int nrows() { return _nrows; }
-  std::tuple<int, int> shape() { return std::make_tuple(_nrows, _ncols); }
+    int ncols() { return _ncols; }
+    int nrows() { return _nrows; }
+    std::tuple<int, int> shape() { return std::make_tuple(_nrows, _ncols); }
 
-  const int ncols() const { return _ncols; }
-  const int nrows() const { return _nrows; }
-  const std::tuple<int, int> shape() const { return std::make_tuple(_nrows, _ncols); }
+    const int ncols() const { return _ncols; }
+    const int nrows() const { return _nrows; }
+    const std::tuple<int, int> shape() const { return std::make_tuple(_nrows, _ncols); }
 
-  const DenseVector transpose() const;
-  const DenseVector T() const;  // Alias for transpose()
-  const DenseVector matmul(const DenseMatrix& that) const;
-  const DenseMatrix matmul(const DenseVector& that) const;
-  double dot(const DenseVector& that) const;  // Alias for vector vector multiplication which returns double always
-  std::vector<double> toVector() const;
-  const DenseMatrix asDenseMatrix() const;
-  double asDouble() const;
-  double norm(double p=2.0) const;
+    const DenseVector transpose() const;
+    const DenseVector T() const;  // Alias for transpose()
+    const DenseVector matmul(const DenseMatrix& that) const;
+    const DenseMatrix matmul(const DenseVector& that) const;
+    double dot(const DenseVector& that) const;  // Alias for vector vector multiplication which returns double always
+    std::vector<double> toVector() const;
+    const DenseMatrix asDenseMatrix() const;
+    double asDouble() const;
+    double norm(double p=2.0) const;
 
-  // Statistics
+    // Statistics
 
-  double mean();
-  double sd();
+    double mean();
+    double sd();
 
-  // Friend methods
-        
-  friend std::ostream& operator<<(std::ostream& os, DenseVector& A);
-};
+  };
 
-// To accomplish commutative property for vector scalar multiplication
+  std::ostream& operator<<(std::ostream& os, DenseVector& A);
 
-const DenseVector operator* (double scalar, const DenseVector& vector);
+  // To accomplish commutative property for vector scalar multiplication
 
+  const DenseVector operator* (double scalar, const DenseVector& vector);
+
+}
+  
 #endif

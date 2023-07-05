@@ -3,6 +3,8 @@
 #include "declare_lalib.hpp"
 
 
+using namespace lalib;
+
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
 // Constructor that doesn't allocate memory
@@ -459,7 +461,7 @@ bool DenseMatrix::operator!= (const DenseMatrix& that) {
   return !(*this == that);
 }
 
-std::ostream& operator<<(std::ostream& os, DenseMatrix& A) {
+std::ostream& lalib::operator<<(std::ostream& os, DenseMatrix& A) {
   if (A.ncols() == 0 || A.nrows() == 0) {
     os << "[]" << std::endl;  // Signifies uninitialized matrix
         

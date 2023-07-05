@@ -2,7 +2,10 @@
 #include "declare_lalib.hpp"
 
 
+using namespace lalib;
+
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
+
 
 // Constructor that doesn't allocate memory
 CRSMatrix::CRSMatrix(void) {}
@@ -351,10 +354,10 @@ double CRSMatrix::operator() (int row, int col) const {
     for (; col_i < nextRow; col_i++) {
       int col0 = colInds[col_i];
       if (col0 == col) {
-        return vals[col_i];
+	return vals[col_i];
       }
       else if (col0 > col) {
-        return 0.0;
+	return 0.0;
       }
     }
   }
@@ -389,7 +392,7 @@ void CRSMatrix::_printArrays() {
   std::cout << "]\n";
 }
 
-std::ostream& operator<<(std::ostream& os, CRSMatrix& A) {
+std::ostream& lalib::operator<<(std::ostream& os, CRSMatrix& A) {
   if (A.ncols() == 0 || A.nrows() == 0) {
     os << "[]" << std::endl;  // Signifies uninitialized matrix
         
@@ -412,3 +415,4 @@ std::ostream& operator<<(std::ostream& os, CRSMatrix& A) {
 
   return os;
 }
+

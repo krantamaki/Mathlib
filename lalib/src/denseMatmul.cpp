@@ -2,6 +2,9 @@
 #include "denseVector.hpp"
 #include "declare_lalib.hpp"
 
+
+using namespace lalib;
+
 /*
   TODO: PROPER DESCRIPTION HERE
 */

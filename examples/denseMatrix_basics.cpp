@@ -7,6 +7,8 @@
  */
 
 
+using namespace lalib;
+
 int main() {
   
   // Initially generate some basic matrices
