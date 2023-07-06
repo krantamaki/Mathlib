@@ -517,7 +517,7 @@ double DenseVector::norm(double p) const {
     }
   }
 
-  return pow(ret, 1 / p);
+  return pow(ret, 1.0 / p);
 }
 
 // double DenseVector::mean() {}

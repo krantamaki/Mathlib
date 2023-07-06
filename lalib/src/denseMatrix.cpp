@@ -265,7 +265,7 @@ const DenseMatrix DenseMatrix::operator* (const double that) const {
   return ret;
 }
 
-const DenseMatrix operator* (double scalar, const DenseMatrix& matrix) {
+const DenseMatrix lalib::operator* (double scalar, const DenseMatrix& matrix) {
   return matrix * scalar;
 }
 
@@ -569,7 +569,7 @@ double DenseMatrix::norm() const {
     }
   }
 
-  return pow(ret, 1 / 2);
+  return pow(ret, 1.0 / 2.0);
 }
 
 // const DenseVector DenseMatrix::mean(int dim = 0) {}
