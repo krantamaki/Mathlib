@@ -21,6 +21,7 @@
 
 #define BASE_TOL 0.0001
 #define MAX_ITER 1000
+#define OMEGA 0.75
 
 
 namespace lalib {
@@ -40,6 +41,7 @@ namespace lalib {
   */
 
   template<class Matrix> Matrix jacobiSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
+    
     if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
       throw std::invalid_argument("Improper dimensions!");
     }
@@ -101,6 +103,7 @@ namespace lalib {
   */
 
   template<class Matrix> Matrix gsSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
+    
     if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
       throw std::invalid_argument("Improper dimensions!");
     }
@@ -149,6 +152,75 @@ namespace lalib {
     }
 
     std::cout << "\nWARNING: Gauss-Seidel method did not converge to the wanted tolerance!" << "\n\n";
+    
+    return x_k;
+  }
+
+
+  /*
+    Successive overrelaxation method builds on the Gauss-Seidel method by taking a weighted average 
+    between the current and previous iterate [1]: 
+
+      s = (b_i - sum_{j < i} a_{i, j} * x_j^{(k)} - sum_{j > i} a_{i, j} * x_j^{(k-1)}) / a_{i, i}
+      x_i^{(k)} = x_i^{(k-1)} + w(s - x_i^{(k-1)})
+
+    where w is the extrapolation factor. There is no closed form way for choosing the optimal w, but
+    for the method to converge it should be chosen from interval (0, 2). It is good to note that if w = 1
+    SOR methods is equivalent to Gauss-Seidel method. Generally, if w < 1 convergence is improved, but with
+    the drawback of greater number of required iterations. Logically then, if w > 1 convergence might be 
+    less certain, but required number of iterations is decreased.
+  */
+
+  template<class Matrix> Matrix sorSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
+    
+    if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
+      throw std::invalid_argument("Improper dimensions!");
+    }
+
+    if (A.nrows() != A.ncols()) {
+      throw std::invalid_argument("Coefficient matrix must be square!");
+    }
+
+    Matrix x_k = Matrix(x_0);
+
+    for (int iter = 0; iter < max_iter; iter++) {
+
+      // Go over all i in {0, ..., nrows}
+      for (int row = 0; row < A.nrows(); row++) {
+
+	// Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
+	double s_l = 0.0;
+	for (int col = 0; col < row; col++) {
+	  s_l += A(row, col) * x_k(col, 0);
+	}
+
+	// Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
+	double s_g = 0.0;
+	for (int col = row + 1; col < A.ncols(); col++) {
+	  s_g += A(row, col) * x_k(col, 0);
+	}
+
+	// Compute the new value of x_i = x_i^{(k-1)} + w(s - x_i^{(k-1)})
+	double a_ii = A(row, row);
+	double x_i = x_k(row, 0);
+	double s = (b(row, 0) - s_l - s_g) / a_ii;
+	if (a_ii != 0.0) {
+	  x_i = x_i + w * (s - x_i);
+	}
+	else {
+	  throw std::invalid_argument("Coefficient matrix must have a non-zero diagonal!");
+	}
+
+	// Update the vector x
+	x_k.place(row, 0, x_i);
+      }
+
+      if ((A.matmul(x_k) - b).norm() < tol) {
+	return x_k;
+      }
+    }
+
+    std::cout << "\nWARNING: SOR method did not converge to the wanted tolerance!" << "\n\n";
     
     return x_k;
   }
