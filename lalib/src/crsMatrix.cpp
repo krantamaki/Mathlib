@@ -378,6 +378,8 @@ double CRSMatrix::get(int row, int col) const {
 }
 
 
+// ----------------------- MISC ----------------------------
+
 void CRSMatrix::_printArrays() {
   std::cout << "vals: [";
   for (double val: vals) std::cout << val << " ";

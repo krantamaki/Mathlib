@@ -4,7 +4,7 @@
 /*
   CRSMatrix is a sparse matrix storage format that allows for constant time 
   access to the rows and linear time access to columns. The elements are stored
-  in three std::vectors - one for values themselves, one for row indeces and one 
+  in three std::vectors - one for values themselves, one for row offsets and one 
   for column indeces. Unlike DenseMatrix this implementation doesn't utilize SIMD
   commands.
 */
@@ -96,6 +96,18 @@ namespace lalib {
     const std::tuple<int, int> shape() const { return std::make_tuple(_nrows, _ncols); }
 
     void _printArrays();
+
+    const CRSMatrix transpose() const;
+    const CRSMatrix T() const;  // Alias for transpose()
+    // CRSMatrix inv();
+    const CRSMatrix matmul(const CRSMatrix& that) const;
+    const CRSMatrix matmulStrassen(const CRSMatrix& that) const;
+    const CRSMatrix matmulNaive(const CRSMatrix& that) const;
+    const CRSVector matmul(const CRSVector& that) const;
+    std::vector<double> toVector() const;
+    double asDouble() const;
+    const CRSVector asCRSVector();
+    double norm();
   
   };
   
