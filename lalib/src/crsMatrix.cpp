@@ -380,6 +380,64 @@ double CRSMatrix::get(int row, int col) const {
 
 // ----------------------- MISC ----------------------------
 
+
+// TODO: Optimize transpose operation
+
+const CRSMatrix CRSMatrix::transpose() const {
+  
+  if (_ncols <= 0 || _nrows <= 0) {
+    return *this;
+  }
+
+  // Initialize the transpose matrix
+  CRSMatrix ret = CRSMatrix(_ncols, _nrows);
+
+  for (int col = 0; col < _ncols; col++) {
+    for (int row = 0; row < _nrows; row++) {
+      double val = this->operator() (row, col);
+
+      if (val != 0) {
+	ret.vals.push_back(val);
+	ret.colInds.push_back(row);
+
+	for (int col_i = col + 1; col_i <= _ncols; col_i++) {
+	  ret.rowPtrs[col_i] += 1;
+	}
+      }
+    }
+  }
+  
+  return ret;
+}
+
+
+const CRSMatrix CRSMatrix::T() const {
+  return this->transpose();
+}
+
+
+double CRSMatrix::asDouble() const {
+  if (_ncols != 1 || _nrows != 1) {
+    throw std::invalid_argument("Matrix must be a 1 x 1 matrix!");
+  }
+
+  return this->operator() (0, 0);
+}
+
+
+double CRSMatrix::norm() const {
+  if (_ncols <= 0 || _nrows <= 0) {
+    throw std::invalid_argument("Matrix must be initialized!");
+  }
+
+  double ret = 0.0;
+
+  for (double val: vals) ret += pow(val, 2.0);
+
+  return pow(ret, 1.0 / 2.0);
+}
+
+
 void CRSMatrix::_printArrays() {
   std::cout << "vals: [";
   for (double val: vals) std::cout << val << " ";
