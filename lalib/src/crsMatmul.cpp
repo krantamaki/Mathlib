@@ -1,5 +1,4 @@
 #include "crsMatrix.hpp"
-#include "crsVector.hpp"
 #include "declare_lalib.hpp"
 
 
@@ -37,14 +36,14 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
       
       for (int col = 0; col < that._ncols; col++) {
 	
-	int n_that_col_elems = that_T.rowPtrs[col + 1] - rowPtr[col];
+	int n_that_col_elems = that_T.rowPtrs[col + 1] - rowPtrs[col];
 	if (n_that_col_elems == 0) continue;
 
 	else {
 
 	  double sum = 0.0;
 	  for (int col_i = rowPtrs[row]; col_i < rowPtrs[row + 1]; col_i++) {
-	    for (int row_i = that_T.rowPtrs[col] row_i < that_T.rowPtrs[col + 1]; row_i++) {
+	    for (int row_i = that_T.rowPtrs[col]; row_i < that_T.rowPtrs[col + 1]; row_i++) {
 	      if (colInds[col_i] == that_T.colInds[row_i]) {
 		sum += vals[col_i] * that_T.vals[row_i];
 	      }
@@ -55,7 +54,7 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 	  ret.colInds.push_back(col);
 
 	  for (int row_i = row + 1; row_i <= _nrows; row_i++) {
-	    rowPtrs[row_i] += 1;
+	    ret.rowPtrs[row_i] += 1;
 	  }
 
 	}
