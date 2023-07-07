@@ -206,6 +206,24 @@ const CRSMatrix CRSMatrix::operator* (const CRSMatrix& that) const {
   return CRSMatrix(*this) *= that;
 }
 
+const CRSMatrix CRSMatrix::operator* (const double that) const {
+  if (_ncols < 1 || _nrows < 1) {
+    return *this;
+  }
+
+  CRSMatrix ret = CRSMatrix(*this);
+
+  for (int i = 0; i < (int)vals.size(); i++) {
+    ret.vals[i] *= that;
+  }
+
+  return ret;
+}
+
+const CRSMatrix lalib::operator* (double scalar, const CRSMatrix& matrix) {
+  return matrix * scalar;
+}
+
 CRSMatrix& CRSMatrix::operator/= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
     throw std::invalid_argument("Matrix dimensions must match!");

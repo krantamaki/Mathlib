@@ -107,11 +107,12 @@ namespace lalib {
     std::vector<double> toVector() const;
     double asDouble() const;
     const CRSVector asCRSVector();
-    double norm();
-  
+    double norm() const;
   };
   
   std::ostream& operator<<(std::ostream& os, CRSMatrix& A);
+
+  const CRSMatrix operator* (double scalar, const CRSMatrix& matrix);
 
 }
 
