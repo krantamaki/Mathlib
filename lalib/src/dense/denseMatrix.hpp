@@ -8,7 +8,7 @@ matrices the memory requirements are vast and thus this is not the recommended
 choice. Then use of CRSMatrix is a good choice.
 */
 
-#include "declare_lalib.hpp"
+#include "../declare_lalib.hpp"
 
 
 namespace lalib {

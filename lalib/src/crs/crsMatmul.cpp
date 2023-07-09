@@ -1,5 +1,5 @@
 #include "crsMatrix.hpp"
-#include "declare_lalib.hpp"
+#include "../declare_lalib.hpp"
 
 
 #define STRASSEN_THRESHOLD 1000

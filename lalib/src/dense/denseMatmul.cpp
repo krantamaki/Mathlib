@@ -1,6 +1,9 @@
 #include "denseMatrix.hpp"
 #include "denseVector.hpp"
-#include "declare_lalib.hpp"
+#include "../declare_lalib.hpp"
+
+
+#define STRASSEN_THRESHOLD 1000
 
 
 using namespace lalib;
@@ -58,7 +61,7 @@ const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
   }
 
   // 100 chosen as arbitrary threshold
-  if (_ncols > 100 && _nrows > 100 && that._ncols > 100) {
+  if (_ncols > STRASSEN_THRESHOLD && _nrows > STRASSEN_THRESHOLD && that._ncols > STRASSEN_THRESHOLD) {
     return this->matmulNaive(that);  // Should call Strassen algorithm, but that is not implemented yet
   }
 

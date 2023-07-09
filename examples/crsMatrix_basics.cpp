@@ -1,7 +1,7 @@
-#include "../lalib/src/crsMatrix.hpp"
+#include "../lalib/src/crs/crsMatrix.hpp"
 
 /*
-  Compile in root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/crsMatrix.cpp lalib/src/crsMatmul.cpp  examples/crsMatrix_basics.cpp -lm -o crsMatrix_basics.o
+  Compile in root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsMatmul.cpp  examples/crsMatrix_basics.cpp -lm -o crsMatrix_basics.o
   Run with: ./crsMatrix_basics.o
 */
 

@@ -1,6 +1,6 @@
 #include "denseMatrix.hpp"
 #include "denseVector.hpp"
-#include "declare_lalib.hpp"
+#include "../declare_lalib.hpp"
 
 
 using namespace lalib;

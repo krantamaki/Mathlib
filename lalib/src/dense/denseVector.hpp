@@ -6,7 +6,7 @@
   Use of DenseVector allows for fast dot products and other useful features.
 */
 
-#include "declare_lalib.hpp"
+#include "../declare_lalib.hpp"
 
 
 namespace lalib {
