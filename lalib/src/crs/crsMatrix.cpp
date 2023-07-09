@@ -396,11 +396,58 @@ double CRSMatrix::get(int row, int col) const {
 }
 
 
+// -------------------- OTHER OVERLOADED OPERATORS -----------------------
+
+
+CRSMatrix& CRSMatrix::operator= (const CRSMatrix& that) {
+  // Check for self-assignment ie. case where a = a is called by comparing the pointers of the objects
+  if (this == &that) return *this; 
+
+  _ncols = that._ncols;
+  _nrows = that._nrows;
+
+  vals = that.vals;
+  colInds = that.colInds;
+  rowPtrs = that.rowPtrs;
+
+  return *this;
+}
+
+
+bool CRSMatrix::operator== (const CRSMatrix& that) {
+  if (_nrows != that._nrows || _ncols != that._ncols) {
+    return false;
+  }
+
+  int this_num_non_zeros = vals.size();
+  int that_num_non_zeros = that.vals.size();
+
+  if (this_num_non_zeros != that_num_non_zeros) {
+    return false;
+  }
+
+  for (int i = 0; i < this_num_non_zeros; i++) {
+    if (vals[i] != that.vals[i] || colInds[i] != that.colInds[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+bool CRSMatrix::operator!= (const CRSMatrix& that) {
+  return !(*this == that);
+}
+
+
+
 // ----------------------- MISC ----------------------------
 
 
 // TODO: Optimize transpose operation
 
+/*
 const CRSMatrix CRSMatrix::transpose() const {
   
   if (_ncols <= 0 || _nrows <= 0) {
@@ -427,10 +474,35 @@ const CRSMatrix CRSMatrix::transpose() const {
   
   return ret;
 }
+*/
 
+const CRSMatrix CRSMatrix::naiveTranspose() const {
+  if (_ncols <= 0 || _nrows <= 0) {
+    return *this;
+  }
+
+  // Initialize the transpose matrix
+  CRSMatrix ret = CRSMatrix(_ncols, _nrows);
+
+  for (int row = 0; row < _nrows; row++) {
+    for (int col = 0; col < _ncols; col++) {
+      double val = this->operator() (row, col);
+
+      if (val != 0) {
+	ret.place(col, row, val);
+      }
+    }
+  }
+  
+  return ret;
+}
+
+const CRSMatrix CRSMatrix::transpose() const {
+  return this->naiveTranspose();
+}
 
 const CRSMatrix CRSMatrix::T() const {
-  return this->transpose();
+  return this->naiveTranspose();
 }
 
 

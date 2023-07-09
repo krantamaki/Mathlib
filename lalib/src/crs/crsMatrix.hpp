@@ -85,6 +85,13 @@ namespace lalib {
     const CRSMatrix operator/ (const double that) const;
     // ... ?
 
+    // Other overloaded operators
+
+    CRSMatrix& operator= (const CRSMatrix& that);
+    bool operator== (const CRSMatrix& that);
+    bool operator!= (const CRSMatrix& that);
+
+
     // Other methods
 
     int ncols() { return _ncols; }
@@ -97,6 +104,7 @@ namespace lalib {
 
     void _printArrays();
 
+    const CRSMatrix naiveTranspose() const;
     const CRSMatrix transpose() const;
     const CRSMatrix T() const;  // Alias for transpose()
     // CRSMatrix inv();
