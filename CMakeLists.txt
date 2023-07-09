@@ -1,5 +1,0 @@
-SET(CMAKE_BUILD_TYPE Release)
-
-PROJECT(mathlib)
-
-ADD_SUBDIRECTORY(lalib/src)
