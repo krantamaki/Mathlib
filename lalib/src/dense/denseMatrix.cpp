@@ -12,6 +12,9 @@ DenseMatrix::DenseMatrix(void) {}
 
 // Constructor that copies the contents of a given matrix
 DenseMatrix::DenseMatrix(const DenseMatrix& that) {
+  // Check for self-assignment
+  if (this == &that) return; 
+
   if (that._ncols > 0 && that._nrows > 0) {
     _ncols = that._ncols;
     _nrows = that._nrows;
@@ -449,7 +452,7 @@ bool DenseMatrix::operator== (const DenseMatrix& that) {
   for (int vect = 0; vect < total_vects; vect++) {
     for (int elem = 0; elem < VECT_ELEMS; elem++) {
       if (data[vect][elem] != that.data[vect][elem]) {
-	return false;
+        return false;
       }
     }
   }

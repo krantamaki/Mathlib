@@ -12,6 +12,9 @@ CRSMatrix::CRSMatrix(void) {}
 
 // Constructor that copies the contents of a given matrix
 CRSMatrix::CRSMatrix(const CRSMatrix& that) {
+  // Check for self-assignment
+  if (this == &that) return; 
+
   if (that._ncols > 0 && that._nrows > 0) {
     _ncols = that._ncols;
     _nrows = that._nrows;
@@ -511,7 +514,7 @@ double CRSMatrix::asDouble() const {
     throw std::invalid_argument("Matrix must be a 1 x 1 matrix!");
   }
 
-  return this->operator() (0, 0);
+  return vals[0];
 }
 
 
