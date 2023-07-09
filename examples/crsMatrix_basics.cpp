@@ -1,7 +1,7 @@
 #include "../lalib/src/crsMatrix.hpp"
 
 /*
-  Compile in root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/crsMatrix.cpp examples/crsMatrix_basics.cpp -lm -o crsMatrix_basics.o
+  Compile in root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/crsMatrix.cpp lalib/src/crsMatmul.cpp  examples/crsMatrix_basics.cpp -lm -o crsMatrix_basics.o
   Run with: ./crsMatrix_basics.o
 */
 
@@ -69,5 +69,28 @@ int main() {
 
   std::cout << "Should be: \n\n" << "[[-1.3 1.5 0]\n [4 0 0]\n [0 0 0]]" << "\n\n";
 
+
+  // Matrix multiplication
+  CRSMatrix E = D.matmul(B);
+  std::cout << "Matrix formed by matrix multiplication E = DB = \n\n" << E << "\n";
+
+  std::cout << "Should be: \n\n" << "[[-1.69 6.85 0]\n [5.2 2 0]\n [0 0 0]]" << "\n\n";
+
+
+  // Matrix multiplication with different dimensions
+  CRSMatrix v = CRSMatrix(3, 1, {1.0, 0.0, -0.2});
+  std::cout << "Column matrix initialized from an array: v = \n\n" << v << "\n";
+
+  std::cout << "Should be: \n\n" << "[[1.0]\n [0.0]\n [-0.2]]" << "\n\n";
+
+  CRSMatrix w = E.matmul(v);
+  std::cout << "Matrix formed by matrix multiplication w = Ev = \n\n" << w << "\n";
+  std::cout << "Should be: \n\n" << "[[-1.69]\n [5.2]\n [0]]" << "\n\n";
+
+  CRSMatrix w_T = w.T();
+  CRSMatrix a = w_T.matmul(v);
+  std::cout << "Vector inner product a = w^Tv =" << a << "\n";
+  std::cout << "Should be: \n\n" << "[[-1.69]]" << "\n\n";
+  
   return 0;
 }

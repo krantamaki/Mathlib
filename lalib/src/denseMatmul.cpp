@@ -98,12 +98,11 @@ double DenseVector::dot(const DenseVector& that) const {
     sum[i] = 0.0;
   }
 
-  #pragma omp parallel for schedule(dynamic, 1)
   for (int vect = 0; vect < total_vects; vect++) {
     sum += data[vect] * that.data[vect];
   }
 
-  double ret = 0;
+  double ret = 0.0;
   for (int elem = 0; elem < VECT_ELEMS; elem++) {
     ret += sum[elem];	
   }

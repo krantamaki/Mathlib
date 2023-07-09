@@ -2,7 +2,7 @@
 #include "../lalib/src/denseVector.hpp"
 
 /*
-  Compile int the root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/denseMatrix.cpp lalib/src/denseVector.cpp lalib/src/denseMatmul.cpp examples/denseMatrix_basics.cpp -lm -o denseMatrix_basics.o
+  Compile in the root (mathlib) directory with: g++ -mavx -fopenmp -Wall lalib/src/denseMatrix.cpp lalib/src/denseVector.cpp lalib/src/denseMatmul.cpp examples/denseMatrix_basics.cpp -lm -o denseMatrix_basics.o
   Run with: ./denseMatrix_basics.o
  */
 
