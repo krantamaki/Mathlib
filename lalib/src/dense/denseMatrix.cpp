@@ -12,9 +12,6 @@ DenseMatrix::DenseMatrix(void) {}
 
 // Constructor that copies the contents of a given matrix
 DenseMatrix::DenseMatrix(const DenseMatrix& that) {
-  // Check for self-assignment
-  if (this == &that) return; 
-
   if (that._ncols > 0 && that._nrows > 0) {
     _ncols = that._ncols;
     _nrows = that._nrows;
