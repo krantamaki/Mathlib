@@ -445,7 +445,7 @@ bool CRSMatrix::operator!= (const CRSMatrix& that) {
 // ----------------------- MISC ----------------------------
 
 
-bool isclose(const CRSMatrix& that, double tol) {
+bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
   if (_nrows != that._nrows || _ncols != that._ncols) {
     return false;
   }
