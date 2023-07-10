@@ -496,7 +496,7 @@ bool DenseMatrix::isclose(const DenseMatrix& that, double tol) {
 
   for (int vect = 0; vect < total_vects; vect++) {
     for (int elem = 0; elem < VECT_ELEMS; elem++) {
-      if (data[vect][elem] - that.data[vect][elem] > tol) {
+      if (fabs(data[vect][elem] - that.data[vect][elem]) > tol) {
         return false;
       }
     }

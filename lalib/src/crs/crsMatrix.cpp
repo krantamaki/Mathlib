@@ -458,7 +458,7 @@ bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
   }
 
   for (int i = 0; i < this_num_non_zeros; i++) {
-    if (vals[i] - that.vals[i] > tol || colInds[i] != that.colInds[i]) {
+    if (fabs(vals[i] - that.vals[i]) > tol || colInds[i] != that.colInds[i]) {
       return false;
     }
   }

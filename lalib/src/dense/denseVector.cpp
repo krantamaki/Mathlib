@@ -449,6 +449,24 @@ std::ostream& lalib::operator<<(std::ostream& os, DenseVector& v) {
 
 // ----------------------------------MISC----------------------------------------
 
+
+bool DenseVector::isclose(const DenseVector& that, double tol) {
+  if (_nrows != that._nrows || _ncols != that._ncols) {
+    return false;
+  }
+
+  for (int vect = 0; vect < total_vects; vect++) {
+    for (int elem = 0; elem < VECT_ELEMS; elem++) {
+      if (fabs(data[vect][elem] - that.data[vect][elem]) > tol) {
+	return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+
 const DenseVector DenseVector::transpose() const {
   DenseVector ret = DenseVector(*this);
 
