@@ -104,6 +104,8 @@ namespace lalib {
     const int nrows() const { return _nrows; }
     const std::tuple<int, int> shape() const { return std::make_tuple(_nrows, _ncols); }
 
+    bool isclose(const DenseMatrix& that, double tol);
+
     const DenseMatrix transpose() const;
     const DenseMatrix T() const;  // Alias for transpose()
     // DenseMatrix inv();

@@ -445,6 +445,28 @@ bool CRSMatrix::operator!= (const CRSMatrix& that) {
 // ----------------------- MISC ----------------------------
 
 
+bool isclose(const CRSMatrix& that, double tol) {
+  if (_nrows != that._nrows || _ncols != that._ncols) {
+    return false;
+  }
+
+  int this_num_non_zeros = vals.size();
+  int that_num_non_zeros = that.vals.size();
+
+  if (this_num_non_zeros != that_num_non_zeros) {
+    return false;
+  }
+
+  for (int i = 0; i < this_num_non_zeros; i++) {
+    if (vals[i] - that.vals[i] > tol || colInds[i] != that.colInds[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 // TODO: Optimize transpose operation
 
 /*

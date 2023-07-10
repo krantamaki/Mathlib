@@ -488,6 +488,24 @@ std::ostream& lalib::operator<<(std::ostream& os, DenseMatrix& A) {
 
 // ----------------------------------MISC----------------------------------------
 
+
+bool DenseMatrix::isclose(const DenseMatrix& that, double tol) {
+  if (_nrows != that._nrows || _ncols != that._ncols) {
+    return false;
+  }
+
+  for (int vect = 0; vect < total_vects; vect++) {
+    for (int elem = 0; elem < VECT_ELEMS; elem++) {
+      if (data[vect][elem] - that.data[vect][elem] > tol) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+
 const DenseMatrix DenseMatrix::transpose() const{
   // Check that matrix initialized
   if (_ncols <= 0 || _nrows <= 0) {

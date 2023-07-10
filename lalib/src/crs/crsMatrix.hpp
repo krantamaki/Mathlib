@@ -94,6 +94,8 @@ namespace lalib {
 
     // Other methods
 
+    bool isclose(const CRSMatrix& that, double tol);
+
     int ncols() { return _ncols; }
     int nrows() { return _nrows; }
     std::tuple<int, int> shape() { return std::make_tuple(_nrows, _ncols); }
