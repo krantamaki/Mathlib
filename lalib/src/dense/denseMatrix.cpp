@@ -567,7 +567,7 @@ const DenseVector DenseMatrix::asDenseVector() const {
 
   for (int row = 0; row < _nrows; row++) {
     for (int col = 0; col < _ncols; col++) {
-      ret.place(row * _nrows + col, this->operator() (row, col));
+      ret.place(row * _ncols + col, this->operator() (row, col));
     }
   }
 
