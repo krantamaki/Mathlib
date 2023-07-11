@@ -299,6 +299,8 @@ const DenseMatrix DenseMatrix::operator/ (const double that) const {
     return *this;
   }
 
+  DenseMatrix ret = DenseMatrix(*this);
+
   vect_t div;
   for (int i = 0; i < VECT_ELEMS; i++) {
     div[i] = that;
@@ -307,11 +309,11 @@ const DenseMatrix DenseMatrix::operator/ (const double that) const {
   #pragma omp parallel for schedule(dynamic, 1)
   for (int row = 0; row < _nrows; row++) {
     for (int vect = 0; vect < vects_per_row; vect++) {
-      data[vects_per_row * row + vect] = data[vects_per_row * row + vect] / div;
+      ret.data[vects_per_row * row + vect] = ret.data[vects_per_row * row + vect] / div;
     }
   }
 
-  return *this;
+  return ret;
 }
 
 
