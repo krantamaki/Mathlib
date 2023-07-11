@@ -446,6 +446,14 @@ bool DenseMatrix::operator== (const DenseMatrix& that) {
     return false;
   }
 
+  for (int row = 0; row < _nrows; row++) {
+    for (int col = 0; col < _ncols; col++) {
+      if (this->operator() (row, col) != that(row, col)) {
+	return false;
+      }
+    }
+  }
+  
   for (int vect = 0; vect < total_vects; vect++) {
     for (int elem = 0; elem < VECT_ELEMS; elem++) {
       if (data[vect][elem] != that.data[vect][elem]) {
@@ -494,10 +502,10 @@ bool DenseMatrix::isclose(const DenseMatrix& that, double tol) {
     return false;
   }
 
-  for (int vect = 0; vect < total_vects; vect++) {
-    for (int elem = 0; elem < VECT_ELEMS; elem++) {
-      if (fabs(data[vect][elem] - that.data[vect][elem]) > tol) {
-        return false;
+  for (int row = 0; row < _nrows; row++) {
+    for (int col = 0; col < _ncols; col++) {
+      if (fabs(this->operator() (row, col) - that(row, col)) > tol) {
+	return false;
       }
     }
   }

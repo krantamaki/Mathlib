@@ -400,11 +400,9 @@ bool DenseVector::operator== (const DenseVector& that) {
     return false;
   }
 
-  for (int vect = 0; vect < total_vects; vect++) {
-    for (int elem = 0; elem < VECT_ELEMS; elem++) {
-      if (data[vect][elem] != that.data[vect][elem]) {
-	return false;
-      }
+  for (int i = 0; i < (_nrows > _ncols ? _nrows : _ncols); i++) {
+    if (this->operator() (i) != that(i)) {
+      return false;
     }
   }
 
@@ -455,11 +453,9 @@ bool DenseVector::isclose(const DenseVector& that, double tol) {
     return false;
   }
 
-  for (int vect = 0; vect < total_vects; vect++) {
-    for (int elem = 0; elem < VECT_ELEMS; elem++) {
-      if (fabs(data[vect][elem] - that.data[vect][elem]) > tol) {
-	return false;
-      }
+  for (int i = 0; i < (_nrows > _ncols ? _nrows : _ncols); i++) {
+    if (fabs(this->operator() (i) - that(i)) > tol) {
+      return false;
     }
   }
 
