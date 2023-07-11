@@ -114,37 +114,6 @@ double DenseVector::dot(const DenseVector& that) const {
 }
 
 
-// Matrix vector multiplications could reuse the matmul method for DenseMatrix
-// but as it is crucial for it to be efficient it is implemented from scratch here
-
 const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
-  if (_ncols != that.nrows()) {
-    throw std::invalid_argument("Improper dimensions given!");
-  }
-
-  // Allocate memory for the resulting vector
-  DenseVector ret = DenseVector(that.nrows(), 1);
-
-  #pragma omp parallel for schedule(dynamic, 1)
-  for (int row = 0; row < _nrows; row++) {
-
-    vect_t sum;
-    for (int i = 0; i < VECT_ELEMS; i++) {
-      sum[i] = 0.0;
-    }
-
-    for (int vect = 0; vect < vects_per_row; vect++) {    
-
-      sum += data[vects_per_row * row + vect] * that.getSIMD(vect);
-
-      double val = 0.0;
-      for (int elem = 0; elem < VECT_ELEMS; elem++) {
-	val += sum[elem];	
-      }
-			
-      ret.place(row, val);
-    }
-  }
-
-  return ret;
+  return (this->matmul(that.asDenseMatrix())).asDenseVector();
 }
