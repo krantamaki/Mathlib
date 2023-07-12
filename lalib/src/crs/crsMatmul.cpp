@@ -36,7 +36,7 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
       
       for (int col = 0; col < that._ncols; col++) {
 	
-	int n_that_col_elems = that_T.rowPtrs[col + 1] - rowPtrs[col];
+	int n_that_col_elems = that_T.rowPtrs[col + 1] - that_T.rowPtrs[col];
 	if (n_that_col_elems == 0) continue;
 
 	else {
@@ -50,13 +50,14 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 	    }
 	  }
 
-	  ret.vals.push_back(sum);
-	  ret.colInds.push_back(col);
+	  if (sum != 0.0) {
+	    ret.vals.push_back(sum);
+	    ret.colInds.push_back(col);
 
-	  for (int row_i = row + 1; row_i <= _nrows; row_i++) {
-	    ret.rowPtrs[row_i] += 1;
+	    for (int row_i = row + 1; row_i <= _nrows; row_i++) {
+	      ret.rowPtrs[row_i] += 1;
+	    }
 	  }
-
 	}
       }
     }
