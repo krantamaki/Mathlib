@@ -38,25 +38,35 @@ CRSMatrix::CRSMatrix(int rows, int cols) {
 // Constructor that allocates memory for wanted sized matrix and initializes
 // the values as zeros
 CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
-  std::cout << "\nWARNING: Full matrix allocation is not memory efficient! Consider using DenseMatrix class instead." << "\n\n";
 
   if (cols < 1 || rows < 1) {
     throw std::invalid_argument("Matrix dimensions must be positive!");
   }
+
+  if (init_val == 0.0) {
+    _ncols = cols;
+    _nrows = rows;
+
+    rowPtrs = std::vector<int>(rows + 1, 0);
+  }
+  else {
+    std::cout << "\nWARNING: Full matrix allocation is not memory efficient! Consider using DenseMatrix class instead." << "\n\n";
   
-  _ncols = cols;
-  _nrows = rows;
+    _ncols = cols;
+    _nrows = rows;
 
-  vals.reserve(_ncols * _nrows);
-  colInds.reserve(_ncols * _nrows);
-  rowPtrs.reserve(_nrows + 1);
+    vals.reserve(_ncols * _nrows);
+    colInds.reserve(_ncols * _nrows);
+    rowPtrs.reserve(_nrows + 1);
 
-  for (int row = 0; row < _nrows; row++) {
-    for (int col = 0; col < _ncols; col++) {
-      vals.push_back(init_val);
-      colInds.push_back(col);
+    for (int row = 0; row < _nrows; row++) {
+      for (int col = 0; col < _ncols; col++) {
+	vals.push_back(init_val);
+	colInds.push_back(col);
+      }
+      rowPtrs.push_back(row * _ncols);
     }
-    rowPtrs.push_back(row * _ncols);
+    rowPtrs.push_back(_nrows * _ncols);
   }
 }
 
@@ -190,10 +200,7 @@ CRSMatrix& CRSMatrix::operator*= (const CRSMatrix& that) {
   }
 
   for (int row = 0; row < _nrows; row++) {
-    int rowPtr = that.rowPtrs[row];
-    int nrowElems = that.rowPtrs[row + 1] - rowPtr;
-    for (int col_i = 0; col_i < nrowElems; col_i++) {
-      int col = that.colInds[rowPtr + col_i];
+    for (int col = 0; col < _ncols; col++) {
       double val = this->operator() (row, col) * that(row, col);
       this->place(row, col, val);
     }
@@ -230,10 +237,7 @@ CRSMatrix& CRSMatrix::operator/= (const CRSMatrix& that) {
   }
 
   for (int row = 0; row < _nrows; row++) {
-    int rowPtr = that.rowPtrs[row];
-    int nrowElems = that.rowPtrs[row + 1] - rowPtr;
-    for (int col_i = 0; col_i < nrowElems; col_i++) {
-      int col = that.colInds[rowPtr + col_i];
+    for (int col = 0; col < _ncols; col++) {
       double val = this->operator() (row, col) / that(row, col);
       this->place(row, col, val);
     }
@@ -469,7 +473,7 @@ bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
 
 // TODO: Optimize transpose operation
 
-/*
+
 const CRSMatrix CRSMatrix::transpose() const {
   
   if (_ncols <= 0 || _nrows <= 0) {
@@ -483,7 +487,7 @@ const CRSMatrix CRSMatrix::transpose() const {
     for (int row = 0; row < _nrows; row++) {
       double val = this->operator() (row, col);
 
-      if (val != 0) {
+      if (val != 0.0) {
 	ret.vals.push_back(val);
 	ret.colInds.push_back(row);
 
@@ -496,7 +500,6 @@ const CRSMatrix CRSMatrix::transpose() const {
   
   return ret;
 }
-*/
 
 const CRSMatrix CRSMatrix::naiveTranspose() const {
   if (_ncols <= 0 || _nrows <= 0) {
@@ -510,7 +513,7 @@ const CRSMatrix CRSMatrix::naiveTranspose() const {
     for (int col = 0; col < _ncols; col++) {
       double val = this->operator() (row, col);
 
-      if (val != 0) {
+      if (val != 0.0) {
 	ret.place(col, row, val);
       }
     }
@@ -519,12 +522,8 @@ const CRSMatrix CRSMatrix::naiveTranspose() const {
   return ret;
 }
 
-const CRSMatrix CRSMatrix::transpose() const {
-  return this->naiveTranspose();
-}
-
 const CRSMatrix CRSMatrix::T() const {
-  return this->naiveTranspose();
+  return this->transpose();
 }
 
 
@@ -533,7 +532,9 @@ double CRSMatrix::asDouble() const {
     throw std::invalid_argument("Matrix must be a 1 x 1 matrix!");
   }
 
-  return vals[0];
+  if (vals.size() > 0) return vals[0];
+
+  return 0.0;
 }
 
 
