@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
   // Write output into a log file
-  freopen("log.txt", "w", stdout);
+  // freopen("log.txt", "w", stdout);
 
   if (argc != 2) {
     throw runtime_error("Improper number of arguments passed!");
