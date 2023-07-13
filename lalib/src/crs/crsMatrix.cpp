@@ -163,13 +163,13 @@ CRSMatrix::CRSMatrix(std::string path) {
     throw std::invalid_argument("Improper data file!");
   }
 
-  _nrows = row;
-  _ncols = col;
+  _nrows = row + 1;
+  _ncols = col + 1;
 
   rowPtrs = std::vector<int>(_nrows + 1, 0);
 
   // Start reading the lines from the beginning of the file
-  ifstream file(path);
+  std::ifstream file(path);
 
   while (file >> row >> col >> val) {
     this->place(row, col, val);
@@ -190,13 +190,13 @@ CRSMatrix::CRSMatrix(std::string path, int offset) {
     throw std::invalid_argument("Improper data file!");
   }
 
-  _nrows = row - offset;
-  _ncols = col - offset;
+  _nrows = row + 1 - offset;
+  _ncols = col + 1 - offset;
 
   rowPtrs = std::vector<int>(_nrows + 1, 0);
 
   // Start reading the lines from the beginning of the file
-  ifstream file(path);
+  std::ifstream file(path);
 
   while (file >> row >> col >> val) {
     this->place(row - offset, col - offset, val);
@@ -540,11 +540,12 @@ bool CRSMatrix::save(std::string path) {
       int col = colInds[row_p];
       double val = vals[row_p];
 
-      if (!(file << row << col << val << "\n")) {
+      if (!(file << row << " " << col << " " << val << "\n")) {
 	success = false;
       }
     }
   }
+  
   file.close();
   
   return success;

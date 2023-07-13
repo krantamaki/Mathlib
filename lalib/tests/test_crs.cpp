@@ -2,8 +2,8 @@
 #include "../src/crs/crsMatrix.hpp"
 
 
-#define TOL 0.00001
-#define N_TESTS 17
+#define TOL 0.0001
+#define N_TESTS 21
 
 
 using namespace lalib;
@@ -55,7 +55,7 @@ int main() {
   CRSMatrix A = CRSMatrix(5, 5, tmp_vec);
 
   double tmp2[25] =
-    {0.0, 3.22, 0.00, 0.0, 0.0,
+    {0.0, 3.22, 0.0, 0.0, 0.0,
      3.423, 3.2234, 0.0, 5.32, 0.0,
      0.0, 0.0, 0.432, 0.0, 0.0,
      0.0, 9.89, -3.54, 0.0, 4.26,
@@ -83,6 +83,47 @@ int main() {
 
   std::vector<double> tmp_vec4(tmp4, tmp4 + sizeof(tmp4) / sizeof(tmp4[0]));
   CRSMatrix w = CRSMatrix(5, 1, tmp_vec4);
+
+  
+  // ----------- SAVING AND LOADING --------------
+
+  std::cout << "Testing saving and loading:" << "\n\n";
+
+  std::cout << "######### SAVING ##########" << "\n\n";
+
+  bool success1 = A.save("tmp.txt");
+  std::cout << "TEST 1: ";
+  if (success1) {
+    std::cout << "PASSED" << "\n";
+    passed_tests += 1;
+  }
+  else {
+    std::cout << "FAILED" << "\n\n";
+    std::cout << "Something went wrong with saving a square matrix" << "\n\n";
+  }
+  
+  
+  bool success2 = v.save("tmp2.txt");
+  std::cout << "TEST 2: ";
+  if (success2) {
+    std::cout << "PASSED" << "\n";
+    passed_tests += 1;
+  }
+  else {
+    std::cout << "FAILED" << "\n\n";
+    std::cout << "Something went wrong with saving a column matrix" << "\n\n";
+  }
+  
+  std::cout << "######### LOADING ##########" << "\n\n";
+  CRSMatrix A_loaded = CRSMatrix("tmp.txt");
+  std::cout << "TEST 3: ";
+  passed_tests += test(A_loaded, A);
+
+  CRSMatrix v_loaded = CRSMatrix("tmp2.txt");
+  std::cout << "TEST 4: ";
+  passed_tests += test(v_loaded, v);
+
+  std::cout << "---------------------------------------" << "\n";
 
 
   // ----------- PLACING AND INDEXING -------------
@@ -409,7 +450,7 @@ int main() {
     {10.269, 12.8902, 0.0, 15.96, 0.0,
      0.0, 6.44, 1.728, 0.0, 0.0,
      27.384, 85.1272, -18.216, 42.56, 25.56,
-     0.0, 120.16, 28.32, 75.24, -32.025,
+     0.0, 120.16, -28.32, 75.24, -32.025,
      0.0, 48.56, 2.592, 41.8, -36.725};
 
   std::vector<double> m_tmp_vec(m_tmp, m_tmp + sizeof(m_tmp) / sizeof(m_tmp[0]));
@@ -477,6 +518,4 @@ int main() {
   
   clock_t end = clock();
   std::cout << "Total time spent in tests: " << ((double)(end - start)) / CLOCKS_PER_SEC << " seconds\n";
-
-  
 }

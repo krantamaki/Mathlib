@@ -44,15 +44,15 @@ inline int _ceil(int a, int b) {
 
 // Function for reading the last line of a given text file
 // Inspired by: https://stackoverflow.com/questions/11876290/c-fastest-way-to-read-only-last-line-of-text-file
-std::string _lastLine(const std::string& filepath) {
-  ifstream file(filepath);
+inline std::stringstream _lastLine(const std::string& filepath) {
+  std::ifstream file(filepath);
   char c;
-  file.seekg(-1, ios_base::end);  // Go to last non EOF char
+  file.seekg(-1, std::ios_base::end);  // Go to last non EOF char
 
   file.get(c);
 
   if (c == '\n') {  // File ends with a newline char. Ignore it
-    file.seekg(-2, ios_base::cur);
+    file.seekg(-2, std::ios_base::cur);
   }
 
   bool cont = true;
@@ -63,11 +63,11 @@ std::string _lastLine(const std::string& filepath) {
       file.seekg(0);
       cont = false;
     }
-    else if(ch == '\n') {  // End of last line found
+    else if(c == '\n') {  // End of last line found
       cont = false; 
     }
     else {  // Continue
-      fin.seekg(-2,ios_base::cur);
+      file.seekg(-2, std::ios_base::cur);
     }
   }
 
