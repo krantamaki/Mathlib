@@ -26,7 +26,7 @@ CRSMatrix::CRSMatrix(const CRSMatrix& that) {
 // the values as zeros
 CRSMatrix::CRSMatrix(int rows, int cols) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be positive!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -40,7 +40,7 @@ CRSMatrix::CRSMatrix(int rows, int cols) {
 CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
 
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be positive!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
   }
 
   if (init_val == 0.0) {
@@ -79,7 +79,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, double* elems) {
   std::cout << "\nWARNING: Initializing a matrix with double array might lead to undefined behaviour!" << "\n\n";
 
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be non-negative!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -107,7 +107,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, double* elems) {
 // warning is printed.
 CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> elems) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be non-negative!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
   }
 
   if (rows * cols != (int)elems.size()) {
@@ -136,7 +136,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> elems) {
 // the value and index arrays
 CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vector<int> new_colInds, std::vector<int> new_rowPtrs) {
   if (*std::max_element(new_colInds.begin(), new_colInds.end()) > cols || *std::max_element(new_rowPtrs.begin(), new_rowPtrs.end()) || *std::min_element(new_colInds.begin(), new_colInds.end()) <= 0 || *std::min_element(new_rowPtrs.begin(), new_rowPtrs.end()) <= 0.0) {
-    throw std::invalid_argument("Matrix dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
   
   _ncols = cols;
@@ -156,23 +156,46 @@ CRSMatrix::CRSMatrix(std::string path) {
   // Variables to read the line contents to
   int row, col;
   double val;
+
+  int nTokens = _numTokens(lastLine.str());
   
-  // Read the last line of the file to get the dimensions of the matrix
-  std::stringstream lastLine = _lastLine(path);
-  if (!(lastLine >> row >> col >> val)) {
-    throw std::invalid_argument("Improper data file!");
+  if (nTokens == 3) {
+    lastLine >> row >> col >> val;
+    
+    _nrows = row + 1;
+    _ncols = col + 1;
+
+    rowPtrs = std::vector<int>(_nrows + 1, 0);
+
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
+
+    while (file >> row >> col >> val) {
+      this->place(row, col, val);
+    }
+    
+    file.close();
   }
 
-  _nrows = row + 1;
-  _ncols = col + 1;
+  else if (nTokens == 2) {
+    lastLine >> row  >> val;
+    
+    _nrows = row + 1;
+    _ncols = 1;
 
-  rowPtrs = std::vector<int>(_nrows + 1, 0);
+    rowPtrs = std::vector<int>(_nrows + 1, 0);
 
-  // Start reading the lines from the beginning of the file
-  std::ifstream file(path);
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
 
-  while (file >> row >> col >> val) {
-    this->place(row, col, val);
+    while (file >> row >> val) {
+      this->place(row, 0, val);
+    }
+
+    file.close();
+  }
+  else {
+    throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
   }
 }
 
@@ -186,20 +209,46 @@ CRSMatrix::CRSMatrix(std::string path, int offset) {
   
   // Read the last line of the file to get the dimensions of the matrix
   std::stringstream lastLine = _lastLine(path);
-  if (!(lastLine >> row >> col >> val)) {
-    throw std::invalid_argument("Improper data file!");
+
+  int nTokens = _numTokens(lastLine.str());
+  
+  if (nTokens == 3) {
+    lastLine >> row >> col >> val;
+    
+    _nrows = row + 1 - offset;
+    _ncols = col + 1 - offset;
+
+    rowPtrs = std::vector<int>(_nrows + 1, 0);
+
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
+
+    while (file >> row >> col >> val) {
+      this->place(row - offset, col - offset, val);
+    }
+    
+    file.close();
   }
 
-  _nrows = row + 1 - offset;
-  _ncols = col + 1 - offset;
+  else if (nTokens == 2) {
+    lastLine >> row  >> val;
+    
+    _nrows = row + 1 - offset;
+    _ncols = 1;
 
-  rowPtrs = std::vector<int>(_nrows + 1, 0);
+    rowPtrs = std::vector<int>(_nrows + 1, 0);
 
-  // Start reading the lines from the beginning of the file
-  std::ifstream file(path);
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
 
-  while (file >> row >> col >> val) {
-    this->place(row - offset, col - offset, val);
+    while (file >> row >> val) {
+      this->place(row - offset, 0, val);
+    }
+
+    file.close();
+  }
+  else {
+    throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
   }
 }
 
@@ -208,7 +257,7 @@ CRSMatrix::CRSMatrix(std::string path, int offset) {
 
 CRSMatrix& CRSMatrix::operator+= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -230,7 +279,7 @@ const CRSMatrix CRSMatrix::operator+ (const CRSMatrix& that) const {
 
 CRSMatrix& CRSMatrix::operator-= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -252,7 +301,7 @@ const CRSMatrix CRSMatrix::operator- (const CRSMatrix& that) const {
 
 CRSMatrix& CRSMatrix::operator*= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -289,7 +338,7 @@ const CRSMatrix lalib::operator* (double scalar, const CRSMatrix& matrix) {
 
 CRSMatrix& CRSMatrix::operator/= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -311,7 +360,7 @@ const CRSMatrix CRSMatrix::operator/ (const CRSMatrix& that) const {
 
 void CRSMatrix::place(int row, int col, double val) {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-    throw std::invalid_argument("Given dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   // If value is not zero it needs to be placed into the matrix
@@ -417,7 +466,7 @@ void CRSMatrix::place(int row, int col, double val) {
 
 double CRSMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-    throw std::invalid_argument("Given dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   int rowPtr = rowPtrs[row];
@@ -529,7 +578,7 @@ bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
 
 bool CRSMatrix::save(std::string path) {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument("Cannot save an unitialized matrix!");
+    throw std::invalid_argument(_formErrorMsg("Cannot save an unitialized matrix!", __FILE__, __func__, __LINE__));
   }
 
   std::ofstream file(path);
@@ -610,7 +659,7 @@ const CRSMatrix CRSMatrix::T() const {
 
 double CRSMatrix::asDouble() const {
   if (_ncols != 1 || _nrows != 1) {
-    throw std::invalid_argument("Matrix must be a 1 x 1 matrix!");
+    throw std::invalid_argument(_formErrorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __func__, __LINE__));
   }
 
   if (vals.size() > 0) return vals[0];
@@ -621,7 +670,7 @@ double CRSMatrix::asDouble() const {
 
 double CRSMatrix::norm() const {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument("Matrix must be initialized!");
+    throw std::invalid_argument(_formErrorMsg("Matrix must be initialized!", __FILE__, __func__, __LINE__));
   }
 
   double ret = 0.0;

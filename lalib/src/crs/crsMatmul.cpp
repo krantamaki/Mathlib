@@ -18,7 +18,7 @@ using namespace lalib;
 const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 
   if (_ncols != that._nrows) {
-    throw std::invalid_argument("Improper dimensions!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __line__));
   }
 
   // Create the matrix that will be filled
@@ -75,7 +75,7 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 
 const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument("Improper dimensions!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __line__));
   }
 
   if (_ncols > STRASSEN_THRESHOLD && _nrows > STRASSEN_THRESHOLD && that._ncols > STRASSEN_THRESHOLD) {

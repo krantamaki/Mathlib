@@ -19,6 +19,7 @@
 #include <vector>
 #include <tuple>
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -80,5 +81,32 @@ inline std::stringstream _lastLine(const std::string& filepath) {
 
   return ret;
 }
+
+
+// Function that generates a more descriptive error message that can be thrown
+inline std::string _formErrorMsg(const std::string& msg, const char* file, const char* func, int line) {
+  std::ostringstream msgStream;
+
+  msgStream << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
+
+  return msgStream.str();
+}
+
+
+// Function that counts the number of (whitespace separated) tokens in a stringstream
+inline int _numTokens(const std::string& str) {
+  std::istringstream stream(str);
+  std::string token;
+  int count = 0;
+
+  while (std::getline(stream, token, ' ')) {
+    if (token != "") {
+      count++;
+    }
+  }
+
+  return count;
+}
+
 
 #endif
