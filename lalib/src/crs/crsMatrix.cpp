@@ -147,6 +147,62 @@ CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vect
   rowPtrs = new_rowPtrs;
 }
 
+// Constructor that reads the contents of a given file and stores them in a matrix.
+// The file should consist of three whitespace separated columns s.t. the first column
+// tells the row, the second tells the column and third the value.
+// The last row of the file should hold the lower right corner element of the matrix
+// even if it is zero.
+CRSMatrix::CRSMatrix(std::string path) {
+  // Variables to read the line contents to
+  int row, col;
+  double val;
+  
+  // Read the last line of the file to get the dimensions of the matrix
+  std::stringstream lastLine = _lastLine(path);
+  if (!(lastLine >> row >> col >> val)) {
+    throw std::invalid_argument("Improper data file!");
+  }
+
+  _nrows = row;
+  _ncols = col;
+
+  rowPtrs = std::vector<int>(_nrows + 1, 0);
+
+  // Start reading the lines from the beginning of the file
+  ifstream file(path);
+
+  while (file >> row >> col >> val) {
+    this->place(row, col, val);
+  }
+}
+
+// Constructor that is very similar to the one above, but allows telling the offset for
+// indexing. That is if the file was written so that indexing starts at 1 passing an
+// offset of 1 negates this.
+CRSMatrix::CRSMatrix(std::string path, int offset) {
+  // Variables to read the line contents to
+  int row, col;
+  double val;
+  
+  // Read the last line of the file to get the dimensions of the matrix
+  std::stringstream lastLine = _lastLine(path);
+  if (!(lastLine >> row >> col >> val)) {
+    throw std::invalid_argument("Improper data file!");
+  }
+
+  _nrows = row - offset;
+  _ncols = col - offset;
+
+  rowPtrs = std::vector<int>(_nrows + 1, 0);
+
+  // Start reading the lines from the beginning of the file
+  ifstream file(path);
+
+  while (file >> row >> col >> val) {
+    this->place(row - offset, col - offset, val);
+  }
+}
+
 
 // ---------------------OVERLOADED BASIC MATH OPERATORS-----------------------
 
@@ -468,6 +524,30 @@ bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
   }
 
   return true;
+}
+
+
+bool CRSMatrix::save(std::string path) {
+  if (_ncols <= 0 || _nrows <= 0) {
+    throw std::invalid_argument("Cannot save an unitialized matrix!");
+  }
+
+  std::ofstream file(path);
+  bool success = true;
+
+  for (int row = 0; row < _nrows; row++) {
+    for (int row_p = rowPtrs[row]; row_p < rowPtrs[row + 1]; row_p++) {
+      int col = colInds[row_p];
+      double val = vals[row_p];
+
+      if (!(file << row << col << val << "\n")) {
+	success = false;
+      }
+    }
+  }
+  file.close();
+  
+  return success;
 }
 
 

@@ -36,6 +36,8 @@ namespace lalib {
     CRSMatrix(int rows, int cols, double* elems);
     CRSMatrix(int rows, int cols, std::vector<double> elems);
     CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vector<int> new_colInds, std::vector<int> new_rowPtrs);
+    CRSMatrix(std::string path);
+    CRSMatrix(std::string path, int offset);
 
     // ~CRSMatrix();  // Destructor not needed
 
@@ -95,6 +97,7 @@ namespace lalib {
     // Other methods
 
     bool isclose(const CRSMatrix& that, double tol);
+    bool save(std::string path);
 
     int ncols() { return _ncols; }
     int nrows() { return _nrows; }
@@ -111,12 +114,12 @@ namespace lalib {
     const CRSMatrix T() const;  // Alias for transpose()
     // CRSMatrix inv();
     const CRSMatrix matmul(const CRSMatrix& that) const;
-    const CRSMatrix matmulStrassen(const CRSMatrix& that) const;
+    // const CRSMatrix matmulStrassen(const CRSMatrix& that) const;
     const CRSMatrix matmulNaive(const CRSMatrix& that) const;
-    const CRSVector matmul(const CRSVector& that) const;
+    // const CRSVector matmul(const CRSVector& that) const;
     std::vector<double> toVector() const;
     double asDouble() const;
-    const CRSVector asCRSVector();
+    // const CRSVector asCRSVector();
     double norm() const;
   };
   
