@@ -2,7 +2,7 @@
 
 
 /*
-  Compile with: g++ -mavx -fopenmp -Wall solver.cpp parse_file.cpp -lm -o solver.o
+  Compile with at root mathlib with: g++ -mavx -fopenmp -Wall solver/src/solver.cpp solver/src/parse_file.cpp solver/src/linsolve.cpp lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsMatmul.cpp -lm -o solver.o
   Run with: ./solver.o <config file>
 */
 
@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
 
   map<string, string> config_map = solver::parse_file(config_path);
 
-  for (const auto& [key, value] : config_map) {
-    cout << "Given key: " << key << " maps to: " << value << "\n";
-  }
+  solver::solve(config_map["coef_path"], config_map["rhs_path"], config_map["ret_path"],
+		config_map["init_path"], config_map["method"], config_map["verbosity"]);
 }

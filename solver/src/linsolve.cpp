@@ -19,8 +19,8 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   }
 
   // Initialize the matrices
-  CRSMatrix A = CRSMatrix(coef_path);
-  CRSMatrix b = CRSMatrix(rhs_path);
+  CRSMatrix A = CRSMatrix(coef_path, 1);
+  CRSMatrix b = CRSMatrix(rhs_path, 1);
   CRSMatrix x0;
   
   if (init_path != "") {
@@ -39,7 +39,7 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   else if (method == "Jacobi" || method == "jacobi" || method == "JACOBI"){
     ret = jacobiSolve<CRSMatrix>(A, x0, b);
   }
-  else if (method == "Gauss-Seidel" || method == "gauss-seidel" || method == "GAUSS-SEIDEL" || method == "GS" || mehtod == "gs"){
+  else if (method == "Gauss-Seidel" || method == "gauss-seidel" || method == "GAUSS-SEIDEL" || method == "GS" || method == "gs"){
     ret = gsSolve<CRSMatrix>(A, x0, b);
   }
   else if (method == "SOR" || method == "sor" || method == "Sor"){

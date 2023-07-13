@@ -37,6 +37,19 @@ map<string, string> solver::parse_file(const string& filepath) {
   if (ret.find("ret_path") == ret.end()) {
     throw runtime_error("Path to where the solution is to be stored not provided!");
   }
+
+  // Pass empty string to the missing arguments
+  if (ret.find("init_path") == ret.end()) {
+    ret.insert({"init_path", ""});
+  }
+  if (ret.find("method") == ret.end()) {
+    ret.insert({"method", ""});
+  }
+  if (ret.find("verbosity") == ret.end()) {
+    ret.insert({"verbosity", "0"});
+  }
+
+  file.close();
   
   return ret;
 }
