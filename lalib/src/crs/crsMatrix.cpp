@@ -157,6 +157,9 @@ CRSMatrix::CRSMatrix(std::string path) {
   int row, col;
   double val;
 
+  // Read the last line of the file to get the dimensions of the matrix
+  std::stringstream lastLine = _lastLine(path);
+
   int nTokens = _numTokens(lastLine.str());
   
   if (nTokens == 3) {

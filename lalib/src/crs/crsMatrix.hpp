@@ -116,7 +116,7 @@ namespace lalib {
     const CRSMatrix matmul(const CRSMatrix& that) const;
     // const CRSMatrix matmulStrassen(const CRSMatrix& that) const;
     const CRSMatrix matmulNaive(const CRSMatrix& that) const;
-    // const CRSVector matmul(const CRSVector& that) const;
+    const CRSVector matmul(const CRSVector& that) const;
     std::vector<double> toVector() const;
     double asDouble() const;
     // const CRSVector asCRSVector();

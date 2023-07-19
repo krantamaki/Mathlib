@@ -1,4 +1,5 @@
 #include "crsMatrix.hpp"
+#include "crsVector.hpp"
 #include "../declare_lalib.hpp"
 
 
@@ -18,7 +19,7 @@ using namespace lalib;
 const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 
   if (_ncols != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __line__));
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
   }
 
   // Create the matrix that will be filled
@@ -75,7 +76,7 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 
 const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __line__));
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
   }
 
   if (_ncols > STRASSEN_THRESHOLD && _nrows > STRASSEN_THRESHOLD && that._ncols > STRASSEN_THRESHOLD) {
@@ -83,4 +84,44 @@ const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
   }
 
   return this->matmulNaive(that);
+}
+
+
+// Efficient implementation for sparse matrix-vector multiplication
+const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
+  if (_ncols != that.len()) {
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+  }
+
+  CRSVector ret = CRSVector(_nrows);
+
+  #pragma omp parallel for schedule(dynamic, 1)
+  for (int row = 0; row < _nrows; row++) {
+    int n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
+    if (n_row_elems == 0) continue;
+    else {
+      for (int col_i = 0; col_i < n_row_elems; col_i++) {
+	int col = colInds[rowPtrs[row] + col_i];
+	double val = vals[rowPtrs[row] + col_i];
+
+	ret.place(row, ret(row) + val * that(col));
+      }
+    }
+  }
+
+  return ret;
+}
+
+double CRSVector::dot(const CRSVector& that) const {
+  if (_len != that._len) {
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+  }
+
+  double ret = 0.0;
+
+  for (int i = 0; i < _len; i++) {
+    ret += data[i] * that.data[i];
+  }
+
+  return ret;
 }
