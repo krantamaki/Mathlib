@@ -40,9 +40,9 @@ namespace lalib {
     Which is implemented below
   */
 
-  template<class Matrix> Matrix jacobiSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
+  template<class Matrix, class Vector> Vector jacobiSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
-    if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
+    if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       throw std::invalid_argument("Improper dimensions!");
     }
 
@@ -50,10 +50,10 @@ namespace lalib {
       throw std::invalid_argument("Coefficient matrix must be square!");
     }
 
-    Matrix x_k = Matrix(x_0);
+    Vector x_k = Vector(x_0);
 
     for (int iter = 0; iter < max_iter; iter++) {
-      Matrix x_temp = Matrix(A.nrows(), 1);
+      Vector x_temp = Vector(A.nrows());
 
       // Go over all i in {0, ..., nrows}
       for (int row = 0; row < A.nrows(); row++) {
@@ -62,20 +62,20 @@ namespace lalib {
 	double s = 0.0;
 	for (int col = 0; col < A.ncols(); col++) {
 	  if (col == row) continue;
-	  s += A(row, col) * x_k(col, 0);
+	  s += A(row, col) * x_k(col);
 	}
 
 	// Compute the new value of x_i = (b_i - s) / a_{i, i}
 	double a_ii = A(row, row);
 	if (a_ii != 0.0) {
-	  s = (b(row, 0) - s) / a_ii;
+	  s = (b(row) - s) / a_ii;
 	}
 	else {
 	  throw std::invalid_argument("Coefficient matrix must have a non-zero diagonal!");
 	}
 
 	// Update the vector x
-	x_temp.place(row, 0, s);
+	x_temp.place(row, s);
       }
 
       x_k = x_temp;
@@ -102,9 +102,9 @@ namespace lalib {
     fundamentally serial nature.
   */
 
-  template<class Matrix> Matrix gsSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
+  template<class Matrix, class Vector> Vector gsSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
-    if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
+    if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       throw std::invalid_argument("Improper dimensions!");
     }
 
@@ -112,7 +112,7 @@ namespace lalib {
       throw std::invalid_argument("Coefficient matrix must be square!");
     }
 
-    Matrix x_k = Matrix(x_0);
+    Vector x_k = Vector(x_0);
 
     for (int iter = 0; iter < max_iter; iter++) {
 
@@ -122,13 +122,13 @@ namespace lalib {
 	// Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
 	double s_l = 0.0;
 	for (int col = 0; col < row; col++) {
-	  s_l += A(row, col) * x_k(col, 0);
+	  s_l += A(row, col) * x_k(col);
 	}
 
 	// Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
 	double s_g = 0.0;
 	for (int col = row + 1; col < A.ncols(); col++) {
-	  s_g += A(row, col) * x_k(col, 0);
+	  s_g += A(row, col) * x_k(col);
 	}
 
 	double s = s_l + s_g;
@@ -136,14 +136,14 @@ namespace lalib {
 	// Compute the new value of x_i = (b_i - s) / a_{i, i}
 	double a_ii = A(row, row);
 	if (a_ii != 0.0) {
-	  s = (b(row, 0) - s) / a_ii;
+	  s = (b(row) - s) / a_ii;
 	}
 	else {
 	  throw std::invalid_argument("Coefficient matrix must have a non-zero diagonal!");
 	}
 
 	// Update the vector x
-	x_k.place(row, 0, s);
+	x_k.place(row, s);
       }
 
       if ((A.matmul(x_k) - b).norm() < tol) {
@@ -171,9 +171,9 @@ namespace lalib {
     less certain, but required number of iterations is decreased.
   */
 
-  template<class Matrix> Matrix sorSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
+  template<class Matrix, class Vector> Vector sorSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
     
-    if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
+    if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       throw std::invalid_argument("Improper dimensions!");
     }
 
@@ -181,7 +181,7 @@ namespace lalib {
       throw std::invalid_argument("Coefficient matrix must be square!");
     }
 
-    Matrix x_k = Matrix(x_0);
+    Vector x_k = Vector(x_0);
 
     for (int iter = 0; iter < max_iter; iter++) {
 
@@ -191,19 +191,19 @@ namespace lalib {
 	// Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
 	double s_l = 0.0;
 	for (int col = 0; col < row; col++) {
-	  s_l += A(row, col) * x_k(col, 0);
+	  s_l += A(row, col) * x_k(col);
 	}
 
 	// Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
 	double s_g = 0.0;
 	for (int col = row + 1; col < A.ncols(); col++) {
-	  s_g += A(row, col) * x_k(col, 0);
+	  s_g += A(row, col) * x_k(col);
 	}
 
 	// Compute the new value of x_i = x_i^{(k-1)} + w(s - x_i^{(k-1)})
 	double a_ii = A(row, row);
-	double x_i = x_k(row, 0);
-	double s = (b(row, 0) - s_l - s_g) / a_ii;
+	double x_i = x_k(row);
+	double s = (b(row) - s_l - s_g) / a_ii;
 	if (a_ii != 0.0) {
 	  x_i = x_i + w * (s - x_i);
 	}
@@ -212,7 +212,7 @@ namespace lalib {
 	}
 
 	// Update the vector x
-	x_k.place(row, 0, x_i);
+	x_k.place(row, x_i);
       }
 
       if ((A.matmul(x_k) - b).norm() < tol) {

@@ -31,9 +31,9 @@ namespace lalib {
     the traditional formulation for conjugate gradient method [2].
   */
 
-  template<class Matrix> Matrix cgSolve(const Matrix& A, const Matrix& x_0, const Matrix& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
+  template<class Matrix, class Vector> Vector cgSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
     
-    if (A.nrows() != x_0.nrows() || A.nrows() != b.nrows()) {
+    if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       throw std::invalid_argument("Improper dimensions!");
     }
 
@@ -51,22 +51,19 @@ namespace lalib {
       }
     }
 
-    Matrix x_k = Matrix(x_0);
-    Matrix r = b - A.matmul(x_k);
-    Matrix p = Matrix(r);
+    Vector x_k = Vector(x_0);
+    Vector r = b - A.matmul(x_k);
+    Vector p = Vector(r);
 
     for (int iter = 0; iter < max_iter; iter++) {
-
-      Matrix p_T = p.T();
-      
-      double alpha = (p_T.matmul(r)).asDouble() / (p_T.matmul(A.matmul(p))).asDouble();
+      double alpha = (p.dot(r)) / (p.dot(A.matmul(p)));
       
       x_k += alpha * p;
 
-      Matrix r_tmp = Matrix(r);
+      Vector r_tmp = Vector(r);
 
-      r -= alpha * A.matmul(p);
-      p = r + (r.T().matmul(r)).asDouble() / (r_tmp.T().matmul(r_tmp)).asDouble() * p;
+      r -= alpha * (A.matmul(p));
+      p = r + ((r.dot(r)) / (r_tmp.dot(r_tmp))) * p;
 
       if (r.norm() < tol) {
 	return x_k;
