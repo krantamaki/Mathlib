@@ -90,6 +90,59 @@ CRSVector::CRSVector(int len, double* elems) {
   data.assign(elems, elems + len);
 }
 
+// Constructor that reads the contents of a given file and stores them in a matrix.
+// The file should consist of three whitespace separated columns s.t. the first column
+// tells the row, the second tells the column and third the value.
+// The last row of the file should hold the lower right corner element of the matrix
+// even if it is zero.
+CRSVector::CRSVector(std::string path, int offset) {
+  // Variables to read the line contents to
+  int row, col;
+  double val;
+  
+  // Read the last line of the file to get the dimensions of the matrix
+  std::stringstream lastLine = _lastLine(path);
+
+  int nTokens = _numTokens(lastLine.str());
+  
+  if (nTokens == 3) {
+    lastLine >> row >> col >> val;
+
+    if (col > 1 && row > 1) {
+      throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
+    }
+
+    _len = row * col + 1 - offset;
+
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
+
+    while (file >> row >> col >> val) {
+      this->place(row > col ? row - offset : col - offset, val);
+    }
+    
+    file.close();
+  }
+
+  else if (nTokens == 2) {
+    lastLine >> row  >> val;
+    
+    _len = row + 1 - offset;
+
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
+
+    while (file >> row >> val) {
+      this->place(row - offset, val);
+    }
+
+    file.close();
+  }
+  else {
+    throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
+  }
+}
+
 // Destructor not needed
 
 
@@ -108,7 +161,7 @@ CRSVector& CRSVector::operator+= (const CRSVector& that) {
   return *this;
 }
 
-const CSRVector CRSVector::operator+ (const CRSVector& that) const {
+const CRSVector CRSVector::operator+ (const CRSVector& that) const {
   return CRSVector(*this) += that;
 }
 
@@ -125,7 +178,7 @@ CRSVector& CRSVector::operator-= (const CRSVector& that) {
   return *this;
 }
 
-const CSRVector CRSVector::operator- (const CRSVector& that) const {
+const CRSVector CRSVector::operator- (const CRSVector& that) const {
   return CRSVector(*this) -= that;
 }
 
@@ -142,14 +195,14 @@ CRSVector& CRSVector::operator*= (const CRSVector& that) {
   return *this;
 }
 
-const CSRVector CRSVector::operator* (const CRSVector& that) const {
+const CRSVector CRSVector::operator* (const CRSVector& that) const {
   return CRSVector(*this) *= that;
 }
 
 const CRSVector CRSVector::operator* (const double that) const {
   if (_len < 1) return *this;
 
-  CRSMatrix ret = CRSMatrix(*this);
+  CRSVector ret = CRSVector(*this);
 
   #pragma omp parallel for schedule(dynamic, 1)
   for (int i = 0; i < _len; i++) {
@@ -176,14 +229,14 @@ CRSVector& CRSVector::operator/= (const CRSVector& that) {
   return *this;
 }
 
-const CSRVector CRSVector::operator/ (const CRSVector& that) const {
+const CRSVector CRSVector::operator/ (const CRSVector& that) const {
   return CRSVector(*this) /= that;
 }
 
 const CRSVector CRSVector::operator/ (const double that) const {
   if (_len < 1) return *this;
 
-  CRSMatrix ret = CRSMatrix(*this);
+  CRSVector ret = CRSVector(*this);
 
   #pragma omp parallel for schedule(dynamic, 1)
   for (int i = 0; i < _len; i++) {
@@ -215,7 +268,7 @@ void CRSVector::place(int start, int end, CRSVector vector) {
   }
 }
 
-double CRSMatrix::operator() (int num) const {
+double CRSVector::operator() (int num) const {
   if (num < 0 || num >= _len) {
     throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
   }
@@ -223,11 +276,11 @@ double CRSMatrix::operator() (int num) const {
   return data[num];
 }
 
-double CRSMatrix::operator[] (int num) const {
+double CRSVector::operator[] (int num) const {
   return this->operator() (num);
 }
 
-double CRSMatrix::get(int num) const {
+double CRSVector::get(int num) const {
   return this->operator() (num);
 }
 
@@ -251,7 +304,7 @@ const CRSVector CRSVector::operator() (int start, int end) const {
   return ret;
 }
 
-const CRSVector CRSVector::get(int start, int end) {
+const CRSVector CRSVector::get(int start, int end) const {
   return this->operator() (start, end);
 }
 
@@ -264,6 +317,8 @@ CRSVector& CRSVector::operator= (const CRSVector& that) {
 
   data = that.data;
   _len = that._len;
+
+  return *this;
 }
 
 bool CRSVector::operator== (const CRSVector& that) {

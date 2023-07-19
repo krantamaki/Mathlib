@@ -35,6 +35,7 @@ namespace lalib {
     CRSVector(int len, double init_val);
     CRSVector(int len, double* elems);
     CRSVector(int len, std::vector<double> elems);
+    CRSVector(std::string path, int offset);
 
     // ~CRSVector();
 
