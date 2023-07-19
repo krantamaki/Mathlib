@@ -95,17 +95,19 @@ const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
 
   CRSVector ret = CRSVector(_nrows);
 
-  #pragma omp parallel for schedule(dynamic, 1)
+  // #pragma omp parallel for schedule(dynamic, 1)
   for (int row = 0; row < _nrows; row++) {
     int n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
     if (n_row_elems == 0) continue;
     else {
-      for (int col_i = 0; col_i < n_row_elems; col_i++) {
-	int col = colInds[rowPtrs[row] + col_i];
-	double val = vals[rowPtrs[row] + col_i];
+      double sum = 0.0;
+      for (int col_i = rowPtrs[row]; col_i < rowPtrs[row + 1]; col_i++) {
+	int col = colInds[col_i];
+	double val = vals[col_i];
 
-	ret.place(row, ret(row) + val * that(col));
+	sum += val * that(col);
       }
+      ret.place(row, sum);
     }
   }
 

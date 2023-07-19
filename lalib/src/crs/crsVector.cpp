@@ -114,6 +114,8 @@ CRSVector::CRSVector(std::string path, int offset) {
 
     _len = row * col + 1 - offset;
 
+    data = std::vector<double>(_len, 0.0);
+
     // Start reading the lines from the beginning of the file
     std::ifstream file(path);
 
@@ -128,6 +130,8 @@ CRSVector::CRSVector(std::string path, int offset) {
     lastLine >> row  >> val;
     
     _len = row + 1 - offset;
+
+    data = std::vector<double>(_len, 0.0);
 
     // Start reading the lines from the beginning of the file
     std::ifstream file(path);
@@ -169,7 +173,7 @@ CRSVector& CRSVector::operator-= (const CRSVector& that) {
   if (_len != that._len) {
     throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
   }
-
+  
   #pragma omp parallel for schedule(dynamic, 1)
   for (int i = 0; i < _len; i++) {
     data[i] = data[i] - that.data[i];
