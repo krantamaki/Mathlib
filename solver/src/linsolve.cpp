@@ -41,7 +41,7 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
 
   CRSVector ret;
 
-  clock_t start = clock();
+  auto start = chrono::high_resolution_clock::now();
   // Call the solver
   if (method == "" || method == "CG" || method == "cg") {
     std::cout << "Calling the Conjugate Gradient method ..." << "\n";
@@ -62,9 +62,11 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   else {
     throw runtime_error("Improper solver provided!");
   }
-  clock_t end = clock();
+  auto end = chrono::high_resolution_clock::now();
+
+  auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
   
-  std::cout << "\n" << "Time taken by the solver: " << ((double)(end - start)) / CLOCKS_PER_SEC << " seconds" << "\n";
+  std::cout << "\n" << "Time taken by the solver: " << duration.count() << " milliseconds" << "\n";
   
   std::cout << "Residual norm: " << (A.matmul(ret) - b).norm() << "\n\n";
 
