@@ -1,4 +1,4 @@
-coef_path solver/tests/poisson/linsys_a.dat
-rhs_path solver/tests/poisson/linsys_b.dat
+coef_path solver/tests/poisson/linsys_a_ML3.dat
+rhs_path solver/tests/poisson/linsys_b_ML3.dat
 ret_path ret.dat
 method cg
