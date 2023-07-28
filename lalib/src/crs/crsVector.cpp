@@ -95,7 +95,8 @@ CRSVector::CRSVector(int len, double* elems) {
 // tells the row, the second tells the column and third the value.
 // The last row of the file should hold the lower right corner element of the matrix
 // even if it is zero.
-CRSVector::CRSVector(std::string path, int offset) {
+// Alternatively, .mtx format will (eventually) be supported
+CRSVector::CRSVector(std::string path, int offset, std::string format) {
   // Variables to read the line contents to
   int row, col;
   double val;
@@ -104,6 +105,10 @@ CRSVector::CRSVector(std::string path, int offset) {
   std::stringstream lastLine = _lastLine(path);
 
   int nTokens = _numTokens(lastLine.str());
+
+  if (format != ".dat") {
+    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not implemented!", __FILE__, __func__, __LINE__));
+  }
   
   if (nTokens == 3) {
     lastLine >> row >> col >> val;

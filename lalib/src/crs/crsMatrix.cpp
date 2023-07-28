@@ -148,68 +148,24 @@ CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vect
 }
 
 // Constructor that reads the contents of a given file and stores them in a matrix.
-// The file should consist of three whitespace separated columns s.t. the first column
-// tells the row, the second tells the column and third the value.
-// The last row of the file should hold the lower right corner element of the matrix
-// even if it is zero.
-CRSMatrix::CRSMatrix(std::string path) {
+// Constructor will allow (eventually) reading from files of either .mtx format or 
+// of standard whitespace separated (row, col, val) tuples. In the case of standard
+// data file the last row of the file should contain the lower right corner element
+// even in the case where it is zero.
+// Additionally, user can define the offset in indexing. That is if the software that
+// generated the matrix uses indexing starting at 1 this can be taken in to account by
+// passing offset value of 1.
+// Final parameter is a boolean telling if the indexing is "safe". Safe indexing would 
+// would have sorted rows and columns, with row values in sequence.
+CRSMatrix::CRSMatrix(std::string path, int offset, std::string format, bool safe_indexing) {
   // Variables to read the line contents to
   int row, col;
   double val;
 
-  // Read the last line of the file to get the dimensions of the matrix
-  std::stringstream lastLine = _lastLine(path);
-
-  int nTokens = _numTokens(lastLine.str());
-  
-  if (nTokens == 3) {
-    lastLine >> row >> col >> val;
-    
-    _nrows = row + 1;
-    _ncols = col + 1;
-
-    rowPtrs = std::vector<int>(_nrows + 1, 0);
-
-    // Start reading the lines from the beginning of the file
-    std::ifstream file(path);
-
-    while (file >> row >> col >> val) {
-      this->place(row, col, val);
-    }
-    
-    file.close();
+  if (format != ".dat") {
+    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not implemented!", __FILE__, __func__, __LINE__));
   }
 
-  else if (nTokens == 2) {
-    lastLine >> row  >> val;
-    
-    _nrows = row + 1;
-    _ncols = 1;
-
-    rowPtrs = std::vector<int>(_nrows + 1, 0);
-
-    // Start reading the lines from the beginning of the file
-    std::ifstream file(path);
-
-    while (file >> row >> val) {
-      this->place(row, 0, val);
-    }
-
-    file.close();
-  }
-  else {
-    throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
-  }
-}
-
-// Constructor that is very similar to the one above, but allows telling the offset for
-// indexing. That is if the file was written so that indexing starts at 1 passing an
-// offset of 1 negates this.
-CRSMatrix::CRSMatrix(std::string path, int offset) {
-  // Variables to read the line contents to
-  int row, col;
-  double val;
-  
   // Read the last line of the file to get the dimensions of the matrix
   std::stringstream lastLine = _lastLine(path);
 
@@ -226,17 +182,38 @@ CRSMatrix::CRSMatrix(std::string path, int offset) {
     // Start reading the lines from the beginning of the file
     std::ifstream file(path);
 
-    while (file >> row >> col >> val) {
-      this->place(row - offset, col - offset, val);
+    if (safe_indexing) {
+      int n_vals = 0;
+      int lastRow = 0;
+      while (file >> row >> col >> val) {
+        row = row - offset;
+        if (row != lastRow) {
+          int n_emptyRows = row - lastRow;
+          for (int i = 1; i < n_emptyRows; i++) {
+            rowPtrs[lastRow + i] = rowPtrs[lastRow];
+          }
+          rowPtrs[row] = n_vals;
+          lastRow = row;
+        }
+        colInds.push_back(col - offset);
+        vals.push_back(val);
+        n_vals++;
+      }
+      rowPtrs[_nrows] = n_vals;
     }
-    
+    else {
+      while (file >> row >> col >> val) {
+        this->place(row - offset, col - offset, val);
+      }
+    }
+
     file.close();
   }
 
   else if (nTokens == 2) {
     lastLine >> row  >> val;
     
-    _nrows = row + 1 - offset;
+    _nrows = row + 1;
     _ncols = 1;
 
     rowPtrs = std::vector<int>(_nrows + 1, 0);
@@ -244,8 +221,26 @@ CRSMatrix::CRSMatrix(std::string path, int offset) {
     // Start reading the lines from the beginning of the file
     std::ifstream file(path);
 
-    while (file >> row >> val) {
-      this->place(row - offset, 0, val);
+    if (safe_indexing) {
+      int n_vals = 0;
+      int lastRow = 0;
+      while (file >> row >> val) {
+        row = row - offset;
+        int emptyRows = row - lastRow - 1;
+        for (int i = 0; i < emptyRows; i++) {
+          rowPtrs[lastRow + i + 1] = n_vals - 1;
+        }
+        rowPtrs[row] = n_vals;
+        vals.push_back(val);
+        n_vals++;
+        lastRow = row;
+      }
+      rowPtrs[_nrows] = n_vals;
+    }
+    else {
+      while (file >> row >> val) {
+        this->place(row - offset, 0, val);
+      }
     }
 
     file.close();

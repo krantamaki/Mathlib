@@ -36,8 +36,8 @@ namespace lalib {
     CRSMatrix(int rows, int cols, double* elems);
     CRSMatrix(int rows, int cols, std::vector<double> elems);
     CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vector<int> new_colInds, std::vector<int> new_rowPtrs);
-    CRSMatrix(std::string path);
-    CRSMatrix(std::string path, int offset);
+    CRSMatrix(std::string path, int offset = 0, std::string format = ".dat", bool safe_indexing = false);
+    // CRSMatrix(std::string path, int offset);
 
     // ~CRSMatrix();  // Destructor not needed
 
