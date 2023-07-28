@@ -22,7 +22,7 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   // Initialize the matrices
 
   std::cout << "Forming the coefficient matrix ..." << "\n";
-  CRSMatrix A = CRSMatrix(coef_path, 1);
+  CRSMatrix A = CRSMatrix(coef_path, 1, ".dat", true);
 
   std::cout << "Forming the right hand side matrix ..." << "\n";
   CRSVector b = CRSVector(rhs_path, 1);

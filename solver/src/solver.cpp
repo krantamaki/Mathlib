@@ -2,7 +2,7 @@
 
 
 /*
-  Compile with at root mathlib with: g++ -mavx -fopenmp -Wall solver/src/solver.cpp solver/src/parse_file.cpp solver/src/linsolve.cpp lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsMatmul.cpp -lm -o solver.o
+  Compile with at root mathlib with: g++ -mavx -fopenmp -Wall solver/src/solver.cpp solver/src/parse_file.cpp solver/src/linsolve.cpp lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsVector.cpp lalib/src/crs/crsMatmul.cpp -lm -o solver.o
   Run with: ./solver.o <config file>
 */
 
