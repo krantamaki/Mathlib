@@ -16,7 +16,7 @@ using namespace lalib;
 
 const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   // Allocate memory for the resulting matrix
@@ -57,7 +57,7 @@ const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
 
 const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   // 100 chosen as arbitrary threshold
@@ -74,7 +74,7 @@ const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
 
 const DenseMatrix DenseVector::matmul(const DenseVector& that) const {
   if (_ncols != that._nrows || _nrows != that._ncols) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   return (this->asDenseMatrix()).matmul(that.asDenseMatrix());
@@ -82,7 +82,7 @@ const DenseMatrix DenseVector::matmul(const DenseVector& that) const {
 
 const DenseVector DenseVector::matmul(const DenseMatrix& that) const {
   if (_ncols != that.nrows()) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   return ((this->asDenseMatrix()).matmul(that)).asDenseVector();
@@ -93,7 +93,7 @@ const DenseVector DenseVector::matmul(const DenseMatrix& that) const {
 
 double DenseVector::dot(const DenseVector& that) const {
   if (!((_ncols == that._ncols && _nrows == that._nrows) || (_ncols == that._nrows && _nrows == that._ncols))) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   vect_t sum;

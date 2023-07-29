@@ -41,7 +41,7 @@ DenseMatrix::DenseMatrix(const DenseMatrix& that) {
 // the values as zeros
 DenseMatrix::DenseMatrix(int rows, int cols) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be positive!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -75,7 +75,7 @@ DenseMatrix::DenseMatrix(int rows, int cols) {
 // the values as a given double
 DenseMatrix::DenseMatrix(int rows, int cols, double init_val) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be non-negative!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -113,7 +113,7 @@ DenseMatrix::DenseMatrix(int rows, int cols, double init_val) {
 // warning is printed.
 DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double> elems) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be non-negative!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
   }
   if (rows * cols != (int)elems.size()) {
     std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
@@ -151,7 +151,7 @@ DenseMatrix::DenseMatrix(int rows, int cols, double* elems) {
   std::cout << "\nWARNING: Initializing a matrix with double array might lead to undefined behaviour!" << "\n\n";
 
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument("Matrix dimensions must be non-negative!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -187,7 +187,7 @@ DenseMatrix::~DenseMatrix() {
 
 DenseMatrix& DenseMatrix::operator+= (const DenseMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -206,7 +206,7 @@ const DenseMatrix DenseMatrix::operator+ (const DenseMatrix& that) const {
 
 DenseMatrix& DenseMatrix::operator-= (const DenseMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -227,7 +227,7 @@ const DenseMatrix DenseMatrix::operator- (const DenseMatrix& that) const {
 // For standard matrix multiplication use DenseMatrix::matmul
 DenseMatrix& DenseMatrix::operator*= (const DenseMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -273,7 +273,7 @@ const DenseMatrix lalib::operator* (double scalar, const DenseMatrix& matrix) {
 // Matlabs backslash operator
 DenseMatrix& DenseMatrix::operator/= (const DenseMatrix& that) {
   if (ncols() != that._ncols || nrows() != that._ncols) {
-    throw std::invalid_argument("Matrix dimensions must match!");
+    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -292,7 +292,7 @@ const DenseMatrix DenseMatrix::operator/ (const DenseMatrix& that) const {
 
 const DenseMatrix DenseMatrix::operator/ (const double that) const {
   if (that == 0) {
-    throw std::invalid_argument("Division by zero undefined!");
+    throw std::invalid_argument(_formErrorMsg("Division by zero undefined!", __FILE__, __func__, __LINE__));
   }
 
   if (_ncols < 1 || _nrows < 1) {
@@ -321,7 +321,7 @@ const DenseMatrix DenseMatrix::operator/ (const double that) const {
 
 void DenseMatrix::place(int row, int col, double val) {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-    throw std::invalid_argument("Given dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   // Find the proper vector and element in said vector for column col
@@ -334,7 +334,7 @@ void DenseMatrix::place(int row, int col, double val) {
 void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, DenseMatrix mat) {
   // Check that the matrix to be placed fits
   if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || mat._nrows < rowEnd - rowStart || mat._ncols < colEnd - colStart) {
-    throw std::invalid_argument("Given dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -349,7 +349,7 @@ void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, Dens
 
 double DenseMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-    throw std::invalid_argument("Given dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   // Find the proper vector and element in said vector for column col
@@ -365,7 +365,7 @@ double DenseMatrix::get(int row, int col) const {
 
 double DenseMatrix::operator[] (int num) const {
   if (num >= _ncols * _nrows) {
-    throw std::invalid_argument("Given index out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given index out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   const int row = num / _ncols;
@@ -379,7 +379,7 @@ double DenseMatrix::operator[] (int num) const {
 
 const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
   if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   if (rowEnd > _nrows || colEnd > _ncols) {
@@ -545,7 +545,7 @@ const DenseMatrix DenseMatrix::T() const{
 
 std::vector<double> DenseMatrix::toVector() const {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument("Matrix must be initialized!");
+    throw std::invalid_argument(_formErrorMsg("Matrix must be initialized!", __FILE__, __func__, __LINE__));
   }
 
   std::vector<double> ret;
@@ -562,7 +562,7 @@ std::vector<double> DenseMatrix::toVector() const {
 
 double DenseMatrix::asDouble() const {
   if (_ncols != 1 || _nrows != 1) {
-    throw std::invalid_argument("Matrix must be a 1 x 1 matrix!");
+    throw std::invalid_argument(_formErrorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __func__, __LINE__));
   }
 
   return this->operator() (0, 0);
@@ -570,7 +570,7 @@ double DenseMatrix::asDouble() const {
 
 const DenseVector DenseMatrix::asDenseVector() const {
   if (_ncols != 1 && _nrows != 1) {
-    throw std::invalid_argument("Matrix must be a 1 x n or n x 1 matrix!");
+    throw std::invalid_argument(_formErrorMsg("Matrix must be a 1 x n or n x 1 matrix!", __FILE__, __func__, __LINE__));
   }
     
   DenseVector ret = DenseVector(_nrows, _ncols);
@@ -586,7 +586,7 @@ const DenseVector DenseMatrix::asDenseVector() const {
 
 double DenseMatrix::norm() const {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument("Matrix must be initialized!");
+    throw std::invalid_argument(_formErrorMsg("Matrix must be initialized!", __FILE__, __func__, __LINE__));
   }
 
   double ret = 0;

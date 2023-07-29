@@ -38,7 +38,7 @@ DenseVector::DenseVector(const DenseVector& that) {
 // the values as zeros
 DenseVector::DenseVector(int rows, int cols) {
   if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -69,7 +69,7 @@ DenseVector::DenseVector(int rows, int cols) {
 // the values as wanted double
 DenseVector::DenseVector(int rows, int cols, double init_val) {
   if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -103,7 +103,7 @@ DenseVector::DenseVector(int rows, int cols, double init_val) {
 // warning is printed.
 DenseVector::DenseVector(int rows, int cols, std::vector<double> elems) {
   if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
   }
   if (rows * cols != (int)elems.size()) {
     std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
@@ -138,7 +138,7 @@ DenseVector::DenseVector(int rows, int cols, double* elems) {
   std::cout << "\nWARNING: Initializing a vector with double array might lead to undefined behaviour!" << "\n\n";
  
   if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument("Improper dimensions! Either rows or cols has to be positive and the other 0!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
   }
 
   _ncols = cols;
@@ -171,7 +171,7 @@ DenseVector::~DenseVector() {
 
 DenseVector& DenseVector::operator+= (const DenseVector& that) {
   if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
-    throw std::invalid_argument("Vectors must have equal amount of elements!");
+    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -188,7 +188,7 @@ const DenseVector DenseVector::operator+ (const DenseVector& that) const {
 
 DenseVector& DenseVector::operator-= (const DenseVector& that) {
   if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
-    throw std::invalid_argument("Vectors must have equal amount of elements!");
+    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -205,7 +205,7 @@ const DenseVector DenseVector::operator- (const DenseVector& that) const {
 
 DenseVector& DenseVector::operator*= (const DenseVector& that) {
   if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
-    throw std::invalid_argument("Vectors must have equal amount of elements!");
+    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -246,7 +246,7 @@ const DenseVector operator* (double scalar, const DenseVector& vector) {
 
 DenseVector& DenseVector::operator/= (const DenseVector& that) {
   if ((_ncols > 1 ? _ncols : _nrows) != (that._ncols > 1 ? that._ncols : that._nrows)) {
-    throw std::invalid_argument("Vectors must have equal amount of elements!");
+    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -263,7 +263,7 @@ const DenseVector DenseVector::operator/ (const DenseVector& that) const {
 
 const DenseVector DenseVector::operator/ (const double that) const {
   if (that == 0) {
-    throw std::invalid_argument("Division by zero undefined!");
+    throw std::invalid_argument(_formErrorMsg("Division by zero undefined!", __FILE__, __func__, __LINE__));
   }
   if (_ncols < 1 || _nrows < 1) {
     return *this;
@@ -289,7 +289,7 @@ const DenseVector DenseVector::operator/ (const double that) const {
 
 void DenseVector::place(int num, double val) {
   if ((_ncols > 1 ? _ncols : _nrows) < num) {
-    throw std::invalid_argument("Index out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   const int vect = num / VECT_ELEMS;
@@ -300,7 +300,7 @@ void DenseVector::place(int num, double val) {
 
 void DenseVector::place(int start, int end, DenseVector vector) {
   if ((_ncols > 1 ? _ncols : _nrows) < end - start) {
-    throw std::invalid_argument("Given dimensions out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -311,7 +311,7 @@ void DenseVector::place(int start, int end, DenseVector vector) {
 
 double DenseVector::operator() (int num) const {
   if ((_ncols > 1 ? _ncols : _nrows) < num) {
-    throw std::invalid_argument("Index out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   const int vect = num / VECT_ELEMS;
@@ -330,7 +330,7 @@ double DenseVector::get(int num) const {
 
 const DenseVector DenseVector::operator() (int start, int end) const {
   if (start >= end || start < 0) {
-    throw std::invalid_argument("Improper dimensions given!");
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
   int max = (_ncols > 1 ? _ncols : _nrows);
@@ -356,7 +356,7 @@ const DenseVector DenseVector::get(int start, int end) const {
 
 vect_t DenseVector::getSIMD(int num) const {
   if (num > total_vects) {
-    throw std::invalid_argument("Index out of bounds!");
+    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   return data[num / VECT_ELEMS];
@@ -478,7 +478,7 @@ const DenseVector DenseVector::T() const {
 
 std::vector<double> DenseVector::toVector() const {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument("Vector must be initialized!");
+    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
   }
 
   std::vector<double> ret;
@@ -496,7 +496,7 @@ std::vector<double> DenseVector::toVector() const {
 
 const DenseMatrix DenseVector::asDenseMatrix() const {
   if (_ncols < 1 && _nrows < 1) {
-    throw std::invalid_argument("Vector must be initialized!");
+    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
   }
     
   DenseMatrix ret = DenseMatrix(_nrows, _ncols);
@@ -512,7 +512,7 @@ const DenseMatrix DenseVector::asDenseMatrix() const {
 
 double DenseVector::asDouble() const {
   if (_ncols != 1 || _nrows != 1) {
-    throw std::invalid_argument("Vector must be a 1 x 1 Vector!");
+    throw std::invalid_argument(_formErrorMsg("Vector must be a 1 x 1 Vector!", __FILE__, __func__, __LINE__));
   }
 
   return this->operator() (0);
@@ -520,7 +520,7 @@ double DenseVector::asDouble() const {
 
 double DenseVector::norm(double p) const {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument("Vector must be initialized!");
+    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
   }
   
   double ret = 0;
