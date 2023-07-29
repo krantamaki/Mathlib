@@ -97,7 +97,7 @@ namespace lalib {
     // Other methods
 
     bool isclose(const CRSMatrix& that, double tol);
-    bool save(std::string path);
+    bool save(std::string path, int offset = 0, std::string format = ".dat");
 
     int ncols() { return _ncols; }
     int nrows() { return _nrows; }

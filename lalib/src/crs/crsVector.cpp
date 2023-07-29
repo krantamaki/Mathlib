@@ -361,6 +361,33 @@ bool CRSVector::isclose(const CRSVector& that, double tol) {
   return true;
 }
 
+bool CRSVector::save(std::string path, int offset, std::string format) {
+  if (_len <= 0) {
+    throw std::invalid_argument(_formErrorMsg("Cannot save an unitialized matrix!", __FILE__, __func__, __LINE__));
+  }
+
+  if (format != ".dat") {
+    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __func__, __LINE__));
+  }
+
+  std::ofstream file(path);
+  bool success = true;
+
+  for (int i = 0; i < _len; i++) {
+    double val = data[i];
+    if (val != 0.0) {
+      if (!(file << i + offset << " " << data[i] << "\n")) {
+        success = false;
+      }
+    }
+  }
+  
+  file.close();
+  
+  return success;
+}
+
+
 std::vector<double> CRSVector::toVector() const {
   if (_len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));

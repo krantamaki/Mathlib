@@ -70,7 +70,8 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   
   std::cout << "Residual norm: " << (A.matmul(ret) - b).norm() << "\n\n";
 
-  // NOTE! Save method not yet implemented
-  // std::cout << "Saving the solution as " << ret_path << " ..." << "\n";
-  // ret.save(ret_path);
+  std::cout << "Saving the solution as " << ret_path << " ..." << "\n";
+  ret.save(ret_path);
+
+  std::cout << "\nDONE" << "\n";
 }

@@ -574,9 +574,13 @@ bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
 }
 
 
-bool CRSMatrix::save(std::string path) {
+bool CRSMatrix::save(std::string path, int offset, std::string format) {
   if (_ncols <= 0 || _nrows <= 0) {
     throw std::invalid_argument(_formErrorMsg("Cannot save an unitialized matrix!", __FILE__, __func__, __LINE__));
+  }
+
+  if (format != ".dat") {
+    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __func__, __LINE__));
   }
 
   std::ofstream file(path);
@@ -587,8 +591,8 @@ bool CRSMatrix::save(std::string path) {
       int col = colInds[row_p];
       double val = vals[row_p];
 
-      if (!(file << row << " " << col << " " << val << "\n")) {
-	success = false;
+      if (!(file << row + offset << " " << col + offset << " " << val << "\n")) {
+	      success = false;
       }
     }
   }

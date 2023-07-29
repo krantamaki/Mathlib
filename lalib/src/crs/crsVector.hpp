@@ -87,6 +87,7 @@ namespace lalib {
     // Other methods
 
     bool isclose(const CRSVector& that, double tol);
+    bool save(std::string path, int offset = 0, std::string format = ".dat");
 
     int len() { return _len; }
 
