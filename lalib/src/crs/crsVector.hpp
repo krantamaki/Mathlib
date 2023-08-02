@@ -93,10 +93,8 @@ namespace lalib {
 
     const int len() const { return _len; }
 
-    // const CRSVector transpose() const;
-    // const CRSVector T() const;  // Alias for transpose()
-    const CRSVector matmul(const CRSMatrix& that) const;
-    const CRSMatrix matmul(const CRSVector& that) const;
+    // TODO: const CRSVector matmul(const CRSMatrix& that) const;
+    // TODO: const CRSMatrix matmul(const CRSVector& that) const;
     double dot(const CRSVector& that) const;  // Alias for vector vector multiplication which returns double always
     std::vector<double> toVector() const;
     const CRSMatrix asCRSMatrix() const;
@@ -105,12 +103,12 @@ namespace lalib {
 
     // Statistics
 
-    double mean();
-    double sd();
+    // TODO: double mean();
+    // TODO: double sd();
 
   };
 
-  std::ostream& operator<<(std::ostream& os, CRSVector& A);
+  // TODO: std::ostream& operator<<(std::ostream& os, CRSVector& A);
 
   // To accomplish commutative property for vector scalar multiplication
 

@@ -12,6 +12,7 @@
 namespace lalib {
 
   class DenseMatrix;  // To avoid circular dependencies
+  class CRSVector; // To avoid circular dependencies
 
   class DenseVector {
 
@@ -86,6 +87,8 @@ namespace lalib {
 
     bool isclose(const DenseVector& that, double tol);
 
+    // TODO: int len()  // CHANGE WHOLE STRUCTURE TO BE SIMILAR TO CRSVector
+
     int ncols() { return _ncols; }
     int nrows() { return _nrows; }
     std::tuple<int, int> shape() { return std::make_tuple(_nrows, _ncols); }
@@ -101,13 +104,14 @@ namespace lalib {
     double dot(const DenseVector& that) const;  // Alias for vector vector multiplication which returns double always
     std::vector<double> toVector() const;
     const DenseMatrix asDenseMatrix() const;
+    // TODO: CRSVector asCRSVector() const;
     double asDouble() const;
     double norm(double p=2.0) const;
 
     // Statistics
 
-    double mean();
-    double sd();
+    // TODO: double mean();
+    // TODO: double sd();
 
   };
 

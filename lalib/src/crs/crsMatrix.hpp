@@ -15,6 +15,7 @@
 namespace lalib {
 
   class CRSVector;  // To avoid circular dependencies
+  class DenseMatrix; // To avoid circular dependencies
 
   class CRSMatrix {
 
@@ -37,7 +38,6 @@ namespace lalib {
     CRSMatrix(int rows, int cols, std::vector<double> elems);
     CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vector<int> new_colInds, std::vector<int> new_rowPtrs);
     CRSMatrix(std::string path, int offset = 0, std::string format = ".dat", bool safe_indexing = false);
-    // CRSMatrix(std::string path, int offset);
 
     // ~CRSMatrix();  // Destructor not needed
 
@@ -60,15 +60,17 @@ namespace lalib {
     double operator[] (int num) const;
     double operator() (int row, int col) const;
     double get(int row, int col) const;  // Alias for operator()
-    const CRSMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const;
-    const CRSMatrix get(int rowStart, int rowEnd, int colStart, int colEnd) const;  // Alias for operator()
-    const CRSVector getCol(int col) const;
-    const CRSVector getRow(int row) const;
+    // TODO: const CRSMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const;
+    // TODO: const CRSMatrix get(int rowStart, int rowEnd, int colStart, int colEnd) const;  // Alias for operator()
+    // TODO: const CRSVector getCol(int col) const;
+    // TODO: const CRSVector getRow(int row) const;
 
     // Functions for placing values into existing matrices
   
     void place(int row, int col, double val);
-    void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix);
+    // TODO: void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix);
+    // TODO: void placeCol(int col, CRSVector vector);
+    // TODO: void placeRow(int row, CRSVector vector);
 
   
     // Overload basic math operators
@@ -84,7 +86,7 @@ namespace lalib {
     const CRSMatrix operator* (const double that) const;
     const CRSMatrix operator/ (const CRSMatrix& that) const;
     CRSMatrix& operator/= (const CRSMatrix& that);
-    const CRSMatrix operator/ (const double that) const;
+    // TODO: const CRSMatrix operator/ (const double that) const;
     // ... ?
 
     // Other overloaded operators
@@ -112,15 +114,22 @@ namespace lalib {
     const CRSMatrix naiveTranspose() const;
     const CRSMatrix transpose() const;
     const CRSMatrix T() const;  // Alias for transpose()
-    // CRSMatrix inv();
+    // TODO: CRSMatrix inv();
     const CRSMatrix matmul(const CRSMatrix& that) const;
-    // const CRSMatrix matmulStrassen(const CRSMatrix& that) const;
+    // TODO: const CRSMatrix matmulStrassen(const CRSMatrix& that) const;
     const CRSMatrix matmulNaive(const CRSMatrix& that) const;
     const CRSVector matmul(const CRSVector& that) const;
     std::vector<double> toVector() const;
+    // TODO: DenseMatrix asDenseMatrix() const;
     double asDouble() const;
-    // const CRSVector asCRSVector();
+    // TODO: const CRSVector asCRSVector();
+
     double norm() const;
+
+    // Statistics
+
+    // TODO: const CRSVector mean(int dim = 0);
+    // TODO: const CRSVector sd(int dim = 0);
   };
   
   std::ostream& operator<<(std::ostream& os, CRSMatrix& A);

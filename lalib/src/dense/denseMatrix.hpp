@@ -14,6 +14,7 @@ choice. Then use of CRSMatrix is a good choice.
 namespace lalib {
 
   class DenseVector;  // To avoid circular dependencies
+  class CRSMatrix;  // To avoid circular dependencies
 
   class DenseMatrix {
 
@@ -76,16 +77,17 @@ namespace lalib {
     double get(int row, int col) const;  // Alias for operator()
     const DenseMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const;
     const DenseMatrix get(int rowStart, int rowEnd, int colStart, int colEnd) const;  // Alias for operator()
-    const DenseVector getCol(int col) const;
-    const DenseVector getRow(int row) const;
+    // TODO: const DenseVector getCol(int col) const;
+    // TODO: const DenseVector getRow(int row) const;
 
-    vect_t getSIMD(int num);  // Allows user to access the SIMD vectors for further parallelization
+    // TODO: vect_t getSIMD(int num);  // Allows user to access the SIMD vectors for further parallelization
 
     // Functions for placing values into existing matrices
 
     void place(int row, int col, double val);
     void place(int rowStart, int rowEnd, int colStart, int colEnd, DenseMatrix matrix);
-
+    // TODO: void placeCol(int col, DenseVector vector);
+    // TODO: void placeRow(int row, DenseVector vector);
         
     // Other overloaded operators
 
@@ -108,20 +110,21 @@ namespace lalib {
 
     const DenseMatrix transpose() const;
     const DenseMatrix T() const;  // Alias for transpose()
-    // DenseMatrix inv();
+    // TODO: DenseMatrix inv();
     const DenseMatrix matmul(const DenseMatrix& that) const;
-    const DenseMatrix matmulStrassen(const DenseMatrix& that) const;
+    // TODO: const DenseMatrix matmulStrassen(const DenseMatrix& that) const;
     const DenseMatrix matmulNaive(const DenseMatrix& that) const;
     const DenseVector matmul(const DenseVector& that) const;
     std::vector<double> toVector() const;
+    // TODO: CRSMatrix asCRSMatrix() const;
     double asDouble() const;
     const DenseVector asDenseVector() const;
     double norm() const;
 
     // Statistics
 
-    // const DenseVector mean(int dim = 0);
-    // const DenseVector sd(int dim = 0);
+    // TODO: const DenseVector mean(int dim = 0);
+    // TODO: const DenseVector sd(int dim = 0);
 
   };
 
