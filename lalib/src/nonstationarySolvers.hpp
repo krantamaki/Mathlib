@@ -1,6 +1,7 @@
 #ifndef NONSTATIONARY_SOLVERS_HPP
 #define NONSTATIONARY_SOLVERS_HPP
 
+#include "declare_lalib.hpp"
 
 /*
   Methods that use values that change in each iteration, e.g. the residuals, are 
@@ -23,8 +24,8 @@ namespace lalib {
 
 
   /*
-    Conjugate gradient method doesn't solve the system of linear equations Ax = b  explicitly, but solves
-    an auxiliary problem x^T Ax - x^T b = 0. The equality between the solutions of these problems holds 
+    Conjugate gradient method doesn't solve the system of linear equations Ax = b  explicitly, but finds the minimizer
+    for an auxiliary problem x^T Ax - x^T b. The equality between the solutions of these problems holds 
     only in the case that A is symmetric and positive definite. If that is the case we can note that the
     auxiliary problem is quadratic in nature and thus can be solved as an unconstrained nonlinear optimization 
     problem with gradient descent. Furthermore, if the search directions are chosen to be A-orthogonal we get 
@@ -34,18 +35,18 @@ namespace lalib {
   template<class Matrix, class Vector> Vector cgSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      throw std::invalid_argument("Improper dimensions!");
+      throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
     }
 
     if (A.nrows() != A.ncols()) {
-      throw std::invalid_argument("Coefficient matrix must be square!");
+      throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be square!", __FILE__, __func__, __LINE__));
     }
 
     if (check_symmetric) {
       for (int row = 0; row < A.nrows(); row++) {
 	for (int col = 0; col < A.ncols(); col++) {
 	  if (A(row, col) != A(col, row)) {
-	    throw std::invalid_argument("Coefficient matrix must be symmetric!");
+	    throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be symmetric!", __FILE__, __func__, __LINE__));
 	  }
 	}
       }

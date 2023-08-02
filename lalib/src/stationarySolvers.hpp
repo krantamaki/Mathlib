@@ -1,6 +1,8 @@
 #ifndef STATIONARY_SOLVERS_HPP
 #define STATIONARY_SOLVERS_HPP
 
+#include "declare_lalib.hpp"
+
 
 /*
   Stationary methods are iterative methods that can be expressed as [1]:
@@ -43,11 +45,11 @@ namespace lalib {
   template<class Matrix, class Vector> Vector jacobiSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      throw std::invalid_argument("Improper dimensions!");
+      throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
     }
 
     if (A.nrows() != A.ncols()) {
-      throw std::invalid_argument("Coefficient matrix must be square!");
+      throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be square!", __FILE__, __func__, __LINE__));
     }
 
     Vector x_k = Vector(x_0);
@@ -71,7 +73,7 @@ namespace lalib {
 	  s = (b(row) - s) / a_ii;
 	}
 	else {
-	  throw std::invalid_argument("Coefficient matrix must have a non-zero diagonal!");
+	  throw std::invalid_argument(_formErrorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __func__, __LINE__));
 	}
 
 	// Update the vector x
@@ -105,11 +107,11 @@ namespace lalib {
   template<class Matrix, class Vector> Vector gsSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      throw std::invalid_argument("Improper dimensions!");
+      throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
     }
 
     if (A.nrows() != A.ncols()) {
-      throw std::invalid_argument("Coefficient matrix must be square!");
+      throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be square!", __FILE__, __func__, __LINE__));
     }
 
     Vector x_k = Vector(x_0);
@@ -139,7 +141,7 @@ namespace lalib {
 	  s = (b(row) - s) / a_ii;
 	}
 	else {
-	  throw std::invalid_argument("Coefficient matrix must have a non-zero diagonal!");
+	  throw std::invalid_argument(_formErrorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __func__, __LINE__));
 	}
 
 	// Update the vector x
@@ -174,11 +176,11 @@ namespace lalib {
   template<class Matrix, class Vector> Vector sorSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      throw std::invalid_argument("Improper dimensions!");
+      throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
     }
 
     if (A.nrows() != A.ncols()) {
-      throw std::invalid_argument("Coefficient matrix must be square!");
+      throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be square!", __FILE__, __func__, __LINE__));
     }
 
     Vector x_k = Vector(x_0);
@@ -208,7 +210,7 @@ namespace lalib {
 	  x_i = x_i + w * (s - x_i);
 	}
 	else {
-	  throw std::invalid_argument("Coefficient matrix must have a non-zero diagonal!");
+	  throw std::invalid_argument(_formErrorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __func__, __LINE__));
 	}
 
 	// Update the vector x
