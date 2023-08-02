@@ -29,6 +29,14 @@
 #include <omp.h>
 
 
+// Define constants used by the solvers
+
+#define BASE_TOL 0.0000001
+#define MAX_ITER 1000
+#define CHECK_SYMMETRIC 0
+#define OMEGA 0.75
+
+
 // Define a vector for SIMD commands. Currently set up to hold 4 doubles (for 256 bit vector registers)
 
 #define VECT_ELEMS 4

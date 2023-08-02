@@ -15,11 +15,6 @@
 */
 
 
-#define BASE_TOL 0.0000001
-#define MAX_ITER 1000
-#define CHECK_SYMMETRIC 0
-
-
 namespace lalib {
 
 
