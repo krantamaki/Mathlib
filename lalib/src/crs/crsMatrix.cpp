@@ -155,7 +155,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, std::vector<double> new_vals, std::vect
 // Additionally, user can define the offset in indexing. That is if the software that
 // generated the matrix uses indexing starting at 1 this can be taken in to account by
 // passing offset value of 1.
-// Final parameter is a boolean telling if the indexing is "safe". Safe indexing would 
+// Final parameter is a boolean telling if the indexing is "safe". Safe indexing 
 // would have sorted rows and columns, with row values in sequence.
 CRSMatrix::CRSMatrix(std::string path, int offset, std::string format, bool safe_indexing) {
   // Variables to read the line contents to
@@ -462,6 +462,11 @@ void CRSMatrix::place(int row, int col, double val) {
   }
 }
 
+void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix) {
+
+
+}
+
 double CRSMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
@@ -500,6 +505,70 @@ double CRSMatrix::operator[] (int num) const {
 
 double CRSMatrix::get(int row, int col) const {
   return this->operator() (row, col);
+}
+
+const CRSMatrix CRSMatrix::operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
+  if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+  }
+
+  if (rowEnd > _nrows || colEnd > _ncols) {
+    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+  }
+
+  int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
+  int _colEnd = colEnd > _ncols ? _ncols : colEnd;
+
+  CRSMatrix ret = CRSMatrix(_rowEnd - rowStart, _colEnd - colStart);
+
+  for (int row0 = 0; row0 < _rowEnd - rowStart; row0++) {
+    int row = row0 + rowStart;
+    for (int col0 = 0; col0 < _colEnd - colStart; col0++) {
+      int col = col0 + colStart;
+      double val = this->operator()(row, col);
+      if (val != 0.0) {
+	ret.place(row0, col0, this->operator() (row, col));
+      }
+    }
+  }
+
+  return ret;
+}
+
+const CRSMatrix CRSMatrix::get(int rowStart, int rowEnd, int colStart, int colEnd) const {
+  return this->operator() (rowStart, rowEnd, colStart, colEnd);
+}
+
+const CRSVector CRSMatrix::getCol(int col) const {
+  if (col >= _ncols) {
+    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+  }
+
+  CRSVector ret = CRSVector(_nrows);
+
+  // As there is no efficient way to access the column elements of a CRSMatrix the implementation is naive
+  for (int row = 0; row < _nrows; row++) {
+    ret.place(row, this->operator() (row, col));
+  }
+
+  return ret;
+}
+
+const CRSVector CRSMatrix::getRow(int row) const {
+  if (row >= _nrows) {
+    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+  }
+
+  CRSVector ret = CRSVector(_ncols);
+  
+  for (int i = rowPtrs[row]; i < rowPtrs[row + 1]; i++) {
+    int col = colInds[i];
+    double val = vals[i];
+    
+    ret.place(col, val);
+  }
+
+  return ret;
 }
 
 

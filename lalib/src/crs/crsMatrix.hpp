@@ -60,10 +60,10 @@ namespace lalib {
     double operator[] (int num) const;
     double operator() (int row, int col) const;
     double get(int row, int col) const;  // Alias for operator()
-    // TODO: const CRSMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const;
-    // TODO: const CRSMatrix get(int rowStart, int rowEnd, int colStart, int colEnd) const;  // Alias for operator()
-    // TODO: const CRSVector getCol(int col) const;
-    // TODO: const CRSVector getRow(int row) const;
+    const CRSMatrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const;
+    const CRSMatrix get(int rowStart, int rowEnd, int colStart, int colEnd) const;  // Alias for operator()
+    const CRSVector getCol(int col) const;
+    const CRSVector getRow(int row) const;
 
     // Functions for placing values into existing matrices
   
