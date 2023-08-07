@@ -59,7 +59,9 @@ namespace lalib {
       Vector r_tmp = Vector(r);
 
       r -= alpha * (A.matmul(p));
-      p = r + ((r.dot(r)) / (r_tmp.dot(r_tmp))) * p;
+      // p = r + ((r.dot(r)) / (r_tmp.dot(r_tmp))) * p;
+      p *= (r.dot(r)) / (r_tmp.dot(r_tmp));
+      p += r;
 
       if (r.norm() < tol) {
 	return x_k;

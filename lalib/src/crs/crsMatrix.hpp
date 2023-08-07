@@ -15,7 +15,7 @@
 namespace lalib {
 
   class CRSVector;  // To avoid circular dependencies
-  class DenseMatrix; // To avoid circular dependencies
+  class DenseMatrix;  // To avoid circular dependencies
 
   class CRSMatrix {
 
@@ -84,6 +84,7 @@ namespace lalib {
     const CRSMatrix operator* (const CRSMatrix& that) const;
     CRSMatrix& operator*= (const CRSMatrix& that);
     const CRSMatrix operator* (const double that) const;
+    // TODO: CRSMatrix& operator*= (double that);
     const CRSMatrix operator/ (const CRSMatrix& that) const;
     CRSMatrix& operator/= (const CRSMatrix& that);
     // TODO: const CRSMatrix operator/ (const double that) const;

@@ -208,17 +208,21 @@ const CRSVector CRSVector::operator* (const CRSVector& that) const {
   return CRSVector(*this) *= that;
 }
 
-const CRSVector CRSVector::operator* (const double that) const {
+
+CRSVector& CRSVector::operator*= (double that) {
   if (_len < 1) return *this;
-
-  CRSVector ret = CRSVector(*this);
-
+  
   #pragma omp parallel for schedule(dynamic, 1)
   for (int i = 0; i < _len; i++) {
-    ret.data[i] = ret.data[i] * that;
+    data[i] *= that;
   }
 
-  return ret;
+  return *this;
+}
+
+
+const CRSVector CRSVector::operator* (const double that) const {
+  return CRSVector(*this) *= that;
 }
 
 const CRSVector lalib::operator* (double scalar, const CRSVector& vector) {

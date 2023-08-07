@@ -51,6 +51,7 @@ namespace lalib {
     const CRSVector operator* (const CRSVector& that) const;
     CRSVector& operator*= (const CRSVector& that);
     const CRSVector operator* (const double that) const;
+    CRSVector& operator*= (double that);
     const CRSVector operator/ (const CRSVector& that) const;
     CRSVector& operator/= (const CRSVector& that);
     const CRSVector operator/ (const double that) const;

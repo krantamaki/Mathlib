@@ -1,4 +1,5 @@
 #include "crsMatrix.hpp"
+#include "crsVector.hpp"
 #include "../declare_lalib.hpp"
 
 
@@ -462,10 +463,11 @@ void CRSMatrix::place(int row, int col, double val) {
   }
 }
 
+/*
 void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix) {
 
-
 }
+*/
 
 double CRSMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
@@ -556,7 +558,7 @@ const CRSVector CRSMatrix::getCol(int col) const {
 
 const CRSVector CRSMatrix::getRow(int row) const {
   if (row >= _nrows) {
-    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+    throw std::invalid_argument(_formErrorMsg("Given row out of bounds!", __FILE__, __func__, __LINE__));
   }
 
   CRSVector ret = CRSVector(_ncols);
@@ -670,9 +672,6 @@ bool CRSMatrix::save(std::string path, int offset, std::string format) {
   
   return success;
 }
-
-
-// TODO: Optimize transpose operation
 
 
 const CRSMatrix CRSMatrix::transpose() const {
