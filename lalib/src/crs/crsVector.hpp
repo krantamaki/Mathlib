@@ -94,7 +94,7 @@ namespace lalib {
 
     const int len() const { return _len; }
 
-    // TODO: const CRSVector matmul(const CRSMatrix& that) const;
+    const CRSVector matmul(const CRSMatrix& that, bool is_symmetric=false) const;
     // TODO: const CRSMatrix matmul(const CRSVector& that) const;
     double dot(const CRSVector& that) const;  // Alias for vector vector multiplication which returns double always
     std::vector<double> toVector() const;

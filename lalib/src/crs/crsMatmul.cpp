@@ -114,6 +114,24 @@ const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
   return ret;
 }
 
+
+// Not so efficient implementation for sparse vector-matrix multiplication
+// Unlike other matmul functions this can take a voluntary parameter
+// tells that the matrix is symmetric (and thus no transpose is needed)
+const CRSVector CRSVector::matmul(const CRSMatrix& that, bool is_symmetric) const {
+  if (_len != that.nrows()) {
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+  }
+
+  if (is_symmetric) {
+    return that.matmul(*this);
+  }
+  else {
+    CRSMatrix that_T = that.T();
+    return that_T.matmul(*this);
+  }
+}
+
 double CRSVector::dot(const CRSVector& that) const {
   if (_len != that._len) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
