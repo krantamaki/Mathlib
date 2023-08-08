@@ -48,7 +48,7 @@ namespace lalib {
     // 1. double elem = A[num]
     // 2. double elem = A(row, col)
     // For these to return the same value must hold that:
-    //    num = row * num_rows + col
+    //    num = row * num_cols + col
     // Thus it is recommended to use () for indexing
 
     // Additionally for slicing there exists a overloaded operator:
@@ -68,9 +68,9 @@ namespace lalib {
     // Functions for placing values into existing matrices
   
     void place(int row, int col, double val);
-    // TODO: void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix);
-    // TODO: void placeCol(int col, CRSVector vector);
-    // TODO: void placeRow(int row, CRSVector vector);
+    void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix);
+    void placeCol(int col, CRSVector vector);
+    void placeRow(int row, CRSVector vector);
 
   
     // Overload basic math operators
@@ -84,7 +84,7 @@ namespace lalib {
     const CRSMatrix operator* (const CRSMatrix& that) const;
     CRSMatrix& operator*= (const CRSMatrix& that);
     const CRSMatrix operator* (const double that) const;
-    // TODO: CRSMatrix& operator*= (double that);
+    CRSMatrix& operator*= (double that);
     const CRSMatrix operator/ (const CRSMatrix& that) const;
     CRSMatrix& operator/= (const CRSMatrix& that);
     // TODO: const CRSMatrix operator/ (const double that) const;

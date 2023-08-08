@@ -317,18 +317,20 @@ const CRSMatrix CRSMatrix::operator* (const CRSMatrix& that) const {
   return CRSMatrix(*this) *= that;
 }
 
-const CRSMatrix CRSMatrix::operator* (const double that) const {
+CRSMatrix& CRSMatrix::operator*= (double that) {
   if (_ncols < 1 || _nrows < 1) {
     return *this;
   }
 
-  CRSMatrix ret = CRSMatrix(*this);
-
   for (int i = 0; i < (int)vals.size(); i++) {
-    ret.vals[i] *= that;
+    vals[i] *= that;
   }
 
-  return ret;
+  return *this;
+}
+
+const CRSMatrix CRSMatrix::operator* (const double that) const {
+  return CRSMatrix(*this) *= that;
 }
 
 const CRSMatrix lalib::operator* (double scalar, const CRSMatrix& matrix) {
@@ -463,11 +465,94 @@ void CRSMatrix::place(int row, int col, double val) {
   }
 }
 
-/*
 void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix) {
+  if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
+    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+  }
 
+  for (int row0 = 0; row0 < rowEnd - rowStart; row0++) {
+    int row = row0 + rowStart;
+    for (int col0 = 0; col0 < colEnd - colStart; col0++) {
+      int col = col0 + colStart;
+      double val = matrix(row0, col0);
+
+      if (val != 0.0) {
+	this->place(row, col, val);
+      }
+      else if (this->operator() (row, col) != 0.0) {
+	this->place(row, col, val);
+      }
+      else {
+	continue;
+      }
+    }
+  }
 }
-*/
+
+void CRSMatrix::placeCol(int col, CRSVector vector) {
+  if (col >= _ncols) {
+    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+  }
+
+  if (vector.len() > _nrows) {
+    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+  }
+
+  for (int row = 0; row < _nrows; row++) {
+    double val = vector(row);
+
+    if (val != 0.0) {
+      this->place(row, col, val);
+    }
+    else if (this->operator() (row, col) != 0.0) {
+      this->place(row, col, val);
+    }
+    else {
+      continue;
+    }
+  }
+}
+
+void CRSMatrix::placeRow(int row, CRSVector vector) {
+  if (row >= _nrows) {
+    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+  }
+
+  if (vector.len() > _ncols) {
+    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+  }
+
+  int old_n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
+
+  // Find the new non-zero values for the row
+  std::vector<int> new_cols;
+  std::vector<double> new_vals;
+
+  for (int col = 0; col < _ncols; col++) {
+    double val = vector(col);
+    
+    if (val != 0.0) {
+      new_cols.push_back(col);
+      new_vals.push_back(val);
+    }
+  }
+
+  int new_n_row_elems = new_vals.size();
+
+  // Remove existing non-zeros
+  vals.erase(vals.begin() + rowPtrs[row], vals.begin() + rowPtrs[row + 1]);
+  colInds.erase(colInds.begin() + rowPtrs[row], colInds.begin() + rowPtrs[row + 1]);
+
+  // Add the new non-zeros
+  vals.insert(vals.begin() + rowPtrs[row], new_vals.begin(), new_vals.end());
+  colInds.insert(colInds.begin() + rowPtrs[row], new_cols.begin(), new_cols.end());
+
+  int n_elem_diff = new_n_row_elems - old_n_row_elems;
+
+  for (int i = row + 1; i <= _nrows; i++) {
+    rowPtrs[i] += n_elem_diff;
+  }
+}
 
 double CRSMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
