@@ -123,7 +123,7 @@ namespace lalib {
      * indices of the non-zero elements of the matrix
      * @param new_rowPtrs A reference to a std::vector containing the row pointers
      */
-    CRSMatrix(int rows, int cols, const std::vector<double>& new_vals, const std::vector<int>& new_colInds, const std::vector<int> new_rowPtrs);
+    CRSMatrix(int rows, int cols, const std::vector<double>& new_vals, const std::vector<int>& new_colInds, const std::vector<int>& new_rowPtrs);
 
     /**
      * @brief Load from file constructor
@@ -141,12 +141,12 @@ namespace lalib {
      * @param offset OPTIONAL, DEFAULTS TO < int offset = 0 >. The offset between the 
      * indexing conventions. That is if the values in the file are indexed 
      * e.g. starting from 1 that should be passed as the offset.
-     * @param format OPTIONAL, DEFAULTS TO < std::string& format ".dat" >. the extension
+     * @param format OPTIONAL, DEFAULTS TO < std::string format ".dat" >. the extension
      * of the used format. Choices are ".dat" and ".mtx".
      * @param safe_indexing OPTIONAL, DEFAULTS TO < bool safe_indexing = false >. 
      * Boolean flag telling if the elements are sorted by rows and columns in the file.
      */
-    CRSMatrix(const std::string& path, int offset = 0, const std::string& format = ".dat", bool safe_indexing = false);
+    CRSMatrix(const std::string& path, int offset = 0, const std::string format = ".dat", bool safe_indexing = false);
 
     // ~CRSMatrix();  // Destructor not needed
 
@@ -403,7 +403,7 @@ namespace lalib {
      * @param colEnd The ending column index for the placement
      * @param matrix A reference to the CRSMatrix object of which values are to be placed
      */
-    void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix);
+    void place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix& matrix);
 
     /**
      * @brief Standard column placement
@@ -412,9 +412,9 @@ namespace lalib {
      * CRSMatrix object.
      *
      * @param col The column on to which the elements of the CRSVector are to be placed
-     * @param vector The CRSVector object with wanted values
+     * @param vector A reference to the CRSVector object with wanted values
      */
-    void placeCol(int col, CRSVector vector);
+    void placeCol(int col, CRSVector& vector);
 
     /**
      * @brief Standard row placement
@@ -423,9 +423,9 @@ namespace lalib {
      * CRSMatrix object.
      *
      * @param row The row on to which the elements of the CRSVector are to be placed
-     * @param vector The CRSVector object with wanted values
+     * @param vector A reference to the CRSVector object with wanted values
      */
-    void placeRow(int row, CRSVector vector);
+    void placeRow(int row, CRSVector& vector);
 
 
     // -------- Other overloaded operators ----------
@@ -498,7 +498,7 @@ namespace lalib {
      * @param offset OPTIONAL, DEFAULTS TO < int offset = 0 >. The offset between the 
      * indexing conventions. That is if the values should be indexed 
      * e.g. starting from 1 that should be passed as the offset.
-     * @param format OPTIONAL, DEFAULTS TO < std::string& format ".dat" >. the extension
+     * @param format OPTIONAL, DEFAULTS TO < std::string format ".dat" >. the extension
      * of the used format. Choices are ".dat" and ".mtx".
      */
     bool save(std::string& path, int offset = 0, std::string format = ".dat");

@@ -145,7 +145,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& new_vals, co
 
 
 // Load from file constructor
-CRSMatrix::CRSMatrix(std::string path, int offset, std::string format, bool safe_indexing) {
+CRSMatrix::CRSMatrix(const std::string& path, int offset, std::string format, bool safe_indexing) {
   // Variables to read the line contents to
   int row, col;
   double val;
@@ -478,7 +478,7 @@ void CRSMatrix::place(int row, int col, double val) {
 
 
 // Standard matrix placement
-void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix matrix) {
+void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix& matrix) {
   if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
@@ -504,7 +504,7 @@ void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMat
 
 
 // Standard column placement
-void CRSMatrix::placeCol(int col, CRSVector vector) {
+void CRSMatrix::placeCol(int col, CRSVector& vector) {
   if (col >= _ncols) {
     throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
   }
@@ -530,7 +530,7 @@ void CRSMatrix::placeCol(int col, CRSVector vector) {
 
 
 // Standard row placement
-void CRSMatrix::placeRow(int row, CRSVector vector) {
+void CRSMatrix::placeRow(int row, CRSVector& vector) {
   if (row >= _nrows) {
     throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
   }
