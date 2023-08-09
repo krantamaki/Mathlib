@@ -7,10 +7,12 @@ using namespace lalib;
 
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
-// Constructor that doesn't allocate memory
+
+// Default constuctor
 DenseMatrix::DenseMatrix(void) {}
 
-// Constructor that copies the contents of a given matrix
+
+// Copying constructor
 DenseMatrix::DenseMatrix(const DenseMatrix& that) {
   if (that._ncols > 0 && that._nrows > 0) {
     _ncols = that._ncols;
@@ -37,8 +39,8 @@ DenseMatrix::DenseMatrix(const DenseMatrix& that) {
   }
 }
 
-// Constructor that allocates memory for wanted sized matrix and initializes
-// the values as zeros
+
+// Zeros constructor
 DenseMatrix::DenseMatrix(int rows, int cols) {
   if (cols < 1 || rows < 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
@@ -71,8 +73,8 @@ DenseMatrix::DenseMatrix(int rows, int cols) {
   }
 }
 
-// Constructor that allocates memory for wanted sized matrix and initializes
-// the values as a given double
+
+// Default value constructor
 DenseMatrix::DenseMatrix(int rows, int cols, double init_val) {
   if (cols < 1 || rows < 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
@@ -106,12 +108,9 @@ DenseMatrix::DenseMatrix(int rows, int cols, double init_val) {
   }
 }
 
-// Constructor that copies the contents of a std::vector into a matrix.
-// NOTE! If the number of elements in the std::vector doesn't match the 
-// dimensions of the matrix either the extra elements are ignored or 
-// the matrix is padded with zeros at the last rows. In either case a 
-// warning is printed.
-DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double> elems) {
+
+// Vector copying constructor
+DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double>& elems) {
   if (cols < 1 || rows < 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
   }
@@ -143,10 +142,8 @@ DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double> elems) {
   }
 }
 
-// Constructor that copies the contents of a double array into a matrix.
-// NOTE! SHOULD NOT BE USED UNLESS ABSOLUTELY NECESSARY! This function will
-// read the needed amount of elements from the array independent of the size
-// of the array (which can not be verified) and thus might read unwanted memory.
+
+// Array copying constructor
 DenseMatrix::DenseMatrix(int rows, int cols, double* elems) {
   std::cout << "\nWARNING: Initializing a matrix with double array might lead to undefined behaviour!" << "\n\n";
 
@@ -178,6 +175,8 @@ DenseMatrix::DenseMatrix(int rows, int cols, double* elems) {
   }
 }
 
+
+// Default destructor
 DenseMatrix::~DenseMatrix() {
   free(data);
 }
@@ -185,6 +184,8 @@ DenseMatrix::~DenseMatrix() {
 
 // ---------------------OVERLOADED BASIC MATH OPERATORS------------------------
 
+
+// Element-wise addition assignment
 DenseMatrix& DenseMatrix::operator+= (const DenseMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
@@ -200,10 +201,14 @@ DenseMatrix& DenseMatrix::operator+= (const DenseMatrix& that) {
   return *this;
 }
 
+
+// Element-wise addition
 const DenseMatrix DenseMatrix::operator+ (const DenseMatrix& that) const {
   return DenseMatrix(*this) += that;
 }
 
+
+// Element-wise subtraction assignment
 DenseMatrix& DenseMatrix::operator-= (const DenseMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
@@ -219,12 +224,14 @@ DenseMatrix& DenseMatrix::operator-= (const DenseMatrix& that) {
   return *this;
 }
 
+
+// Element-wise subtraction
 const DenseMatrix DenseMatrix::operator- (const DenseMatrix& that) const {
   return DenseMatrix(*this) -= that;
 }
 
-// NOTE! The overloaded operator for multiplication will do an element-wise multiplication
-// For standard matrix multiplication use DenseMatrix::matmul
+
+// Element-wise multiplication assignment
 DenseMatrix& DenseMatrix::operator*= (const DenseMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
@@ -239,10 +246,14 @@ DenseMatrix& DenseMatrix::operator*= (const DenseMatrix& that) {
   return *this;
 }
 
+
+// Element-wise multiplication
 const DenseMatrix DenseMatrix::operator* (const DenseMatrix& that) const {
   return DenseMatrix(*this) *= that;
 }
 
+
+// Scalar (right) multiplication
 const DenseMatrix DenseMatrix::operator* (const double that) const {
   if (_ncols < 1 || _nrows < 1) {
     return *this;
@@ -265,12 +276,14 @@ const DenseMatrix DenseMatrix::operator* (const double that) const {
   return ret;
 }
 
+
+// Scalar (left) multiplication
 const DenseMatrix lalib::operator* (double scalar, const DenseMatrix& matrix) {
   return matrix * scalar;
 }
 
-// NOTE! The overloaded operator for division will do an element-wise division and is not equivalent to
-// Matlabs backslash operator
+
+// Element-wise division assignment
 DenseMatrix& DenseMatrix::operator/= (const DenseMatrix& that) {
   if (ncols() != that._ncols || nrows() != that._ncols) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
@@ -286,10 +299,14 @@ DenseMatrix& DenseMatrix::operator/= (const DenseMatrix& that) {
   return *this;
 }
 
+
+// Element-wise division
 const DenseMatrix DenseMatrix::operator/ (const DenseMatrix& that) const {
   return DenseMatrix(*this) /= that;
 }
 
+
+// Scalar (right) division
 const DenseMatrix DenseMatrix::operator/ (const double that) const {
   if (that == 0) {
     throw std::invalid_argument(_formErrorMsg("Division by zero undefined!", __FILE__, __func__, __LINE__));
@@ -319,6 +336,8 @@ const DenseMatrix DenseMatrix::operator/ (const double that) const {
 
 // ----------------------OVERLOADED INDEXING OPERATORS--------------------------
 
+
+// Standard single value placement
 void DenseMatrix::place(int row, int col, double val) {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
@@ -331,7 +350,9 @@ void DenseMatrix::place(int row, int col, double val) {
   data[vects_per_row * row + vect][elem] = val;
 }
 
-void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, DenseMatrix mat) {
+
+// Standard matrix placement
+void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, const DenseMatrix& mat) {
   // Check that the matrix to be placed fits
   if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || mat._nrows < rowEnd - rowStart || mat._ncols < colEnd - colStart) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
@@ -347,6 +368,8 @@ void DenseMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, Dens
   }
 }
 
+
+// Standard indexing method
 double DenseMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
@@ -359,10 +382,14 @@ double DenseMatrix::operator() (int row, int col) const {
   return data[vects_per_row * row + vect][elem];
 }
 
+
+// Named indexing method
 double DenseMatrix::get(int row, int col) const {
   return this->operator() (row, col);
 }
 
+
+// Squared bracket indexing method
 double DenseMatrix::operator[] (int num) const {
   if (num >= _ncols * _nrows) {
     throw std::invalid_argument(_formErrorMsg("Given index out of bounds!", __FILE__, __func__, __LINE__));
@@ -377,6 +404,8 @@ double DenseMatrix::operator[] (int num) const {
   return data[vects_per_row * row + vect][elem];
 }
 
+
+// Standard slicing method
 const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
   if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
@@ -404,6 +433,8 @@ const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStar
   return ret;
 }
 
+
+// Named slicing method
 const DenseMatrix DenseMatrix::get(int rowStart, int rowEnd, int colStart, int colEnd) const {
   return this->operator() (rowStart, rowEnd, colStart, colEnd);
 }
@@ -411,6 +442,8 @@ const DenseMatrix DenseMatrix::get(int rowStart, int rowEnd, int colStart, int c
 
 // ------------------------OTHER OVERLOADED OPERATORS---------------------------
 
+
+// Default assignment operator
 DenseMatrix& DenseMatrix::operator= (const DenseMatrix& that) {
   // Check for self-assignment ie. case where a = a is called by comparing the pointers of the objects
   if (this == &that) return *this; 
@@ -443,6 +476,8 @@ DenseMatrix& DenseMatrix::operator= (const DenseMatrix& that) {
   return *this;
 }
 
+
+// Default (equality) comparison operator
 bool DenseMatrix::operator== (const DenseMatrix& that) {
   if (_nrows != that._nrows || _ncols != that._ncols) {
     return false;
@@ -467,10 +502,14 @@ bool DenseMatrix::operator== (const DenseMatrix& that) {
   return true;
 }
 
+
+// Default (inequality) comparison operator
 bool DenseMatrix::operator!= (const DenseMatrix& that) {
   return !(*this == that);
 }
 
+
+// Default insertion operator
 std::ostream& lalib::operator<<(std::ostream& os, DenseMatrix& A) {
   if (A.ncols() == 0 || A.nrows() == 0) {
     os << "[]" << std::endl;  // Signifies uninitialized matrix
@@ -499,6 +538,7 @@ std::ostream& lalib::operator<<(std::ostream& os, DenseMatrix& A) {
 // ----------------------------------MISC----------------------------------------
 
 
+// Approximative equality comparison
 bool DenseMatrix::isclose(const DenseMatrix& that, double tol) {
   if (_nrows != that._nrows || _ncols != that._ncols) {
     return false;
@@ -516,6 +556,7 @@ bool DenseMatrix::isclose(const DenseMatrix& that, double tol) {
 }
 
 
+// Standard transpose
 const DenseMatrix DenseMatrix::transpose() const{
   // Check that matrix initialized
   if (_ncols <= 0 || _nrows <= 0) {
@@ -539,10 +580,14 @@ const DenseMatrix DenseMatrix::transpose() const{
   return ret;
 }
 
+
+// Standard transpose
 const DenseMatrix DenseMatrix::T() const{
   return this->transpose();
 }
 
+
+// Convert DenseMatrix into std::vector
 std::vector<double> DenseMatrix::toVector() const {
   if (_ncols <= 0 || _nrows <= 0) {
     throw std::invalid_argument(_formErrorMsg("Matrix must be initialized!", __FILE__, __func__, __LINE__));
@@ -560,6 +605,8 @@ std::vector<double> DenseMatrix::toVector() const {
   return ret;
 }
 
+
+// Convert DenseMatrix into a double
 double DenseMatrix::asDouble() const {
   if (_ncols != 1 || _nrows != 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __func__, __LINE__));
@@ -568,6 +615,8 @@ double DenseMatrix::asDouble() const {
   return this->operator() (0, 0);
 }
 
+
+// Convert DenseMatrix into a DenseVector
 const DenseVector DenseMatrix::asDenseVector() const {
   if (_ncols != 1 && _nrows != 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix must be a 1 x n or n x 1 matrix!", __FILE__, __func__, __LINE__));
@@ -584,6 +633,8 @@ const DenseVector DenseMatrix::asDenseVector() const {
   return ret;
 }
 
+
+// The Frobenius norm
 double DenseMatrix::norm() const {
   if (_ncols <= 0 || _nrows <= 0) {
     throw std::invalid_argument(_formErrorMsg("Matrix must be initialized!", __FILE__, __func__, __LINE__));
