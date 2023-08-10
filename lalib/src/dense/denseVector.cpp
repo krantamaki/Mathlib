@@ -7,14 +7,15 @@ using namespace lalib;
 
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
-// Constructor that doesn't allocate memory
+
+// Default constructor
 DenseVector::DenseVector(void) {}
 
-// Constructor that copies the contents of a given vector
+
+// Copying constructor
 DenseVector::DenseVector(const DenseVector& that) {
-  if (that._ncols > 0 || that._nrows > 0) {
-    _ncols = that._ncols;
-    _nrows = that._nrows;
+  if (that._len > 0) {
+    _len = that._len;
 
     total_vects = that.total_vects;
 
@@ -34,130 +35,113 @@ DenseVector::DenseVector(const DenseVector& that) {
   }
 }
 
-// Constructor that allocates memory for wanted sized matrix and initializes
-// the values as zeros
-DenseVector::DenseVector(int rows, int cols) {
-  if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
-  }
+// Zeros constructor
+DenseVector::DenseVector(int len) {
+  if (len > 0) {
+    _len = len;
 
-  _ncols = cols;
-  _nrows = rows;
+    total_vects = _ceil(len, VECT_ELEMS);
 
-  total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
+    // Allocate aligned memory
+    void* tmp = 0;
+    if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
+      throw std::bad_alloc();
+    }
 
-  // Allocate aligned memory
-  void* tmp = 0;
-  if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
-    throw std::bad_alloc();
-  }
+    // Initialize the data values as zeros
+    data = (vect_t*)tmp;
+    vect_t zeros;
+    for (int i = 0; i < VECT_ELEMS; i++) {
+      zeros[i] = 0.0;
+    }
 
-  // Initialize the data values as zeros
-  data = (vect_t*)tmp;
-  vect_t zeros;
-  for (int i = 0; i < VECT_ELEMS; i++) {
-    zeros[i] = 0.0;
-  }
-
-  #pragma omp parallel for schedule(dynamic, 1)
-  for (int vect = 0; vect < total_vects; vect++) {
-    data[vect] = zeros;
-  }
-}
-
-// Constructor that allocates memory for wanted sized matrix and initializes
-// the values as wanted double
-DenseVector::DenseVector(int rows, int cols, double init_val) {
-  if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
-  }
-
-  _ncols = cols;
-  _nrows = rows;
-
-  total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
-
-  // Allocate aligned memory
-  void* tmp = 0;
-  if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
-    throw std::bad_alloc();
-  }
-
-  // Initialize the data values as zeros
-  data = (vect_t*)tmp;
-  vect_t vals;
-  for (int i = 0; i < VECT_ELEMS; i++) {
-    vals[i] = init_val;
-  }
-
-  #pragma omp parallel for schedule(dynamic, 1)
-  for (int vect = 0; vect < total_vects; vect++) {
-    data[vect] = vals;
-  }
-}
-
-// Constructor that copies the contents of a std::vector into a matrix.
-// NOTE! If the number of elements in the std::vector doesn't match the 
-// dimensions of the matrix either the extra elements are ignored or 
-// the matrix is padded with zeros at the last rows. In either case a 
-// warning is printed.
-DenseVector::DenseVector(int rows, int cols, std::vector<double> elems) {
-  if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
-  }
-  if (rows * cols != (int)elems.size()) {
-    std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
-  } 
-
-  _ncols = cols;
-  _nrows = rows;
-
-  total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
-
-  // Allocate aligned memory
-  void* tmp = 0;
-  if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
-    throw std::bad_alloc();
-  }
-
-  data = (vect_t*)tmp;
-
-  for (int vect = 0; vect < total_vects; vect++) {
-    for (int elem = 0; elem < VECT_ELEMS; elem++) {
-      int i = vect * VECT_ELEMS + elem;
-      data[vect][elem] = (int)elems.size() > i ? elems[i] : 0.0;
+    #pragma omp parallel for schedule(dynamic, 1)
+    for (int vect = 0; vect < total_vects; vect++) {
+      data[vect] = zeros;
     }
   }
 }
 
-// Constructor that copies the contents of double array into a matrix.
-// NOTE! SHOULD NOT BE USED UNLESS ABSOLUTELY NECESSARY! This function will
-// read the needed amount of elements from the array independent of the size
-// of the array (which can not be verified) and thus might read unwanted memory.
-DenseVector::DenseVector(int rows, int cols, double* elems) {
+
+// Default value constructor
+DenseVector::DenseVector(int len, double init_val) {
+  if (len > 0) {
+    _len = len;
+    total_vects = _ceil(len, VECT_ELEMS);
+
+    // Allocate aligned memory
+    void* tmp = 0;
+    if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
+      throw std::bad_alloc();
+    }
+
+    // Initialize the data values as zeros
+    data = (vect_t*)tmp;
+    vect_t vals;
+    for (int i = 0; i < VECT_ELEMS; i++) {
+      vals[i] = init_val;
+    }
+
+    #pragma omp parallel for schedule(dynamic, 1)
+    for (int vect = 0; vect < total_vects; vect++) {
+      data[vect] = vals;
+    }
+  }
+}
+
+
+// Vector copying constructor
+DenseVector::DenseVector(int len, std::vector<double>& elems) {
+  if (len > 0) {
+    
+    if (len != (int)elems.size()) {
+      std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
+    } 
+
+    _len = len;
+  
+    total_vects = _ceil(len, VECT_ELEMS);
+
+    // Allocate aligned memory
+    void* tmp = 0;
+    if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
+      throw std::bad_alloc();
+    }
+
+    data = (vect_t*)tmp;
+
+    for (int vect = 0; vect < total_vects; vect++) {
+      for (int elem = 0; elem < VECT_ELEMS; elem++) {
+	int i = vect * VECT_ELEMS + elem;
+	data[vect][elem] = (int)elems.size() > i ? elems[i] : 0.0;
+      }
+    }
+  }
+}
+
+
+// Array copying constructor
+DenseVector::DenseVector(int len, double* elems) {
   std::cout << "\nWARNING: Initializing a vector with double array might lead to undefined behaviour!" << "\n\n";
  
-  if (!((rows > 0 && cols == 1) || (cols > 0 && rows == 1))) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions! Either rows or cols has to be positive and the other 0!", __FILE__, __func__, __LINE__));
-  }
+  if (len > 0) {
+    _len = len;
 
-  _ncols = cols;
-  _nrows = rows;
+    total_vects = _ceil(len, VECT_ELEMS);
 
-  total_vects = _ceil(cols > 1 ? cols : rows, VECT_ELEMS);
+    // Allocate aligned memory
+    void* tmp = 0;
+    if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
+      throw std::bad_alloc();
+    }
 
-  // Allocate aligned memory
-  void* tmp = 0;
-  if (posix_memalign(&tmp, sizeof(vect_t), total_vects * sizeof(vect_t))) {
-    throw std::bad_alloc();
-  }
+    data = (vect_t*)tmp;
 
-  data = (vect_t*)tmp;
-
-  for (int vect = 0; vect < total_vects; vect++) {
-    for (int elem = 0; elem < VECT_ELEMS; elem++) {
-      int i = vect * VECT_ELEMS + elem;
-      data[vect][elem] = elems[i];
+    for (int vect = 0; vect < total_vects; vect++) {
+      for (int elem = 0; elem < VECT_ELEMS; elem++) {
+	int i = vect * VECT_ELEMS + elem;
+	data[vect][elem] = elems[i];
+      }
     }
   }
 }
