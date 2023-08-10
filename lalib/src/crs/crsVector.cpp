@@ -8,10 +8,12 @@ using namespace lalib;
 
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
-// Constructor that doesn't allocate memory
+
+// Default constructor
 CRSVector::CRSVector(void) {}
 
-// Constructor that copies the contents of a given vector
+
+// Copying constructor
 CRSVector::CRSVector(const CRSVector& that) {
   if (that._len > 0) {
     _len = that._len;
@@ -20,8 +22,8 @@ CRSVector::CRSVector(const CRSVector& that) {
   }
 }
 
-// Constructor that allocates memory for wanted sized vector and initializes
-// the values as zeros
+
+// Zeros constructor
 CRSVector::CRSVector(int len) {
   if (len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
@@ -32,8 +34,8 @@ CRSVector::CRSVector(int len) {
   data = std::vector<double>(len, 0.0); 
 }
 
-// Constructor that allocates memory for wanted sized vector and initializes
-// the values as wanted double
+
+// Default value constructor
 CRSVector::CRSVector(int len, double init_val) {
   if (len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
@@ -44,12 +46,9 @@ CRSVector::CRSVector(int len, double init_val) {
   data = std::vector<double>(len, init_val); 
 }
 
-// Constructor that copies the contents of a std::vector into a matrix.
-// NOTE! If the number of elements in the std::vector doesn't match the 
-// dimensions of the matrix either the extra elements are ignored or 
-// the matrix is padded with zeros at the last rows. In either case a 
-// warning is printed.
-CRSVector::CRSVector(int len, std::vector<double> elems) {
+
+// Vector copying constructor
+CRSVector::CRSVector(int len, std::vector<double>& elems) {
   if (len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
   }
@@ -74,10 +73,7 @@ CRSVector::CRSVector(int len, std::vector<double> elems) {
   }
 }
 
-// Constructor that copies the contents of double array into a matrix.
-// NOTE! SHOULD NOT BE USED UNLESS ABSOLUTELY NECESSARY! This function will
-// read the needed amount of elements from the array independent of the size
-// of the array (which can not be verified) and thus might read unwanted memory
+// Array copying constructor
 CRSVector::CRSVector(int len, double* elems) {
   std::cout << "\nWARNING: Initializing a vector with double array might lead to undefined behaviour!" << "\n\n";
 
@@ -90,13 +86,9 @@ CRSVector::CRSVector(int len, double* elems) {
   data.assign(elems, elems + len);
 }
 
-// Constructor that reads the contents of a given file and stores them in a matrix.
-// The file should consist of three whitespace separated columns s.t. the first column
-// tells the row, the second tells the column and third the value.
-// The last row of the file should hold the lower right corner element of the matrix
-// even if it is zero.
-// Alternatively, .mtx format will (eventually) be supported
-CRSVector::CRSVector(std::string path, int offset, std::string format) {
+
+// Load from file constructor
+CRSVector::CRSVector(const std::string& path, int offset, std::string format) {
   // Variables to read the line contents to
   int row, col;
   double val;
@@ -157,6 +149,8 @@ CRSVector::CRSVector(std::string path, int offset, std::string format) {
 
 // ---------------------OVERLOADED BASIC MATH OPERATORS------------------------
 
+
+// Element-wise addition assignment
 CRSVector& CRSVector::operator+= (const CRSVector& that) {
   if (_len != that._len) {
     throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
@@ -170,10 +164,14 @@ CRSVector& CRSVector::operator+= (const CRSVector& that) {
   return *this;
 }
 
+
+// Element-wise addition
 const CRSVector CRSVector::operator+ (const CRSVector& that) const {
   return CRSVector(*this) += that;
 }
 
+
+// Element-wise subtraction assignment
 CRSVector& CRSVector::operator-= (const CRSVector& that) {
   if (_len != that._len) {
     throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
@@ -187,6 +185,8 @@ CRSVector& CRSVector::operator-= (const CRSVector& that) {
   return *this;
 }
 
+
+// Element-wise subtraction
 const CRSVector CRSVector::operator- (const CRSVector& that) const {
   return CRSVector(*this) -= that;
 }
@@ -204,11 +204,14 @@ CRSVector& CRSVector::operator*= (const CRSVector& that) {
   return *this;
 }
 
+
+// Element-wise multiplication
 const CRSVector CRSVector::operator* (const CRSVector& that) const {
   return CRSVector(*this) *= that;
 }
 
 
+// Scalar (right) multiplication assignment
 CRSVector& CRSVector::operator*= (double that) {
   if (_len < 1) return *this;
   
@@ -221,10 +224,13 @@ CRSVector& CRSVector::operator*= (double that) {
 }
 
 
+// Scalar (right) multiplication
 const CRSVector CRSVector::operator* (const double that) const {
   return CRSVector(*this) *= that;
 }
 
+
+// Scalar (left) multiplication
 const CRSVector lalib::operator* (double scalar, const CRSVector& vector) {
   return vector * scalar;
 }
@@ -242,10 +248,14 @@ CRSVector& CRSVector::operator/= (const CRSVector& that) {
   return *this;
 }
 
+
+// Element-wise division
 const CRSVector CRSVector::operator/ (const CRSVector& that) const {
   return CRSVector(*this) /= that;
 }
 
+
+// Scalar division
 const CRSVector CRSVector::operator/ (const double that) const {
   if (_len < 1) return *this;
 
@@ -262,6 +272,8 @@ const CRSVector CRSVector::operator/ (const double that) const {
 
 // ---------------------OVERLOADED INDEXING OPERATORS---------------------------
 
+
+// Standard single value placement
 void CRSVector::place(int num, double val) {
   if (num < 0 || num >= _len) {
     throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
@@ -270,7 +282,9 @@ void CRSVector::place(int num, double val) {
   data[num] = val;
 }
 
-void CRSVector::place(int start, int end, CRSVector vector) {
+
+// Standard vector placement
+void CRSVector::place(int start, int end, CRSVector& vector) {
   if (_len < end - start || start < 0 || start >= end) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
@@ -281,6 +295,8 @@ void CRSVector::place(int start, int end, CRSVector vector) {
   }
 }
 
+
+// Standard indexing method
 double CRSVector::operator() (int num) const {
   if (num < 0 || num >= _len) {
     throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
@@ -289,14 +305,20 @@ double CRSVector::operator() (int num) const {
   return data[num];
 }
 
+
+// Squared bracket indexing method
 double CRSVector::operator[] (int num) const {
   return this->operator() (num);
 }
 
+
+// Named indexing method
 double CRSVector::get(int num) const {
   return this->operator() (num);
 }
 
+
+// Standard slicing method
 const CRSVector CRSVector::operator() (int start, int end) const {
   if (_len < end - start || start < 0 || start >= end) {
     throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
@@ -324,6 +346,8 @@ const CRSVector CRSVector::get(int start, int end) const {
 
 // ----------------------OTHER OVERLOADED OPERATORS-----------------------------
 
+
+// Default assignment operator
 CRSVector& CRSVector::operator= (const CRSVector& that) {
   // Check for self-assignment ie. case where a = a is called by comparing the pointers of the objects
   if (this == &that) return *this;
@@ -334,6 +358,8 @@ CRSVector& CRSVector::operator= (const CRSVector& that) {
   return *this;
 }
 
+
+// Default (equality) comparison operator
 bool CRSVector::operator== (const CRSVector& that) {
   if (_len != that._len) return false;
 
@@ -346,6 +372,8 @@ bool CRSVector::operator== (const CRSVector& that) {
   return true;
 }
 
+
+// Default (inequality) comparison operator
 bool CRSVector::operator!= (const CRSVector& that) {
   return !(*this == that);
 }
@@ -353,6 +381,8 @@ bool CRSVector::operator!= (const CRSVector& that) {
 
 // ----------------------------------MISC----------------------------------------
 
+
+// Approximative equality comparison
 bool CRSVector::isclose(const CRSVector& that, double tol) {
   if (_len != that._len) return false;
 
@@ -365,7 +395,9 @@ bool CRSVector::isclose(const CRSVector& that, double tol) {
   return true;
 }
 
-bool CRSVector::save(std::string path, int offset, std::string format) {
+
+// Vector saving
+bool CRSVector::save(std::string& path, int offset, std::string format) {
   if (_len <= 0) {
     throw std::invalid_argument(_formErrorMsg("Cannot save an unitialized matrix!", __FILE__, __func__, __LINE__));
   }
@@ -392,6 +424,7 @@ bool CRSVector::save(std::string path, int offset, std::string format) {
 }
 
 
+// Convert CRSVector into std::vector
 std::vector<double> CRSVector::toVector() const {
   if (_len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
@@ -402,6 +435,8 @@ std::vector<double> CRSVector::toVector() const {
   return ret;
 }
 
+
+// Convert CRSVector object into a CRSMatrix object
 const CRSMatrix CRSVector::asCRSMatrix() const {
   if (_len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
@@ -416,6 +451,8 @@ const CRSMatrix CRSVector::asCRSMatrix() const {
   return ret;
 }
 
+
+// Convert CRSVector into a double
 double CRSVector::asDouble() const {
   if (_len != 1) {
     throw std::invalid_argument(_formErrorMsg("Vector must have just a single element!", __FILE__, __func__, __LINE__));

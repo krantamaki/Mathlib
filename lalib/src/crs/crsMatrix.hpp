@@ -19,6 +19,12 @@ namespace lalib {
    * allows for a constant time access to rows, which is very useful when
    * defining fast matrix-vector multiplication. However, the access to columns
    * is a linear time operation.
+   *
+   * TODO: Vectorize the implementation to use SIMD commands. This could be
+   * accomplished by filling vectors as if the sparse matrix was a dense one.
+   * That is if a non-zero element exists on index 9 (indexing starting from 1)
+   * that would be the first element of a 4 double wide vector since in a dense
+   * representation two filled vectors would exist before it.
    */
   class CRSMatrix {
 
@@ -31,7 +37,7 @@ namespace lalib {
     std::vector<int> rowPtrs;
   
   public:
-    // ------------- CONSTRUCTORS ---------------
+    // ------------- Constructors  ---------------
 
     /**
      * @brief Default constructor
@@ -141,7 +147,7 @@ namespace lalib {
      * @param offset OPTIONAL, DEFAULTS TO < int offset = 0 >. The offset between the 
      * indexing conventions. That is if the values in the file are indexed 
      * e.g. starting from 1 that should be passed as the offset.
-     * @param format OPTIONAL, DEFAULTS TO < std::string format ".dat" >. the extension
+     * @param format OPTIONAL, DEFAULTS TO < std::string format = ".dat" >. the extension
      * of the used format. Choices are ".dat" and ".mtx".
      * @param safe_indexing OPTIONAL, DEFAULTS TO < bool safe_indexing = false >. 
      * Boolean flag telling if the elements are sorted by rows and columns in the file.
@@ -378,7 +384,7 @@ namespace lalib {
      */
     const CRSVector getRow(int row) const;
 
-    // -------- PLACEMENT METHODS ---------
+    // -------- Placement methods ---------
 
     /**
      * @brief Standard single value placement
@@ -453,7 +459,7 @@ namespace lalib {
      * to use CRSMatrix::isclose() method.
      * @see CRSMatrix::isclose()
      *
-     * @param that A reference to the DenseMatrix object of comparison
+     * @param that A reference to the CRSMatrix object of comparison
      *
      * @return A boolean signifying true if equal and false if unequal
      */
@@ -634,7 +640,7 @@ namespace lalib {
     const CRSMatrix matmulNaive(const CRSMatrix& that) const;
 
     /**
-     * @brief Matrix-vector multiplication
+     * @brief Efficient matrix-vector multiplication
      *
      * Method that computes the matrix-vector multiplication in an efficient way.
      * This method is crucial in most iterative methods.

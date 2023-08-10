@@ -9,13 +9,7 @@
 using namespace lalib;
 
 
-/*
-  TODO: PROPER DESCRIPTION
-*/
-
-
-// Generic matrix multiplication (Not really optimized)
-
+// Matrix-matrix multiplication in the (naive) textbook way
 const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 
   if (_ncols != that._nrows) {
@@ -72,8 +66,7 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 // const CRSMatrix CRSMatrix::matmulStrassen(const CRSMatrix& that) const {}
 
 
-// Wrapper function for calling wanted matrix multiplication algorithm
-
+// Wrapper for matrix-matrix multiplication
 const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
   if (_ncols != that._nrows) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
@@ -87,7 +80,7 @@ const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
 }
 
 
-// Efficient implementation for sparse matrix-vector multiplication
+// Efficient matrix-vector multiplication
 const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
   if (_ncols != that.len()) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
@@ -115,9 +108,7 @@ const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
 }
 
 
-// Not so efficient implementation for sparse vector-matrix multiplication
-// Unlike other matmul functions this can take a voluntary parameter
-// tells that the matrix is symmetric (and thus no transpose is needed)
+// Vector-matrix multiplication
 const CRSVector CRSVector::matmul(const CRSMatrix& that, bool is_symmetric) const {
   if (_len != that.nrows()) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
@@ -132,6 +123,8 @@ const CRSVector CRSVector::matmul(const CRSMatrix& that, bool is_symmetric) cons
   }
 }
 
+
+// Dot (inner) product
 double CRSVector::dot(const CRSVector& that) const {
   if (_len != that._len) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
