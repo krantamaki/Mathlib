@@ -52,19 +52,28 @@ double g(double x_1, double x_2) {
 
 int main() {
   
-  int N = 50;  // Number of grid points in each dimension. 2D grid is then N x N
+  int N = 300;  // Number of grid points in each dimension. 2D grid is then N x N
   double h = 1.0 / ((double)N - 1.0);  // The step size
+  int N_squared = N * N;
   double h_square = h * h;
   double inv_h_square = 1.0 / h_square;
 
   std::cout << "\n" << "Solving a two dimensional Poisson problem using Finite Difference Method" << "\n";
   std::cout << "Finite difference mesh consists of " << N << " x " << N << " points" << "\n";
-
-  std::cout << "\n" << "Initializing the coefficient matrix and RHS vector..." << "\n";
-  CRSMatrix A = CRSMatrix(N * N, N * N);
-  CRSVector b = CRSVector(N * N);
   
-  std::cout << "\n" << "Filling the coefficient matrix and RHS vector. This may take a while..." << "\n";
+  std::cout << "\n" << "Initializing the coefficient matrix and RHS vector. This may take a while..." << "\n";
+
+  auto init_start = std::chrono::high_resolution_clock::now();
+  
+  // Arrays that will define the CRS structure of the coefficient matrix
+  std::vector<double> vals;
+  std::vector<int> colInds;
+  std::vector<int> rowPtrs;
+  rowPtrs.push_back(0);
+
+  // The RHS vector
+  CRSVector b = CRSVector(N_squared);
+  
   // Form the coefficient matrix
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {      
@@ -72,42 +81,49 @@ int main() {
       double x_1 = (double)i / (double)N;
       double x_2 = (double)j / (double)N;
 
-      if ((i > 0) && (i < N - 1) && (j > 0) && (j < N - 1)) {
-	// Point in interior
-	A.place(row, ij(i - 1, j, N), -inv_h_square);
-	A.place(row, ij(i + 1, j, N), -inv_h_square);
-	A.place(row, ij(i, j - 1, N), -inv_h_square);
-	A.place(row, ij(i, j + 1, N), -inv_h_square);
-	A.place(row, row, 4 * inv_h_square);
+      if ((i > 0) && (i < N - 1) && (j > 0) && (j < N - 1)) {  // Point in the interior
+        vals.insert(vals.end(), {-inv_h_square, -inv_h_square, 4 * inv_h_square, -inv_h_square, -inv_h_square});
+	colInds.insert(colInds.end(), {ij(i - 1, j, N), ij(i, j - 1, N), row, ij(i, j + 1, N), ij(i + 1, j, N)});
+	rowPtrs.push_back(rowPtrs.back() + 5);
 
 	b.place(row, f(x_1, x_2));
       }
-      else {
-	// Point on boundary
-	A.place(row, row, 1.0);
+      else { // Point on the boundary
+        vals.push_back(1.0);
+	colInds.push_back(row);
+	rowPtrs.push_back(rowPtrs.back() + 1);
+	
 	b.place(row, g(x_1, x_2));
       }
     }
   }
 
-  std::cout << "\n" << "Initializing the initial guess as a vector of zeros..." << "\n";
-  CRSVector x0 = CRSVector(N * N);
+  CRSMatrix A = CRSMatrix(N_squared, N_squared, vals, colInds, rowPtrs);
 
-  std::cout << "\n" << "Solving a " << N * N << " dimensional system with conjugate gradient method. This may take a while..." << "\n";
+  auto init_end = std::chrono::high_resolution_clock::now();
+
+  auto init_duration = std::chrono::duration_cast<std::chrono::milliseconds>(init_end - init_start);
+
+  std::cout << "\n" << "Time taken in preprocessing: " << init_duration.count() << " milliseconds" << "\n";
+  
+  std::cout << "\n" << "Using a zero vector as the initial guess..." << "\n";
+  CRSVector x0 = CRSVector(N_squared);
+
+  std::cout << "\n" << "Solving a " << N_squared << " dimensional system with conjugate gradient method. This may take a while..." << "\n";
 
   CRSVector ret;
 
-  auto start = std::chrono::high_resolution_clock::now();
-  ret = cgSolve(A, x0, b);
-  auto end = std::chrono::high_resolution_clock::now();
+  auto solve_start = std::chrono::high_resolution_clock::now();
+  ret = cgSolve(A, x0, b, 10 * N);  // 10 * N chosen as an arbitrary maximum number of iterations
+  auto solve_end = std::chrono::high_resolution_clock::now();
 
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  auto solve_duration = std::chrono::duration_cast<std::chrono::milliseconds>(solve_end - solve_start);
 
-  std::cout << "\n" << "Time taken by the solver: " << duration.count() << " milliseconds" << "\n";
+  std::cout << "\n" << "Time taken by the solver: " << solve_duration.count() << " milliseconds" << "\n";
   
   std::cout << "Residual norm: " << (A.matmul(ret) - b).norm() << "\n\n";
 
-  std::cout << "\nDONE" << "\n";
+  std::cout << "DONE" << "\n";
 
   return 0;
 }
