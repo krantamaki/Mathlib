@@ -131,7 +131,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& elems) {
 
 // CRS array constructor
 CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& new_vals, const std::vector<int>& new_colInds, const std::vector<int>& new_rowPtrs) {
-  if (*std::max_element(new_colInds.begin(), new_colInds.end()) > cols || *std::max_element(new_rowPtrs.begin(), new_rowPtrs.end()) || *std::min_element(new_colInds.begin(), new_colInds.end()) <= 0 || *std::min_element(new_rowPtrs.begin(), new_rowPtrs.end()) <= 0.0) {
+  if (*std::max_element(new_colInds.begin(), new_colInds.end()) >= cols || *std::max_element(new_rowPtrs.begin(), new_rowPtrs.end()) > (int)new_colInds.size() || *std::min_element(new_colInds.begin(), new_colInds.end()) < 0 || *std::min_element(new_rowPtrs.begin(), new_rowPtrs.end()) < 0) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions out of bounds!", __FILE__, __func__, __LINE__));
   }
   
