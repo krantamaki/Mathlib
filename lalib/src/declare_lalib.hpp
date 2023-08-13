@@ -35,6 +35,8 @@
 #define MAX_ITER 1000
 #define CHECK_SYMMETRIC 0
 #define OMEGA 0.75
+#define PRINT_INTERVAL 20
+#define BASE_VERBOSITY 1
 
 
 // Define a vector for SIMD commands. Currently set up to hold 4 doubles (for 256 bit vector registers)
@@ -98,6 +100,42 @@ inline std::string _formErrorMsg(const std::string& msg, const char* file, const
   msgStream << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
 
   return msgStream.str();
+}
+
+
+// Function that forms a warning  message
+inline std::string _formWarningMsg(const std::string& msg, const char* func) {
+  std::ostringstream msgStream;
+
+  msgStream << func << ": " << "WARNING! " << msg << "\n";
+
+  return msgStream.str();
+}
+
+
+// Function that forms an iteration message
+inline std::string _formIterMsg(const char* func, int iter, double norm) {
+  std::ostringstream msgStream;
+
+  msgStream << func << ": " << "Iter " << iter << " - Norm " << norm << "\n";
+
+  return msgStream.str();
+}
+
+
+/*
+ * Function that defines and returns the verbosity level
+ * Note that verbosity will have 3 levels:
+ *   1: Error messages
+ *   2: Error and warning messages
+ *   3: Everything else
+ */
+inline int verbosity(int _verbosity = BASE_VERBOSITY) {
+  if (_verbosity < 0 || _verbosity > 3) {
+    _verbosity = 1;
+  }
+  static int set_verbosity = _verbosity;
+  return set_verbosity;
 }
 
 
