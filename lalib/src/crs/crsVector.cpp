@@ -75,7 +75,9 @@ CRSVector::CRSVector(int len, std::vector<double>& elems) {
 
 // Array copying constructor
 CRSVector::CRSVector(int len, double* elems) {
-  std::cout << "\nWARNING: Initializing a vector with double array might lead to undefined behaviour!" << "\n\n";
+  if (verbosity() >= 2) {
+    std::cout << "\n" << _formWarningMsg("Initializing a vector with double array might lead to undefined behaviour!", __func__) << "\n";
+  }
 
   if (len < 1) {
     throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
@@ -325,7 +327,9 @@ const CRSVector CRSVector::operator() (int start, int end) const {
   }
 
   if (end >= _len) {
-    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << "\n" << _formWarningMsg("End index out of bounds", __func__) << "\n";
+    }
     end = _len;
   }
 

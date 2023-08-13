@@ -52,7 +52,9 @@ CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
     rowPtrs = std::vector<int>(rows + 1, 0);
   }
   else {
-    std::cout << "\nWARNING: Full matrix allocation is not memory efficient! Consider using DenseMatrix class instead." << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("Full matrix allocation is not memory efficient! Consider using DenseMatrix class instead.", __func__);
+    }
   
     _ncols = cols;
     _nrows = rows;
@@ -75,8 +77,9 @@ CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
 
 // Array copying constructor
 CRSMatrix::CRSMatrix(int rows, int cols, double* elems) {
-  std::cout << "\nWARNING: Initializing a matrix with double array might lead to undefined behaviour!" << "\n\n";
-
+  if (verbosity() >= 2) {
+    std::cout << _formWarningMsg("Initializing a matrix with double array might lead to undefined behaviour!", __func__);
+  }
   if (cols < 1 || rows < 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
   }
@@ -107,7 +110,9 @@ CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& elems) {
   }
 
   if (rows * cols != (int)elems.size()) {
-    std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
+    }
   } 
 
   _ncols = cols;
@@ -510,7 +515,9 @@ void CRSMatrix::placeCol(int col, CRSVector& vector) {
   }
 
   if (vector.len() > _nrows) {
-    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("End index out of bounds", __func__);
+    }
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -536,7 +543,9 @@ void CRSMatrix::placeRow(int row, CRSVector& vector) {
   }
 
   if (vector.len() > _ncols) {
-    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("End index out of bounds", __func__);
+    }
   }
 
   int old_n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
@@ -625,7 +634,9 @@ const CRSMatrix CRSMatrix::operator() (int rowStart, int rowEnd, int colStart, i
   }
 
   if (rowEnd > _nrows || colEnd > _ncols) {
-    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("End index out of bounds", __func__);
+    }
   }
 
   int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
