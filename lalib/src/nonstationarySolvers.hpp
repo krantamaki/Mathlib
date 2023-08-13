@@ -63,12 +63,20 @@ namespace lalib {
       p *= (r.dot(r)) / (r_tmp.dot(r_tmp));
       p += r;
 
-      if (r.norm() < tol) {
+      double norm = r.norm();
+      
+      if (norm < tol) {
 	return x_k;
+      }
+
+      if (iter % PRINT_INTERVAL == 0 && verbosity() >= 3) {
+	std::cout << _formIterMsg(__func__, iter, norm);
       }
     }
 
-    std::cout << "\nWARNING: Conjugate gradient method did not converge to the wanted tolerance!" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    }
     
     return x_k;
   }

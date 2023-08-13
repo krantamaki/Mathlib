@@ -77,12 +77,20 @@ namespace lalib {
 
       x_k = x_temp;
 
-      if ((A.matmul(x_k) - b).norm() < tol) {
+      double norm = (A.matmul(x_k) - b).norm();
+
+      if (norm < tol) {
 	return x_k;
+      }
+
+      if (iter % PRINT_INTERVAL == 0 && verbosity() >= 3) {
+	std::cout << _formIterMsg(__func__, iter, norm);
       }
     }
 
-    std::cout << "\nWARNING: Jacobi method did not converge to the wanted tolerance!" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    }
     
     return x_k;
   }
@@ -143,12 +151,20 @@ namespace lalib {
 	x_k.place(row, s);
       }
 
-      if ((A.matmul(x_k) - b).norm() < tol) {
+      double norm = (A.matmul(x_k) - b).norm();
+
+      if (norm < tol) {
 	return x_k;
+      }
+
+      if (iter % PRINT_INTERVAL == 0 && verbosity() >= 3) {
+	std::cout << _formIterMsg(__func__, iter, norm);
       }
     }
 
-    std::cout << "\nWARNING: Gauss-Seidel method did not converge to the wanted tolerance!" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    }
     
     return x_k;
   }
@@ -212,12 +228,20 @@ namespace lalib {
 	x_k.place(row, x_i);
       }
 
-      if ((A.matmul(x_k) - b).norm() < tol) {
+      double norm = r.norm();
+      
+      if (norm < tol) {
 	return x_k;
+      }
+
+      if (iter % PRINT_INTERVAL == 0 && verbosity() >= 3) {
+	std::cout << _formIterMsg(__func__, iter, norm);
       }
     }
 
-    std::cout << "\nWARNING: SOR method did not converge to the wanted tolerance!" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    }
     
     return x_k;
   }
