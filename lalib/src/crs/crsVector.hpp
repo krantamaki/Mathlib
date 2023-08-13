@@ -300,7 +300,7 @@ namespace lalib {
      */
     double get(int num) const;
 
-        /**
+    /**
      * @brief Standard slicing method
      *
      * Method that slices a wanted sized vector from a CRSVector object
@@ -350,11 +350,10 @@ namespace lalib {
      *
      * @param start The starting row index for the placement
      * @param end The ending row index for the placement
-     * @param vector A reference to the CRSMatrix object of which values are to be placed
+     * @param vector A reference to the CRSVector object of which values are to be placed
      */
     void place(int start, int end, CRSVector& vector);
-
-        
+      
     // --------- Other overloaded operators ----------
 
     /**
@@ -409,7 +408,7 @@ namespace lalib {
      *
      * @return A boolean signifying false if equal and true if unequal 
      */
-    bool isclose(const CRSVector& that, double tol);
+    bool isclose(const CRSVector& that, double tol = 0.000001);
 
     /**
      * @brief Vector saving

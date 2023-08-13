@@ -115,7 +115,9 @@ DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double>& elems) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
   }
   if (rows * cols != (int)elems.size()) {
-    std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
+    if (verbosity >= 2) {
+      std::cout << _formWarningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
+    }
   } 
 
   _ncols = cols;
@@ -145,7 +147,9 @@ DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double>& elems) {
 
 // Array copying constructor
 DenseMatrix::DenseMatrix(int rows, int cols, double* elems) {
-  std::cout << "\nWARNING: Initializing a matrix with double array might lead to undefined behaviour!" << "\n\n";
+  if (verbosity() >= 2) {
+    std::cout << _formWarningMsg("Initializing a matrix with double array might lead to undefined behaviour!", __func__);
+  }
 
   if (cols < 1 || rows < 1) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
@@ -412,7 +416,9 @@ const DenseMatrix DenseMatrix::operator() (int rowStart, int rowEnd, int colStar
   }
 
   if (rowEnd > _nrows || colEnd > _ncols) {
-    std::cout << "\nWARNING: End index out of bounds" << "\n\n";
+    if (verbosity() >= 2) {
+      std::cout << _formWarningMsg("End index out of bounds", __func__);
+    }
   }
 
   int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
