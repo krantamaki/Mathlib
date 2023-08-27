@@ -246,7 +246,7 @@ namespace lalib {
 	x_k.place(row, x_i);
       }
 
-      double norm = r.norm();
+      double norm = (A.matmul(x_k) - b).norm();
       
       if (norm < tol) {
 	return x_k;
