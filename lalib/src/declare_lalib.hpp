@@ -2,18 +2,6 @@
 #define LALIB_HPP
 
 
-/*
-  This is a general linear algebra library for C++. Main functionality consist of different
-  matrix classes (currently only DenseMatrix is implemented) which override the basic math operators
-  (+, -, ...) to function as element-wise operations equivalent to Matlab's .* etc and contain methods
-  like matmul for computing the common matrix operations. Additionally, there are some general template 
-  functions that work independent of the matrix type (currently only DenseMatrix).
-
-  The methods and functions are made as optimal as feasible with parallelization utilizing multi-threading
-  and SIMD commands as well as making sure memory calls are linear.
-*/
-
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -29,13 +17,8 @@
 #include <omp.h>
 
 
-// Define constants used by the solvers
+// Define useful constants
 
-#define BASE_TOL 0.0000001
-#define MAX_ITER 1000
-#define CHECK_SYMMETRIC 0
-#define OMEGA 0.75
-#define PRINT_INTERVAL 20
 #define BASE_VERBOSITY 1
 
 
@@ -103,7 +86,7 @@ inline std::string _formErrorMsg(const std::string& msg, const char* file, const
 }
 
 
-// Function that forms a warning  message
+// Function that forms a warning message
 inline std::string _formWarningMsg(const std::string& msg, const char* func) {
   std::ostringstream msgStream;
 
