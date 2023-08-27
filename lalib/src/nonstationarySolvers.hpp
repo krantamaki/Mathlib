@@ -1,7 +1,23 @@
 #ifndef NONSTATIONARY_SOLVERS_HPP
 #define NONSTATIONARY_SOLVERS_HPP
 
+
 #include "declare_lalib.hpp"
+
+
+#ifndef BASE_TOL
+#define BASE_TOL 0.000001
+#endif
+#ifndef MAX_ITER
+#define MAX_ITER 1000
+#endif
+#ifndef CHECK_SYMMETRIC
+#define CHECK_SYMMETRIC 0
+#endif
+#ifndef PRINT_INTERVAL
+#define PRINT_INTERVAL 20
+#endif
+
 
 /*
   Methods that use values that change in each iteration, e.g. the residuals, are 

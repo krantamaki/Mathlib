@@ -1,7 +1,25 @@
 #ifndef STATIONARY_SOLVERS_HPP
 #define STATIONARY_SOLVERS_HPP
 
+
 #include "declare_lalib.hpp"
+
+
+#ifndef BASE_TOL
+#define BASE_TOL 0.000001
+#endif
+#ifndef MAX_ITER
+#define MAX_ITER 1000
+#endif
+#ifndef CHECK_SYMMETRIC
+#define CHECK_SYMMETRIC 0
+#endif
+#ifndef OMEGA
+#define OMEGA 0.75
+#endif
+#ifndef PRINT_INTERVAL
+#define PRINT_INTERVAL 20
+#endif
 
 
 /*
