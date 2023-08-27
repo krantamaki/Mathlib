@@ -3,17 +3,15 @@
 #include "../declare_lalib.hpp"
 
 
+#ifndef STRASSEN_THRESHOLD
 #define STRASSEN_THRESHOLD 1000
+#endif
 
 
 using namespace lalib;
 
-/*
-  TODO: PROPER DESCRIPTION HERE
-*/
 
-// Generic matrix multiplication
-
+// Matrix-matrix multiplication in the (naive) textbook way
 const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
@@ -29,19 +27,18 @@ const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
   for (int row = 0; row < _nrows; row++) {
     for (int col = 0; col < that._ncols; col++) {    
 
-      vect_t sum;
-      for (int i = 0; i < VECT_ELEMS; i++) {
-	sum[i] = 0.0;
-      }
+      vect_t sum = zeros;
 
-      for (int vect = 0; vect < vects_per_row; vect++) {
-	sum += data[vects_per_row * row + vect] * that_T.data[vects_per_row * col + vect];
+      for (int vect = 0; vect < vects_per_row - 1; vect++) {
+	      sum += data[vects_per_row * row + vect] * that_T.data[vects_per_row * col + vect];
       }
 
       double val = 0.0;
-      for (int elem = 0; elem < VECT_ELEMS; elem++) {
-	val += sum[elem];	
+      for (int elem = 0; elem < (that._ncols % VECT_ELEMS); elem++) {
+        val += data[vects_per_row * (row + 1) - 1][elem] * that_T.data[vects_per_row * (col + 1) - 1][elem];
       }
+
+      val += _reduce(sum);
 			
       ret.place(row, col, val);
     }
@@ -50,11 +47,12 @@ const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
   return ret;
 }
 
+
 // TODO: Implement Strassen algorithm
 // const DenseMatrix DenseMatrix::matmulStrassen(const DenseMatrix& that) const {}
 
-// Wrapper function that calls either matmulNaive or matmulStrassen based on matrix size
 
+// Wrapper for matrix-matrix multiplication
 const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
@@ -68,52 +66,71 @@ const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
   return this->matmulNaive(that);
 }
 
-// Vector vector multiplication can lead to either a matrix or a scalar depending on if you
-// multiply row vector with column vector or column vector with row vector.
-// Thus the return type is DenseMatrix that might be a 1 x 1 matrix
 
-const DenseMatrix DenseVector::matmul(const DenseVector& that) const {
-  if (_ncols != that._nrows || _nrows != that._ncols) {
+const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
+  if (_ncols != that.len()) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
   }
 
-  return (this->asDenseMatrix()).matmul(that.asDenseMatrix());
-}
+  // Allocate memory for the resulting vector
+  DenseVector ret = DenseVector(_nrows);
 
-const DenseVector DenseVector::matmul(const DenseMatrix& that) const {
-  if (_ncols != that.nrows()) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
-  }
+  #pragma omp parallel for schedule(dynamic, 1)
+  for (int row = 0; row < _nrows; row++) {
 
-  return ((this->asDenseMatrix()).matmul(that)).asDenseVector();
-}
+    vect_t sum = zeros;
 
-// Dot product behaves similarly to matmul, but always returns a scalar value
-// (even when multiplying column vector with row vector or column vector with column vector etc.)
+    for (int vect = 0; vect < vects_per_row - 1; vect++) {
+      sum += data[vects_per_row * row + vect] * that.getSIMD(vect);
+    }
 
-double DenseVector::dot(const DenseVector& that) const {
-  if (!((_ncols == that._ncols && _nrows == that._nrows) || (_ncols == that._nrows && _nrows == that._ncols))) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
-  }
+    double val = 0.0;
+    for (int elem = 0; elem < (that.len() % VECT_ELEMS); elem++) {
+      val += data[vects_per_row * (row + 1) - 1][elem] * that.getSIMD(vects_per_row - 1)[elem];
+    }
 
-  vect_t sum;
-  for (int i = 0; i < VECT_ELEMS; i++) {
-    sum[i] = 0.0;
-  }
-
-  for (int vect = 0; vect < total_vects; vect++) {
-    sum += data[vect] * that.data[vect];
-  }
-
-  double ret = 0.0;
-  for (int elem = 0; elem < VECT_ELEMS; elem++) {
-    ret += sum[elem];	
+    val += _reduce(sum);
+    
+    ret.place(row, val);
   }
 
   return ret;
 }
 
 
-const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
-  return (this->matmul(that.asDenseMatrix())).asDenseVector();
+const DenseVector DenseVector::matmul(const DenseMatrix& that, bool is_symmetric) const {
+  if (_len != that.nrows()) {
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+  }
+
+  if (!is_symmetric) {
+    DenseMatrix that_T = that.T();
+    return that_T.matmul(*this);
+  }
+
+  return that.matmul(*this);
+}
+
+// Dot product behaves similarly to matmul, but always returns a scalar value
+// (even when multiplying column vector with row vector or column vector with column vector etc.)
+
+double DenseVector::dot(const DenseVector& that) const {
+  if (_len != that._len) {
+    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+  }
+
+  vect_t sum = zeros;
+
+  for (int vect = 0; vect < total_vects - 1; vect++) {
+    sum += data[vect] * that.data[vect];
+  }
+
+  double ret = 0.0;
+  for (int elem = 0; elem < (_len % VECT_ELEMS); elem++) {
+    ret += data[total_vects - 1][elem] * that.data[total_vects - 1][elem];
+  }
+
+  ret += _reduce(sum);
+
+  return ret;
 }

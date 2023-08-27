@@ -377,11 +377,11 @@ const DenseVector DenseVector::get(int start, int end) const {
 
 // SIMD accessing method
 vect_t DenseVector::getSIMD(int num) const {
-  if (num > total_vects) {
+  if (num >= total_vects) {
     throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
   }
 
-  return data[num / VECT_ELEMS];
+  return data[num];
 }
 
 
@@ -442,32 +442,20 @@ bool DenseVector::operator!= (const DenseVector& that) {
 
 // Default insertion operator
 std::ostream& lalib::operator<<(std::ostream& os, DenseVector& v) {
-  if (v.ncols() == 0 && v.nrows() == 0) {
+  if (v.len() == 0) {
     os << "[]" << std::endl;  // Signifies uninitialized vector
         
     return os;
   }
     
-  if (v.ncols() > v.nrows()) {
-    os << "[";
-    for (int i = 0; i < v.ncols(); i++) {
-      if (i > 0) {
-	os << " ";
-      }
-      os << v(i);
+  os << "[";
+  for (int i = 0; i < v.len(); i++) {
+    if (i > 0) {
+      os << "\n ";
     }
-    os << "]" << std::endl;
+    os << v(i);
   }
-  else {
-    os << "[";
-    for (int i = 0; i < v.nrows(); i++) {
-      if (i > 0) {
-	os << "\n ";
-      }
-      os << v(i);
-    }
-    os << "]" << std::endl;
-  }
+  os << "]" << std::endl;
   
   return os;
 }
@@ -517,8 +505,8 @@ const DenseMatrix DenseVector::asDenseMatrix() const {
     
   DenseMatrix ret = DenseMatrix(_len, 1);
 
-  for (int i = 0; row < _len; i++) {
-    ret.place(i, 1, this->operator() (i));
+  for (int i = 0; i < _len; i++) {
+    ret.place(i, 0, this->operator() (i));
   }
   
   return ret;

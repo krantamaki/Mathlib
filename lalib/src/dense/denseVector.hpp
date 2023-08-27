@@ -96,7 +96,7 @@ namespace lalib {
      * @param len The size of the vector
      * @param elems A reference to a std::vector
      */
-    DenseVector(int rows, int cols, std::vector<double>& elems);
+    DenseVector(int len, std::vector<double>& elems);
 
     /**
      * @brief Default destructor
@@ -408,7 +408,7 @@ namespace lalib {
      *
      * @return The number of elements as const
      */
-    const int len() { return _len; }
+    const int len() const { return _len; }
 
     /**
      * @brief Vector-matrix multiplication
@@ -419,7 +419,7 @@ namespace lalib {
      *
      * @return The resulting DenseVector object
      */
-    const DenseVector matmul(const DenseMatrix& that) const;
+    const DenseVector matmul(const DenseMatrix& that, bool is_symmetric=false) const;
 
     /** 
      * @brief Vector-vector multiplication

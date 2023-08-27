@@ -60,15 +60,12 @@ DenseMatrix::DenseMatrix(int rows, int cols) {
 
   // Initialize the data values as zeros
   data = (vect_t*)tmp;
-  vect_t zeros;
-  for (int i = 0; i < VECT_ELEMS; i++) {
-    zeros[i] = 0.0;
-  }
+  vect_t init = zeros;
 
   #pragma omp parallel for schedule(dynamic, 1)
   for (int i = 0; i < rows; i++) {
     for (int vect = 0; vect < vects_per_row; vect++) {
-      data[vects_per_row * i + vect] = zeros;
+      data[vects_per_row * i + vect] = init;
     }
   }
 }
@@ -115,7 +112,7 @@ DenseMatrix::DenseMatrix(int rows, int cols, std::vector<double>& elems) {
     throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be non-negative!", __FILE__, __func__, __LINE__));
   }
   if (rows * cols != (int)elems.size()) {
-    if (verbosity >= 2) {
+    if (verbosity() >= 2) {
       std::cout << _formWarningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
     }
   } 
