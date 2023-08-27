@@ -67,6 +67,7 @@ const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
 }
 
 
+// Matrix-vector multiplication
 const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
   if (_ncols != that.len()) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
@@ -98,6 +99,7 @@ const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
 }
 
 
+// Vector-matrix multiplication
 const DenseVector DenseVector::matmul(const DenseMatrix& that, bool is_symmetric) const {
   if (_len != that.nrows()) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
@@ -111,9 +113,8 @@ const DenseVector DenseVector::matmul(const DenseMatrix& that, bool is_symmetric
   return that.matmul(*this);
 }
 
-// Dot product behaves similarly to matmul, but always returns a scalar value
-// (even when multiplying column vector with row vector or column vector with column vector etc.)
 
+// Dot (inner) product
 double DenseVector::dot(const DenseVector& that) const {
   if (_len != that._len) {
     throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
