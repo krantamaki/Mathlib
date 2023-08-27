@@ -3,7 +3,9 @@
 #include "../declare_lalib.hpp"
 
 
+#ifndef STRASSEN_THRESHOLD
 #define STRASSEN_THRESHOLD 1000
+#endif
 
 
 using namespace lalib;
