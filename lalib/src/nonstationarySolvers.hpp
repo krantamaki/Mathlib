@@ -67,23 +67,28 @@ namespace lalib {
     Vector r = b - A.matmul(x_k);
     Vector p = Vector(r);
 
+    double rsold = r.dot(r);
+
     for (int iter = 0; iter < max_iter; iter++) {
-      double alpha = (p.dot(r)) / (p.dot(A.matmul(p)));
+
+      Vector Ap = A.matmul(p);
       
+      double alpha = rsold / (p.dot(Ap));
+
       x_k += alpha * p;
-
-      Vector r_tmp = Vector(r);
-
-      r -= alpha * (A.matmul(p));
-      // p = r + ((r.dot(r)) / (r_tmp.dot(r_tmp))) * p;
-      p *= (r.dot(r)) / (r_tmp.dot(r_tmp));
-      p += r;
+      r -= alpha * Ap;
 
       double norm = r.norm();
+      double rsnew = norm * norm;
       
       if (norm < tol) {
 	return x_k;
       }
+
+      p *= (rsnew / rsold);
+      p += r;
+      
+      rsold = rsnew;
 
       if (iter % PRINT_INTERVAL == 0 && verbosity() >= 3) {
 	std::cout << _formIterMsg(__func__, iter, norm);
