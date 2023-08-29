@@ -11,16 +11,16 @@ using namespace std;
 
 
 void welcome(bool always_print) {
-  _infoMsg("####################################################", __func__, always_print);
-  _infoMsg("You are using a large sparse linear solver!", __func__, always_print);
+  _infoMsg("###########################################################", __func__, always_print);
+  _infoMsg("# You are using a solver for large sparse linear systems! #", __func__, always_print);
   ostringstream msgStream1;
-  msgStream1 << "This program was compiled on " << __DATE__ << " at " << __TIME__;
+  msgStream1 << "# This program was compiled on " << __DATE__ << std::setw(17) << "#";
   _infoMsg(msgStream1.str(), __func__, always_print);
   ostringstream msgStream2;
-  msgStream2 << "Running with " << omp_get_max_threads() << " openMP threads";
+  msgStream2 << "# Running with " << omp_get_max_threads() << " openMP threads" << std::setw(28) << "#";
   _infoMsg(msgStream2.str(), __func__, always_print);
-  _infoMsg("Starting the program!", __func__, always_print);
-  _infoMsg("####################################################", __func__, always_print);
+  _infoMsg("# Starting the program!                                   #", __func__, always_print);
+  _infoMsg("###########################################################", __func__, always_print);
 }
 
 
