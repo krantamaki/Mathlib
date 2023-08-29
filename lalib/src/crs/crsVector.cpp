@@ -26,7 +26,7 @@ CRSVector::CRSVector(const CRSVector& that) {
 // Zeros constructor
 CRSVector::CRSVector(int len) {
   if (len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   _len = len;
@@ -38,7 +38,7 @@ CRSVector::CRSVector(int len) {
 // Default value constructor
 CRSVector::CRSVector(int len, double init_val) {
   if (len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   _len = len;
@@ -50,11 +50,11 @@ CRSVector::CRSVector(int len, double init_val) {
 // Vector copying constructor
 CRSVector::CRSVector(int len, std::vector<double>& elems) {
   if (len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   
   if (len != (int)elems.size()) {
-    std::cout << "\nWARNING: Given length doesn't match with the size of the std::vector!" << "\n\n";
+    _warningMsg("Given length doesn't match with the size of the std::vector!", __func__);
   }
 
   _len = len;
@@ -75,12 +75,10 @@ CRSVector::CRSVector(int len, std::vector<double>& elems) {
 
 // Array copying constructor
 CRSVector::CRSVector(int len, double* elems) {
-  if (verbosity() >= 2) {
-    std::cout << "\n" << _formWarningMsg("Initializing a vector with double array might lead to undefined behaviour!", __func__) << "\n";
-  }
+  _warningMsg("Initializing a vector with double array might lead to undefined behaviour!", __func__);
 
   if (len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector length must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   _len = len;
@@ -101,14 +99,14 @@ CRSVector::CRSVector(const std::string& path, int offset, std::string format) {
   int nTokens = _numTokens(lastLine.str());
 
   if (format != ".dat") {
-    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not implemented!", __FILE__, __func__, __LINE__));
+    _errorMsg("Support for other formats than .dat not implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   
   if (nTokens == 3) {
     lastLine >> row >> col >> val;
 
     if (col > 1 && row > 1) {
-      throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
+      _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
     _len = row * col + 1 - offset;
@@ -142,7 +140,7 @@ CRSVector::CRSVector(const std::string& path, int offset, std::string format) {
     file.close();
   }
   else {
-    throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 }
 
@@ -155,7 +153,7 @@ CRSVector::CRSVector(const std::string& path, int offset, std::string format) {
 // Element-wise addition assignment
 CRSVector& CRSVector::operator+= (const CRSVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector lengths must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -176,7 +174,7 @@ const CRSVector CRSVector::operator+ (const CRSVector& that) const {
 // Element-wise subtraction assignment
 CRSVector& CRSVector::operator-= (const CRSVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector lengths must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   
   #pragma omp parallel for schedule(dynamic, 1)
@@ -195,7 +193,7 @@ const CRSVector CRSVector::operator- (const CRSVector& that) const {
 
 CRSVector& CRSVector::operator*= (const CRSVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector lengths must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -239,7 +237,7 @@ const CRSVector lalib::operator* (double scalar, const CRSVector& vector) {
 
 CRSVector& CRSVector::operator/= (const CRSVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vector lengths must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector lengths must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -278,7 +276,7 @@ const CRSVector CRSVector::operator/ (const double that) const {
 // Standard single value placement
 void CRSVector::place(int num, double val) {
   if (num < 0 || num >= _len) {
-    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   data[num] = val;
@@ -288,7 +286,7 @@ void CRSVector::place(int num, double val) {
 // Standard vector placement
 void CRSVector::place(int start, int end, CRSVector& vector) {
   if (_len < end - start || start < 0 || start >= end) {
-    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -301,7 +299,7 @@ void CRSVector::place(int start, int end, CRSVector& vector) {
 // Standard indexing method
 double CRSVector::operator() (int num) const {
   if (num < 0 || num >= _len) {
-    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   return data[num];
@@ -323,13 +321,11 @@ double CRSVector::get(int num) const {
 // Standard slicing method
 const CRSVector CRSVector::operator() (int start, int end) const {
   if (_len < end - start || start < 0 || start >= end) {
-    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (end >= _len) {
-    if (verbosity() >= 2) {
-      std::cout << "\n" << _formWarningMsg("End index out of bounds", __func__) << "\n";
-    }
+    _warningMsg("End index out of bounds", __func__);
     end = _len;
   }
 
@@ -403,11 +399,11 @@ bool CRSVector::isclose(const CRSVector& that, double tol) {
 // Vector saving
 bool CRSVector::save(std::string& path, int offset, std::string format) {
   if (_len <= 0) {
-    throw std::invalid_argument(_formErrorMsg("Cannot save an unitialized matrix!", __FILE__, __func__, __LINE__));
+    _errorMsg("Cannot save an unitialized matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (format != ".dat") {
-    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __func__, __LINE__));
+    _errorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   std::ofstream file(path);
@@ -431,7 +427,7 @@ bool CRSVector::save(std::string& path, int offset, std::string format) {
 // Convert CRSVector into std::vector
 std::vector<double> CRSVector::toVector() const {
   if (_len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   std::vector<double> ret = data;
@@ -443,7 +439,7 @@ std::vector<double> CRSVector::toVector() const {
 // Convert CRSVector object into a CRSMatrix object
 const CRSMatrix CRSVector::asCRSMatrix() const {
   if (_len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   CRSMatrix ret = CRSMatrix(_len, 1);  // By default a vector is considered as a column vector
@@ -459,7 +455,7 @@ const CRSMatrix CRSVector::asCRSMatrix() const {
 // Convert CRSVector into a double
 double CRSVector::asDouble() const {
   if (_len != 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must have just a single element!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must have just a single element!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   return this->operator() (0);
@@ -467,7 +463,7 @@ double CRSVector::asDouble() const {
 
 double CRSVector::norm(double p) const {
   if (_len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   double ret = 0.0;

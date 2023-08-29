@@ -2,24 +2,16 @@
 #define LALIB_HPP
 
 
-#include <iostream>
-#include <string>
 #include <vector>
 #include <tuple>
 #include <algorithm>
 #include <iterator>
-#include <string>
-#include <fstream>
-#include <sstream>
 #include <float.h>
 #include <time.h>
 #include <math.h>
 #include <omp.h>
 
-
-// Define useful constants
-
-#define BASE_VERBOSITY 1
+#include "../../utils/messaging.hpp"
 
 
 // Define a vector for SIMD commands. Currently set up to hold 4 doubles (for 256 bit vector registers)
@@ -87,52 +79,6 @@ inline std::stringstream _lastLine(const std::string& filepath) {
   file.close();
 
   return ret;
-}
-
-
-// Function that generates a more descriptive error message that can be thrown
-inline std::string _formErrorMsg(const std::string& msg, const char* file, const char* func, int line) {
-  std::ostringstream msgStream;
-
-  msgStream << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
-
-  return msgStream.str();
-}
-
-
-// Function that forms a warning message
-inline std::string _formWarningMsg(const std::string& msg, const char* func) {
-  std::ostringstream msgStream;
-
-  msgStream << func << ": " << "WARNING! " << msg << "\n";
-
-  return msgStream.str();
-}
-
-
-// Function that forms an iteration message
-inline std::string _formIterMsg(const char* func, int iter, double norm) {
-  std::ostringstream msgStream;
-
-  msgStream << func << ": " << "Iter " << iter << " - Norm " << norm << "\n";
-
-  return msgStream.str();
-}
-
-
-/*
- * Function that defines and returns the verbosity level
- * Note that verbosity will have 3 levels:
- *   1: Error messages
- *   2: Error and warning messages
- *   3: Everything else
- */
-inline int verbosity(int _verbosity = BASE_VERBOSITY) {
-  if (_verbosity < 0 || _verbosity > 3) {
-    _verbosity = 1;
-  }
-  static int set_verbosity = _verbosity;
-  return set_verbosity;
 }
 
 

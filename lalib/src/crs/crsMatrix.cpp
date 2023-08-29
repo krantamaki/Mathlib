@@ -28,7 +28,7 @@ CRSMatrix::CRSMatrix(const CRSMatrix& that) {
 // Zeroes constructor
 CRSMatrix::CRSMatrix(int rows, int cols) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   _ncols = cols;
@@ -42,7 +42,7 @@ CRSMatrix::CRSMatrix(int rows, int cols) {
 CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
 
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (init_val == 0.0) {
@@ -52,9 +52,8 @@ CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
     rowPtrs = std::vector<int>(rows + 1, 0);
   }
   else {
-    if (verbosity() >= 2) {
-      std::cout << _formWarningMsg("Full matrix allocation is not memory efficient! Consider using DenseMatrix class instead.", __func__);
-    }
+    _warningMsg("Full matrix allocation is not memory efficient! Consider using DenseMatrix class instead.", __func__);
+    
   
     _ncols = cols;
     _nrows = rows;
@@ -77,11 +76,10 @@ CRSMatrix::CRSMatrix(int rows, int cols, double init_val) {
 
 // Array copying constructor
 CRSMatrix::CRSMatrix(int rows, int cols, double* elems) {
-  if (verbosity() >= 2) {
-    std::cout << _formWarningMsg("Initializing a matrix with double array might lead to undefined behaviour!", __func__);
-  }
+  _warningMsg("Initializing a matrix with double array might lead to undefined behaviour!", __func__);
+
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   _ncols = cols;
@@ -106,13 +104,11 @@ CRSMatrix::CRSMatrix(int rows, int cols, double* elems) {
 // Vector copying constructor
 CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& elems) {
   if (cols < 1 || rows < 1) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must be positive!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (rows * cols != (int)elems.size()) {
-    if (verbosity() >= 2) {
-      std::cout << _formWarningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
-    }
+    _warningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
   } 
 
   _ncols = cols;
@@ -137,7 +133,7 @@ CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& elems) {
 // CRS array constructor
 CRSMatrix::CRSMatrix(int rows, int cols, const std::vector<double>& new_vals, const std::vector<int>& new_colInds, const std::vector<int>& new_rowPtrs) {
   if (*std::max_element(new_colInds.begin(), new_colInds.end()) >= cols || *std::max_element(new_rowPtrs.begin(), new_rowPtrs.end()) > (int)new_colInds.size() || *std::min_element(new_colInds.begin(), new_colInds.end()) < 0 || *std::min_element(new_rowPtrs.begin(), new_rowPtrs.end()) < 0) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   
   _ncols = cols;
@@ -156,7 +152,7 @@ CRSMatrix::CRSMatrix(const std::string& path, int offset, std::string format, bo
   double val;
 
   if (format != ".dat") {
-    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not implemented!", __FILE__, __func__, __LINE__));
+    _errorMsg("Support for other formats than .dat not implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // Read the last line of the file to get the dimensions of the matrix
@@ -239,7 +235,7 @@ CRSMatrix::CRSMatrix(const std::string& path, int offset, std::string format, bo
     file.close();
   }
   else {
-    throw std::invalid_argument(_formErrorMsg("Improper data file!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 }
 
@@ -250,7 +246,7 @@ CRSMatrix::CRSMatrix(const std::string& path, int offset, std::string format, bo
 // Element-wise addition assignment
 CRSMatrix& CRSMatrix::operator+= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -276,7 +272,7 @@ const CRSMatrix CRSMatrix::operator+ (const CRSMatrix& that) const {
 // Element-wise subtraction assignment
 CRSMatrix& CRSMatrix::operator-= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -302,7 +298,7 @@ const CRSMatrix CRSMatrix::operator- (const CRSMatrix& that) const {
 // Element-wise multiplication assignment
 CRSMatrix& CRSMatrix::operator*= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -351,7 +347,7 @@ const CRSMatrix lalib::operator* (double scalar, const CRSMatrix& matrix) {
 // Element-wise division assignment
 CRSMatrix& CRSMatrix::operator/= (const CRSMatrix& that) {
   if (_ncols != that._ncols || _nrows != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Matrix dimensions must match!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -377,7 +373,7 @@ const CRSMatrix CRSMatrix::operator/ (const CRSMatrix& that) const {
 // Standard single value placement
 void CRSMatrix::place(int row, int col, double val) {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // If value is not zero it needs to be placed into the matrix
@@ -485,7 +481,7 @@ void CRSMatrix::place(int row, int col, double val) {
 // Standard matrix placement
 void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMatrix& matrix) {
   if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
-    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   for (int row0 = 0; row0 < rowEnd - rowStart; row0++) {
@@ -511,13 +507,11 @@ void CRSMatrix::place(int rowStart, int rowEnd, int colStart, int colEnd, CRSMat
 // Standard column placement
 void CRSMatrix::placeCol(int col, CRSVector& vector) {
   if (col >= _ncols) {
-    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given column out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (vector.len() > _nrows) {
-    if (verbosity() >= 2) {
-      std::cout << _formWarningMsg("End index out of bounds", __func__);
-    }
+    _warningMsg("End index out of bounds", __func__);
   }
 
   for (int row = 0; row < _nrows; row++) {
@@ -539,13 +533,11 @@ void CRSMatrix::placeCol(int col, CRSVector& vector) {
 // Standard row placement
 void CRSMatrix::placeRow(int row, CRSVector& vector) {
   if (row >= _nrows) {
-    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given column out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (vector.len() > _ncols) {
-    if (verbosity() >= 2) {
-      std::cout << _formWarningMsg("End index out of bounds", __func__);
-    }
+    _warningMsg("End index out of bounds", __func__);
   }
 
   int old_n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
@@ -584,7 +576,7 @@ void CRSMatrix::placeRow(int row, CRSVector& vector) {
 // Standard indexing method
 double CRSMatrix::operator() (int row, int col) const {
   if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   int rowPtr = rowPtrs[row];
@@ -630,13 +622,11 @@ double CRSMatrix::get(int row, int col) const {
 // Standard indexing method
 const CRSMatrix CRSMatrix::operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
   if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (rowEnd > _nrows || colEnd > _ncols) {
-    if (verbosity() >= 2) {
-      std::cout << _formWarningMsg("End index out of bounds", __func__);
-    }
+    _warningMsg("End index out of bounds", __func__);
   }
 
   int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
@@ -668,7 +658,7 @@ const CRSMatrix CRSMatrix::get(int rowStart, int rowEnd, int colStart, int colEn
 // Access a column
 const CRSVector CRSMatrix::getCol(int col) const {
   if (col >= _ncols) {
-    throw std::invalid_argument(_formErrorMsg("Given column out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given column out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   CRSVector ret = CRSVector(_nrows);
@@ -685,7 +675,7 @@ const CRSVector CRSMatrix::getCol(int col) const {
 // Access a row
 const CRSVector CRSMatrix::getRow(int row) const {
   if (row >= _nrows) {
-    throw std::invalid_argument(_formErrorMsg("Given row out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given row out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   CRSVector ret = CRSVector(_ncols);
@@ -780,11 +770,11 @@ bool CRSMatrix::isclose(const CRSMatrix& that, double tol) {
 // Matrix saving
 bool CRSMatrix::save(std::string& path, int offset, std::string format) {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument(_formErrorMsg("Cannot save an unitialized matrix!", __FILE__, __func__, __LINE__));
+    _errorMsg("Cannot save an unitialized matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (format != ".dat") {
-    throw std::invalid_argument(_formErrorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __func__, __LINE__));
+    _errorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   std::ofstream file(path);
@@ -868,7 +858,7 @@ const CRSMatrix CRSMatrix::T() const {
 // Convert CRSMatrix into a double
 double CRSMatrix::asDouble() const {
   if (_ncols != 1 || _nrows != 1) {
-    throw std::invalid_argument(_formErrorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (vals.size() > 0) return vals[0];
@@ -880,7 +870,7 @@ double CRSMatrix::asDouble() const {
 // The Frobenius norm
 double CRSMatrix::norm() const {
   if (_ncols <= 0 || _nrows <= 0) {
-    throw std::invalid_argument(_formErrorMsg("Matrix must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Matrix must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   double ret = 0.0;

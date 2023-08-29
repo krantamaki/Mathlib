@@ -14,7 +14,7 @@ using namespace lalib;
 // Matrix-matrix multiplication in the (naive) textbook way
 const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // Allocate memory for the resulting matrix
@@ -55,7 +55,7 @@ const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
 // Wrapper for matrix-matrix multiplication
 const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
   }
 
   // 100 chosen as arbitrary threshold
@@ -70,7 +70,7 @@ const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
 // Matrix-vector multiplication
 const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
   if (_ncols != that.len()) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // Allocate memory for the resulting vector
@@ -102,7 +102,7 @@ const DenseVector DenseMatrix::matmul(const DenseVector& that) const {
 // Vector-matrix multiplication
 const DenseVector DenseVector::matmul(const DenseMatrix& that, bool is_symmetric) const {
   if (_len != that.nrows()) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (!is_symmetric) {
@@ -117,7 +117,7 @@ const DenseVector DenseVector::matmul(const DenseMatrix& that, bool is_symmetric
 // Dot (inner) product
 double DenseVector::dot(const DenseVector& that) const {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   vect_t sum = zeros;

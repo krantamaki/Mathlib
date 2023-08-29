@@ -16,26 +16,28 @@ map<string, string> solver::parse_file(const string& filepath) {
   
   while (file >> key >> value) {
     if (ret.find(key) != ret.end()) {
-      throw runtime_error("Key appears multiple times in config file!");
+      _errorMsg("Key appears multiple times in config file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
     
     if (find(valid_keys.begin(), valid_keys.end(), key) != valid_keys.end()) {
       ret.insert({key, value});
     }
     else {
-      cout << "\n" << "Improper key: " << key << " passed. Ignoring..." << "\n";
+      std::ostringstream msgStream1;
+      msgStream1 << "\n" << "Improper key: " << key << " passed. Ignoring...";
+      _infoMsg(msgStream1.str(), __func__);
     }
   }
 
   // Mandatory keys are 'coef_path', 'rhs_path' and 'ret_path' so check that those exists
   if (ret.find("coef_path") == ret.end()) {
-    throw runtime_error("Path to coefficient matrix not provided!");
+    _errorMsg("Path to coefficient matrix not provided!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   if (ret.find("rhs_path") == ret.end()) {
-    throw runtime_error("Path to right hand side vector not provided!");
+    _errorMsg("Path to right hand side vector not provided!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   if (ret.find("ret_path") == ret.end()) {
-    throw runtime_error("Path to where the solution is to be stored not provided!");
+    _errorMsg("Path to where the solution is to be stored not provided!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // Pass empty string to the missing arguments

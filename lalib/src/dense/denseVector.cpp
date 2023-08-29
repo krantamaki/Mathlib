@@ -95,7 +95,7 @@ DenseVector::DenseVector(int len, std::vector<double>& elems) {
   if (len > 0) {
     
     if (len != (int)elems.size()) {
-      std::cout << "\nWARNING: Given dimensions don't match with the size of the std::vector!" << "\n\n";
+      _warningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
     } 
 
     _len = len;
@@ -122,9 +122,7 @@ DenseVector::DenseVector(int len, std::vector<double>& elems) {
 
 // Array copying constructor
 DenseVector::DenseVector(int len, double* elems) {
-  if (verbosity() >= 2) {
-    std::cout << _formWarningMsg("Initializing a vector with double array might lead to undefined behaviour!", __func__);
-  }
+  _warningMsg("Initializing a vector with double array might lead to undefined behaviour!", __func__);
  
   if (len > 0) {
     _len = len;
@@ -159,7 +157,7 @@ DenseVector::~DenseVector() {
 // Element-wise addition assignment
 DenseVector& DenseVector::operator+= (const DenseVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__);
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -180,7 +178,7 @@ const DenseVector DenseVector::operator+ (const DenseVector& that) const {
 // Element-wise subtraction assignment
 DenseVector& DenseVector::operator-= (const DenseVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__);
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -201,7 +199,7 @@ const DenseVector DenseVector::operator- (const DenseVector& that) const {
 // Element-wise multiplication assignment
 DenseVector& DenseVector::operator*= (const DenseVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -250,7 +248,7 @@ const DenseVector operator* (double scalar, const DenseVector& vector) {
 // Element-wise division assignment
 DenseVector& DenseVector::operator/= (const DenseVector& that) {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   } 
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -271,7 +269,7 @@ const DenseVector DenseVector::operator/ (const DenseVector& that) const {
 // Scalar division
 const DenseVector DenseVector::operator/ (const double that) const {
   if (that == 0) {
-    throw std::invalid_argument(_formErrorMsg("Division by zero undefined!", __FILE__, __func__, __LINE__));
+    _errorMsg("Division by zero undefined!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   if (_len < 1) {
     return *this;
@@ -299,7 +297,7 @@ const DenseVector DenseVector::operator/ (const double that) const {
 // Standard single value placement
 void DenseVector::place(int num, double val) {
   if (_len < num) {
-    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   const int vect = num / VECT_ELEMS;
@@ -312,7 +310,7 @@ void DenseVector::place(int num, double val) {
 // Standard vector placement
 void DenseVector::place(int start, int end, DenseVector& vector) {
   if (_len < end - start) {
-    throw std::invalid_argument(_formErrorMsg("Given dimensions out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -325,7 +323,7 @@ void DenseVector::place(int start, int end, DenseVector& vector) {
 // Standard indexing method
 double DenseVector::operator() (int num) const {
   if (_len < num || num < 0) {
-    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   const int vect = num / VECT_ELEMS;
@@ -350,11 +348,11 @@ double DenseVector::get(int num) const {
 // Standard slicing method
 const DenseVector DenseVector::operator() (int start, int end) const {
   if (start >= end || start < 0) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions given!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (end >= _len) {
-    std::cout << _formWarningMsg("End index out of bounds", __func__);
+    _warningMsg("End index out of bounds", __func__);
   }
 
   end = end > _len ? _len : end;
@@ -378,7 +376,7 @@ const DenseVector DenseVector::get(int start, int end) const {
 // SIMD accessing method
 vect_t DenseVector::getSIMD(int num) const {
   if (num >= total_vects) {
-    throw std::invalid_argument(_formErrorMsg("Index out of bounds!", __FILE__, __func__, __LINE__));
+    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
   }
 
   return data[num];
@@ -483,7 +481,7 @@ bool DenseVector::isclose(const DenseVector& that, double tol) {
 // Convert DenseVector into std::vector
 std::vector<double> DenseVector::toVector() const {
   if (_len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
   }
 
   std::vector<double> ret;
@@ -500,7 +498,7 @@ std::vector<double> DenseVector::toVector() const {
 // Convert DenseVector object into a DenseMatrix object
 const DenseMatrix DenseVector::asDenseMatrix() const {
   if (_len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
     
   DenseMatrix ret = DenseMatrix(_len, 1);
@@ -516,7 +514,7 @@ const DenseMatrix DenseVector::asDenseMatrix() const {
 // Convert DenseVector into a double
 double DenseVector::asDouble() const {
   if (_len != 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be a 1 x 1 Vector!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be a 1 x 1 Vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   return this->operator() (0);
@@ -526,7 +524,7 @@ double DenseVector::asDouble() const {
 // The l_p norm
 double DenseVector::norm(double p) const {
   if (_len < 1) {
-    throw std::invalid_argument(_formErrorMsg("Vector must be initialized!", __FILE__, __func__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
   
   double ret = 0;

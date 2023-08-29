@@ -15,7 +15,7 @@ using namespace lalib;
 const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 
   if (_ncols != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // Create the matrix that will be filled
@@ -71,7 +71,7 @@ const CRSMatrix CRSMatrix::matmulNaive(const CRSMatrix& that) const {
 // Wrapper for matrix-matrix multiplication
 const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
   if (_ncols != that._nrows) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (_ncols > STRASSEN_THRESHOLD && _nrows > STRASSEN_THRESHOLD && that._ncols > STRASSEN_THRESHOLD) {
@@ -85,7 +85,7 @@ const CRSMatrix CRSMatrix::matmul(const CRSMatrix& that) const {
 // Efficient matrix-vector multiplication
 const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
   if (_ncols != that.len()) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   CRSVector ret = CRSVector(_nrows);
@@ -113,7 +113,7 @@ const CRSVector CRSMatrix::matmul(const CRSVector& that) const {
 // Vector-matrix multiplication
 const CRSVector CRSVector::matmul(const CRSMatrix& that, bool is_symmetric) const {
   if (_len != that.nrows()) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (is_symmetric) {
@@ -129,7 +129,7 @@ const CRSVector CRSVector::matmul(const CRSMatrix& that, bool is_symmetric) cons
 // Dot (inner) product
 double CRSVector::dot(const CRSVector& that) const {
   if (_len != that._len) {
-    throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+    _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   double ret = 0.0;

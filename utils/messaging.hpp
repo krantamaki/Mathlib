@@ -35,11 +35,11 @@ inline void _errorMsg(const std::string& msg, const char* file, const char* func
 
   msgStream << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
 
-  string msgString = msgStream.str();
+  std::string msgString = msgStream.str();
 
   std::cout << msgString << std::endl;
 
-  throw std::runtime_error(msgString)
+  throw std::runtime_error(msgString);
 }
 
 

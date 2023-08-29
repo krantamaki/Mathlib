@@ -7,10 +7,9 @@
 */
 
 
-#include <iostream>
-#include <fstream>
 #include <cstdio>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <tuple>
 #include <algorithm>
@@ -21,8 +20,12 @@
 #include <math.h>
 #include <omp.h>
 
+#include "../../utils/messaging.hpp"
+
 
 namespace solver {
+
+  void welcome(bool always_print);
   
   std::map<std::string, std::string> parse_file(const std::string& filepath);
   

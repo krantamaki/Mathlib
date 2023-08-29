@@ -46,18 +46,18 @@ namespace lalib {
   template<class Matrix, class Vector> Vector cgSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      throw std::invalid_argument(_formErrorMsg("Improper dimensions!", __FILE__, __func__, __LINE__));
+      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
     if (A.nrows() != A.ncols()) {
-      throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be square!", __FILE__, __func__, __LINE__));
+      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
     if (check_symmetric) {
       for (int row = 0; row < A.nrows(); row++) {
 	for (int col = 0; col < A.ncols(); col++) {
 	  if (A(row, col) != A(col, row)) {
-	    throw std::invalid_argument(_formErrorMsg("Coefficient matrix must be symmetric!", __FILE__, __func__, __LINE__));
+	    _errorMsg("Coefficient matrix must be symmetric!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	  }
 	}
       }
@@ -90,14 +90,13 @@ namespace lalib {
       
       rsold = rsnew;
 
-      if (iter % PRINT_INTERVAL == 0 && verbosity() >= 3) {
-	std::cout << _formIterMsg(__func__, iter, norm);
+      if (iter % PRINT_INTERVAL == 0) {
+        _iterMsg(iter, norm, __func__);
       }
     }
 
-    if (verbosity() >= 2) {
-      std::cout << _formWarningMsg("Solver did not converge to the wanted tolerance!", __func__);
-    }
+    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+
     
     return x_k;
   }
