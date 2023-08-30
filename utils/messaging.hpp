@@ -70,4 +70,16 @@ inline void _infoMsg(const std::string& msg, const char* func, bool always_print
   }
 }
 
+
+// Function that returns the used C++ standard
+inline std::string _getcppStandard() {
+  if (__cplusplus == 202101L) return "C++23";
+  else if (__cplusplus == 202002L) return "C++20";
+  else if (__cplusplus == 201703L) return "C++17";
+  else if (__cplusplus == 201402L) return "C++14";
+  else if (__cplusplus == 201103L) return "C++11";
+  else if (__cplusplus == 199711L) return "C++98";
+  else return "pre-standard C++.";
+}
+
 #endif

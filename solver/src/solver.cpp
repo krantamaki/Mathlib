@@ -2,7 +2,7 @@
 
 
 /*
-  Compile at root mathlib with: g++ -mavx -fopenmp -Wall solver/src/solver.cpp solver/src/parse_file.cpp solver/src/linsolve.cpp lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsVector.cpp lalib/src/crs/crsMatmul.cpp -lm -o solver.o
+  Compile at root mathlib with: g++ -std=c++17 -mavx -fopenmp -Wall solver/src/solver.cpp solver/src/parse_file.cpp solver/src/linsolve.cpp lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsVector.cpp lalib/src/crs/crsMatmul.cpp -lm -o solver.o
   Run with: ./solver.o <config file>
 */
 
@@ -11,16 +11,21 @@ using namespace std;
 
 
 void welcome(bool always_print) {
+  _infoMsg("", __func__, always_print);
   _infoMsg("###########################################################", __func__, always_print);
   _infoMsg("# You are using a solver for large sparse linear systems! #", __func__, always_print);
   ostringstream msgStream1;
   msgStream1 << "# This program was compiled on " << __DATE__ << std::setw(17) << "#";
   _infoMsg(msgStream1.str(), __func__, always_print);
   ostringstream msgStream2;
-  msgStream2 << "# Running with " << omp_get_max_threads() << " openMP threads" << std::setw(28) << "#";
+  msgStream2 << "# Using C++ standard " << _getcppStandard() << " (req. C++17 or later)" << std::setw(11) << "#";
   _infoMsg(msgStream2.str(), __func__, always_print);
+  ostringstream msgStream3;
+  msgStream3 << "# Running with " << omp_get_max_threads() << " openMP threads" << std::setw(28) << "#";
+  _infoMsg(msgStream3.str(), __func__, always_print);
   _infoMsg("# Starting the program!                                   #", __func__, always_print);
   _infoMsg("###########################################################", __func__, always_print);
+  _infoMsg("", __func__, always_print);
 }
 
 
