@@ -19,11 +19,18 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
 
   _infoMsg("Forming the right hand side vector ...", __func__);
   CRSVector b = CRSVector(rhs_path, 1);
+
+  // Scale the linear system by ||b||
+  // This should be made optional
+  double bnorm = b.norm();
+  b *= (1 / bnorm);
+  
   CRSVector x0;
   
   if (init_path != "") {
     _infoMsg("Forming the wanted initial guess ...", __func__);
     x0 = CRSVector(init_path, 1);
+    x0 *= (1 / bnorm);
   }
   else {
     _infoMsg("Forming a 0 vector as an initial guess ...", __func__);
@@ -72,6 +79,8 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   std::ostringstream msgStream4;
   msgStream4 << "Saving the solution as " << ret_path << " ...";
   _infoMsg(msgStream4.str(), __func__);
+
+  ret *= bnorm;
   
   ret.save(ret_path);
 
