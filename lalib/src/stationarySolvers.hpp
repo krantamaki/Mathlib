@@ -6,7 +6,7 @@
 
 
 #ifndef BASE_TOL
-#define BASE_TOL 0.000001
+#define BASE_TOL 0.0000001
 #endif
 #ifndef MAX_ITER
 #define MAX_ITER 1000
@@ -67,7 +67,7 @@ namespace lalib {
 
     Vector x_k = Vector(x_0);
 
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 1; iter <= max_iter; iter++) {
       Vector x_temp = Vector(A.nrows());
 
       // Go over all i in {0, ..., nrows}
@@ -98,6 +98,7 @@ namespace lalib {
       double norm = (A.matmul(x_k) - b).norm();
 
       if (norm < tol) {
+	_iterMsg(iter, norm, __func__);
 	return x_k;
       }
 
@@ -135,7 +136,7 @@ namespace lalib {
 
     Vector x_k = Vector(x_0);
 
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 1; iter <= max_iter; iter++) {
 
       // Go over all i in {0, ..., nrows}
       for (int row = 0; row < A.nrows(); row++) {
@@ -170,6 +171,7 @@ namespace lalib {
       double norm = (A.matmul(x_k) - b).norm();
 
       if (norm < tol) {
+	_iterMsg(iter, norm, __func__);
 	return x_k;
       }
 
@@ -210,7 +212,7 @@ namespace lalib {
 
     Vector x_k = Vector(x_0);
 
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 1; iter <= max_iter; iter++) {
 
       // Go over all i in {0, ..., nrows}
       for (int row = 0; row < A.nrows(); row++) {
@@ -245,6 +247,7 @@ namespace lalib {
       double norm = (A.matmul(x_k) - b).norm();
       
       if (norm < tol) {
+	_iterMsg(iter, norm, __func__);
 	return x_k;
       }
 

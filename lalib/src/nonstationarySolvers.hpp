@@ -6,7 +6,7 @@
 
 
 #ifndef BASE_TOL
-#define BASE_TOL 0.000001
+#define BASE_TOL 0.0000001
 #endif
 #ifndef MAX_ITER
 #define MAX_ITER 1000
@@ -69,7 +69,7 @@ namespace lalib {
 
     double rsold = r.dot(r);
 
-    for (int iter = 0; iter < max_iter; iter++) {
+    for (int iter = 1; iter <= max_iter; iter++) {
 
       Vector Ap = A.matmul(p);
       
@@ -82,6 +82,7 @@ namespace lalib {
       double rsnew = norm * norm;
       
       if (norm < tol) {
+	_iterMsg(iter, norm, __func__);
 	return x_k;
       }
 
