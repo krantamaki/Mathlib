@@ -1,0 +1,28 @@
+# This is a example configuration file for the linear linearSolver
+# The structure of the config file allows for single line comments with '#' character
+# Additionally, one needs to define the type of the input as seen below
+# Valid types are 'string', 'int', 'float', 'bool'
+
+### Mandatory information
+
+# Path to the coefficient matrix
+coef_path = string linearSolver/tests/poisson/linsys_a_ML3.dat
+# Path to the right hand side vector
+rhs_path = string linearSolver/tests/poisson/linsys_b_ML3.dat
+# Path where the solution should be stored
+ret_path = string ret.dat
+
+### Optional information
+
+# The method used to find the solution (defaults to cg)
+method = string cg
+# The verbosity (defaults to 3 i.e. output everything)
+verbosity = int 3
+# The tolerance to which solution is found (defaults to 1e-7)
+convergence_tolerance = float 1e-7
+
+### Unnecessary information
+
+# User can add any information they want, but if it's unnecessary it 
+# will end up ignored. Uncomment the line below to observe this
+# test_info = bool false
