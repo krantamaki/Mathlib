@@ -376,7 +376,7 @@ const DenseVector DenseVector::get(int start, int end) const {
 // SIMD accessing method
 vect_t DenseVector::getSIMD(int num) const {
   if (num >= total_vects) {
-    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
+    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   return data[num];
@@ -481,7 +481,7 @@ bool DenseVector::isclose(const DenseVector& that, double tol) {
 // Convert DenseVector into std::vector
 std::vector<double> DenseVector::toVector() const {
   if (_len < 1) {
-    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
+    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   std::vector<double> ret;

@@ -389,7 +389,7 @@ double DenseMatrix::get(int row, int col) const {
 // Squared bracket indexing method
 double DenseMatrix::operator[] (int num) const {
   if (num >= _ncols * _nrows) {
-    _errorMsg("Given index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
+    _errorMsg("Given index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   const int row = num / _ncols;
