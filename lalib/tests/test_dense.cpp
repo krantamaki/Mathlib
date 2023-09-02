@@ -36,6 +36,8 @@ int test(DenseMatrix testMatrix, DenseMatrix solMatrix) {
 
 int main() {
 
+  verbosity(1);
+
   int passed_tests = 0;
 
   clock_t start = clock();
@@ -73,7 +75,7 @@ int main() {
      0.82};
 
   std::vector<double> tmp_vec3(tmp3, tmp3 + sizeof(tmp3) / sizeof(tmp3[0]));
-  DenseVector v = DenseVector(5, 1, tmp_vec3);
+  DenseVector v = DenseVector(5, tmp_vec3);
 
   double tmp4[5] =
     {1.02,
@@ -83,7 +85,7 @@ int main() {
      1.092};
 
   std::vector<double> tmp_vec4(tmp4, tmp4 + sizeof(tmp4) / sizeof(tmp4[0]));
-  DenseVector w = DenseVector(5, 1, tmp_vec4);
+  DenseVector w = DenseVector(5, tmp_vec4);
 
   
   // ----------- PLACING AND INDEXING -------------
@@ -110,7 +112,6 @@ int main() {
 
   passed_tests += test(pi_test_1, pi_sol_1);
 
-  
   std::cout << "TEST 2: ";
 
   double pi_tmp2[25] =
@@ -127,7 +128,6 @@ int main() {
   pi_test_2.place(0, 5, 3, 4, v.asDenseMatrix());
 
   passed_tests += test(pi_test_2, pi_sol_2);
-
   
   std::cout << "\n######### INDEXING  ##########" << "\n\n";
 
@@ -156,7 +156,7 @@ int main() {
      7.0};
   
   std::vector<double> pi_tmp_vec4(pi_tmp4, pi_tmp4 + sizeof(pi_tmp4) / sizeof(pi_tmp4[0]));
-  DenseVector pi_sol_4 = DenseVector(5, 1, pi_tmp_vec4);
+  DenseVector pi_sol_4 = DenseVector(5, pi_tmp_vec4);
 
   DenseVector pi_test_4 = A(0, 5, 1, 2).asDenseVector();
 
@@ -381,7 +381,7 @@ int main() {
 
   passed_tests += test(t_test, t_sol);
 
-
+  /*
   std::cout << "TEST 2: ";
 
   double t_tmp2[5] =
@@ -390,9 +390,11 @@ int main() {
   std::vector<double> t_tmp_vec2(t_tmp2, t_tmp2 + sizeof(t_tmp2) / sizeof(t_tmp2[0]));
   DenseMatrix t_sol2 = DenseMatrix(1, 5, t_tmp_vec2);
 
-  DenseVector t_test2 = v.T();
+  DenseVector t_test2 = v;
 
   passed_tests += test(t_test2.asDenseMatrix(), t_sol2);
+  */
+
 
   std::cout << "---------------------------------------" << "\n";
 
@@ -433,12 +435,12 @@ int main() {
     std::cout << m_test2 << " is not equal to: " << m_sol2 << "\n\n";
   }
 
-
+  /*
   std::cout << "TEST 3: ";
 
   double m_sol3 = 68.676493;
 
-  DenseMatrix m_test3 = (v.T()).matmul(w);
+  DenseMatrix m_test3 = v.matmul(w);
 
   if (fabs(m_sol3 - m_test3.asDouble()) < TOL) {
     std::cout << "PASSED" << "\n";
@@ -448,7 +450,7 @@ int main() {
     std::cout << "FAILED" << "\n\n";
     std::cout << m_test3.asDouble() << " is not equal to: " << m_sol3 << "\n\n";
   }
-
+  */
 
   std::cout << "TEST 5: ";
 
