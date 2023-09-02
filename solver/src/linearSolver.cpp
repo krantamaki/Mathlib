@@ -10,7 +10,7 @@ using namespace std;
 using namespace lalib;
 
 
-void solver::solve(string coef_path, string rhs_path, string ret_path,
+void solver::linearSolver(string coef_path, string rhs_path, string ret_path,
 		   string init_path, string method, string verbosityString) {
 
   // Initialize the matrices
@@ -47,19 +47,27 @@ void solver::solve(string coef_path, string rhs_path, string ret_path,
   // Call the solver
   if (method == "" || method == "CG" || method == "cg") {
     _infoMsg("Calling the Conjugate Gradient method ...", __func__);
+    _infoMsg("", __func__);
     ret = cgSolve<CRSMatrix, CRSVector>(A, x0, b);
+    _infoMsg("", __func__);
   }
   else if (method == "Jacobi" || method == "jacobi" || method == "JACOBI") {
     _infoMsg("Calling the Jacobi method ...", __func__);
+    _infoMsg("", __func__);
     ret = jacobiSolve<CRSMatrix, CRSVector>(A, x0, b);
+    _infoMsg("", __func__);
   }
   else if (method == "Gauss-Seidel" || method == "gauss-seidel" || method == "GAUSS-SEIDEL" || method == "GS" || method == "gs"){
     _infoMsg("Calling the Gauss-Seidel method ...", __func__);
+    _infoMsg("", __func__);
     ret = gsSolve<CRSMatrix, CRSVector>(A, x0, b);
+    _infoMsg("", __func__);
   }
   else if (method == "SOR" || method == "sor" || method == "Sor"){
     _infoMsg("Calling the SOR method ...", __func__);
+    _infoMsg("", __func__);
     ret = sorSolve<CRSMatrix, CRSVector>(A, x0, b);
+    _infoMsg("", __func__);
   }
   else {
     _errorMsg("Improper solver provided!", __FILE__, __PRETTY_FUNCTION__, __LINE__);

@@ -22,6 +22,7 @@
 #include <omp.h>
 
 #include "../../utils/messaging.hpp"
+#include "../../utils/general.hpp"
 
 
 namespace solver {
@@ -30,7 +31,7 @@ namespace solver {
   
   std::map<std::string, std::string> parse_file(const std::string& filepath);
   
-  void solve(std::string coef_path, std::string rhs_path, std::string ret_path,
+  void linearSolver(std::string coef_path, std::string rhs_path, std::string ret_path,
 	     std::string init_path, std::string method, std::string verbosityString);
 }
 

@@ -12,6 +12,7 @@
 #include <omp.h>
 
 #include "../../utils/messaging.hpp"
+#include "../../utils/general.hpp"
 
 
 // Define a vector for SIMD commands. Currently set up to hold 4 doubles (for 256 bit vector registers)
@@ -79,22 +80,6 @@ inline std::stringstream _lastLine(const std::string& filepath) {
   file.close();
 
   return ret;
-}
-
-
-// Function that counts the number of (whitespace separated) tokens in a stringstream
-inline int _numTokens(const std::string& str) {
-  std::istringstream stream(str);
-  std::string token;
-  int count = 0;
-
-  while (std::getline(stream, token, ' ')) {
-    if (token != "") {
-      count++;
-    }
-  }
-
-  return count;
 }
 
 
