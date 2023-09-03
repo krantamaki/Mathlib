@@ -46,8 +46,16 @@ int main(int argc, char* argv[]) {
     _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
+  // Verify that the C++ standard is compatible
+  if (__cplusplus < 201703L) {
+    ostringstream errorMsg;
+    errorMsg << "Incompatible C++ version: " << _getcppStandard() << " used! Required C++17 or later.";
+    _errorMsg(errorMsg.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
+
   welcome(true);
 
+  // Parse the configuration file
   string config_path = argv[1];
 
   ostringstream msg1;
@@ -68,8 +76,10 @@ int main(int argc, char* argv[]) {
               {"max_iter", MAX_ITER},
               {"check_symmetric", false}};
 
+  // Parse the input
   map<string, any> config_map = parser::parser(config_path, req_keys, opt_keys);
 
+  // Set the verbosity
   int _verbosity = any_cast<int>(config_map["verbosity"]);
 
   ostringstream msg2;
@@ -78,9 +88,16 @@ int main(int argc, char* argv[]) {
 
   verbosity(_verbosity);
 
+  // Solve the system
   _infoMsg("Parsing complete. Advancing to the linear solver ...", __func__);
 
-  linearSolver::linearSolver(config_map);
+  bool converged = linearSolver::linearSolver(config_map);
 
-  _infoMsg("DONE", __func__);
+  // Check if convergence was reached
+  if (converged) _infoMsg("Convergence to wanted tolerance reached", __func__);
+  else _infoMsg("Convergence to wanted tolerance NOT reached!", __func__);
+
+  _infoMsg("DONE", __func__, true);
+
+  return converged ? 0 : 1;
 }

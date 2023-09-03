@@ -36,7 +36,7 @@ namespace linearSolver {
 
   void welcome(bool always_print);
   
-  void linearSolver(std::map<std::string, std::any> config_map);
+  bool linearSolver(std::map<std::string, std::any> config_map);
 }
 
 

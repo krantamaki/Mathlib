@@ -5,7 +5,7 @@ using namespace std;
 using namespace lalib;
 
 
-void linearSolver::linearSolver(map<string, any> config_map) {
+bool linearSolver::linearSolver(map<string, any> config_map) {
 
   // Get required values from configuration map
   string coef_path = any_cast<string>(config_map["coef_path"]);
@@ -18,6 +18,7 @@ void linearSolver::linearSolver(map<string, any> config_map) {
   double convergence_tolerance = any_cast<double>(config_map["convergence_tolerance"]);
   int max_iter = any_cast<int>(config_map["max_iter"]);
 
+  // Load coefficient matrix and rhs vector
   ostringstream msg1;
   msg1 << "Loading the coefficient matrix from " << coef_path;
   _infoMsg(msg1.str(), __func__);
@@ -35,6 +36,8 @@ void linearSolver::linearSolver(map<string, any> config_map) {
     b *= (1 / bnorm);
   }
   
+
+  // Define the initial guess
   CRSVector x0;
   
   if (init_path != "__undef__") {
@@ -49,6 +52,7 @@ void linearSolver::linearSolver(map<string, any> config_map) {
     x0 = CRSVector(b.len());
   }
 
+  // Solve the system
   std::ostringstream msgStream1;
   msgStream1 << "Solving a " << x0.len() << " dimensional system ...";
   _infoMsg(msgStream1.str(), __func__);
@@ -86,16 +90,20 @@ void linearSolver::linearSolver(map<string, any> config_map) {
   }
   auto end = chrono::high_resolution_clock::now();
 
+  // Compute the passed time
   auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
 
   std::ostringstream msgStream2;
   msgStream2 << "Time taken by the solver: " << duration.count() << " milliseconds";
   _infoMsg(msgStream2.str(), __func__);
 
+  // Compute the residual norm
+  double res_norm = (A.matmul(ret) - b).norm();
   std::ostringstream msgStream3;
-  msgStream3 << "Residual norm: " << (A.matmul(ret) - b).norm();
+  msgStream3 << "Residual norm: " << res_norm;
   _infoMsg(msgStream3.str(), __func__);
 
+  // Save the solution
   std::ostringstream msgStream4;
   msgStream4 << "Saving the solution as " << ret_path;
   _infoMsg(msgStream4.str(), __func__);
@@ -105,4 +113,7 @@ void linearSolver::linearSolver(map<string, any> config_map) {
   }
   
   ret.save(ret_path);
+
+  // Return boolean signifying if convergence to wanted tolerance was reached
+  return (res_norm < convergence_tolerance);
 }
