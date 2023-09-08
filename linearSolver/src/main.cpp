@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace linearSolver;
+using namespace utils;
 
 
 void linearSolver::welcome(bool always_print) {

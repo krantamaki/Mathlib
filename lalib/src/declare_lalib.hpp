@@ -6,6 +6,9 @@
 #include <tuple>
 #include <algorithm>
 #include <iterator>
+#include <cstdlib>
+#include <cmath>
+#include <complex>
 #include <float.h>
 #include <time.h>
 #include <math.h>
@@ -14,6 +17,9 @@
 #include "../../utils/messaging.hpp"
 #include "../../utils/general.hpp"
 
+
+// Hardcoded value for the SIMD vector size
+#define SIMD_SIZE 256
 
 // Define a vector for SIMD commands. Currently set up to hold 4 doubles (for 256 bit vector registers)
 

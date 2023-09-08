@@ -4,6 +4,7 @@
 
 
 using namespace lalib;
+using namespace utils;
 
 
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
@@ -339,6 +340,8 @@ const CRSVector CRSVector::operator() (int start, int end) const {
   return ret;
 }
 
+
+// Named slicing method
 const CRSVector CRSVector::get(int start, int end) const {
   return this->operator() (start, end);
 }

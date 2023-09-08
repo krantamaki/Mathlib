@@ -9,6 +9,7 @@
 
 
 using namespace lalib;
+using namespace utils;
 
 
 // Matrix-matrix multiplication in the (naive) textbook way
@@ -55,7 +56,7 @@ const DenseMatrix DenseMatrix::matmulNaive(const DenseMatrix& that) const {
 // Wrapper for matrix-matrix multiplication
 const DenseMatrix DenseMatrix::matmul(const DenseMatrix& that) const {
   if (_ncols != that._nrows) {
-    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__));
+    _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // 100 chosen as arbitrary threshold

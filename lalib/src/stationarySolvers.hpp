@@ -22,6 +22,9 @@
 #endif
 
 
+using namespace utils;
+
+
 /*
   Stationary methods are iterative methods that can be expressed as [1]:
     

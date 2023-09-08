@@ -19,6 +19,9 @@
 #endif
 
 
+using namespace utils;
+
+
 /*
   Methods that use values that change in each iteration, e.g. the residuals, are 
   nonstationary. Some such methods are implemented here.

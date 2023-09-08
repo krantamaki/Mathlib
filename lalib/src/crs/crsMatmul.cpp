@@ -9,6 +9,7 @@
 
 
 using namespace lalib;
+using namespace utils;
 
 
 // Matrix-matrix multiplication in the (naive) textbook way

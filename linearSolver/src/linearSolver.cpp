@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace lalib;
+using namespace utils;
 
 
 bool linearSolver::linearSolver(map<string, any> config_map) {

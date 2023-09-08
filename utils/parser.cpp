@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace parser;
+using namespace utils;
 
 
 int parser::validate_int_input(const std::string& input, int fileLine) {
@@ -139,4 +140,5 @@ map<string, any> parser::parser(const string& filepath, const vector<string>& re
 
   return ret;
 }
+
 
