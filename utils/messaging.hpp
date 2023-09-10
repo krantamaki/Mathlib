@@ -12,6 +12,10 @@
 #define BASE_VERBOSITY 3
 #endif
 
+#ifndef EXIT_WITH_WARNING
+#define EXIT_WITH_WARNING false
+#endif
+
 
 namespace utils {
 
@@ -31,14 +35,18 @@ namespace utils {
   }
 
 
+  inline bool exit_with_warning(bool _exit_flag = EXIT_WITH_WARNING) {
+    static bool exit_flag = _exit_flag;
+    return exit_flag;
+  } 
+
+
   // Function that generates and throws a more descriptive error message
   inline void _errorMsg(const std::string& msg, const char* file, const char* func, int line) {
     std::ostringstream msgStream;
 
     msgStream << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
-
     std::string msgString = msgStream.str();
-
     std::cout << msgString << std::endl;
 
     throw std::runtime_error(msgString);
@@ -46,7 +54,19 @@ namespace utils {
 
 
   // Function that forms and prints a warning message
-  inline void _warningMsg(const std::string& msg, const char* func) {
+  inline void _warningMsg(const std::string& msg, const char* func, bool always_print=false) {
+    if (always_print) {
+      std::cout << func << ": " << "WARNING! " << msg << std::endl;
+    }
+    if (exit_with_warning()) {
+      std::ostringstream msgStream;
+      
+      msgStream << func << ": " << "WARNING! " << msg << " - EXITING";
+      std::string msgString = msgStream.str();
+      std::cout << msgString << std::endl;
+
+      throw std::runtime_error(msgString);
+    }
     if (verbosity() > 1) {
       std::cout << func << ": " << "WARNING! " << msg << std::endl;
     }
