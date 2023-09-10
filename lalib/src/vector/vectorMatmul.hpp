@@ -3,7 +3,7 @@
 
 
 #include "vector_impl.hpp"
-#include "../dense/denseMatrix.hpp"
+#include "../dense/DenseMatrix.hpp"
 #include "../declare_lalib.hpp"
 
 
