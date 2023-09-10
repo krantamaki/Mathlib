@@ -1,4 +1,8 @@
-#include "vector.hpp"
+#ifndef VECTOR_IMPL_HPP
+#define VECTOR_IMPL_HPP
+
+
+#include "vector_decl.hpp"
 #include "../declare_lalib.hpp"
 
 
@@ -612,7 +616,7 @@ std::ostream& lalib::operator<<(std::ostream& os, Vector<type, vectorize>& v) {
   os << "[";
   for (int i = 0; i < v.len(); i++) {
     if (i > 0) {
-      os << std::endl;
+      os << std::endl << ' ';
     }
     os << v(i);
   }
@@ -620,3 +624,6 @@ std::ostream& lalib::operator<<(std::ostream& os, Vector<type, vectorize>& v) {
   
   return os;
 }
+
+
+#endif
