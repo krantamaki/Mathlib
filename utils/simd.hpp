@@ -21,7 +21,8 @@ namespace utils {
   template <class type, bool vectorize>
   auto _choose_simd() {
     if constexpr (vectorize) {
-      return simd<type>::data;
+      typename simd<type>::data a;
+      return a;
     }
     else {
       type a;
