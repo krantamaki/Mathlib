@@ -2,6 +2,8 @@
 #define LALIB_HPP
 
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 #include <tuple>
 #include <algorithm>
@@ -16,31 +18,7 @@
 
 #include "../../utils/messaging.hpp"
 #include "../../utils/general.hpp"
-
-
-// Hardcoded value for the SIMD vector size
-#define SIMD_SIZE 256
-
-// Define a vector for SIMD commands. Currently set up to hold 4 doubles (for 256 bit vector registers)
-
-#define VECT_ELEMS 4
-typedef double vect_t __attribute__ ((__vector_size__ (VECT_ELEMS * sizeof(double))));
-
-// Constant expression that should define a wanted sized SIMD vector with only zeros
-constexpr vect_t zeros = { };
-
-
-// Generally useful functions
-
-// Function that sums together the elements in SIMD vector
-inline double _reduce(vect_t vector) {
-  double ret = 0.0;
-  for (int i = 0; i < VECT_ELEMS; i++) {
-    ret += vector[i];
-  }
-
-  return ret;
-}
+#include "../../utils/simd.hpp"
 
 
 // Function for "dividing up" two integers
