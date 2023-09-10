@@ -50,8 +50,8 @@ namespace lalib {
       int var_size = SIMD_SIZE / (int)sizeof(type);
 
 
-      // Function that sums together the elements in a SIMD vector
-      inline type _reduce(var_t val) {
+      // Const function that sums together the elements in a SIMD vector
+      inline const type _reduce(const var_t val) const {
 
         // Check if the implementation is vectorized at compile time
         if constexpr (!vectorize) return val;
@@ -66,8 +66,8 @@ namespace lalib {
         }        
       }
 
-      // Function that fills the SIMD vector with wanted value
-      inline var_t _fill(type val) {
+      // Const function that fills the SIMD vector with wanted value
+      inline const var_t _fill(const type val) const {
 
         // Check if the implementation is vectorized at compile time
         if constexpr (!vectorize) return val;

@@ -23,10 +23,10 @@ const DenseMatrix<type, vectorize> DenseMatrix<type, vectorize>::matmulNaive(con
     _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
-  DenseMatrix ret = DenseMatrix(_nrows, that._ncols);
+  DenseMatrix<type, vectorize> ret = DenseMatrix<type, vectorize>(_nrows, that._ncols);
 
   // Transpose that for linear memory reads
-  DenseMatrix that_T = that.T();
+  DenseMatrix<type, vectorize> that_T = that.T();
 
   if constexpr (vectorize) {
     #pragma omp parallel for schedule(dynamic, 1)
@@ -97,7 +97,7 @@ const Vector<type, vectorize> DenseMatrix<type, vectorize>::matmul(const Vector<
     _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
-  Vector ret = Vector(_nrows);
+  Vector<type, vectorize> ret = Vector<type, vectorize>(_nrows);
 
   if constexpr (vectorize) {
     #pragma omp parallel for schedule(dynamic, 1)
@@ -111,9 +111,7 @@ const Vector<type, vectorize> DenseMatrix<type, vectorize>::matmul(const Vector<
 
       type val = t_zero;
       for (int elem = 0; elem < (that.len() % var_size); elem++) {
-        
-
-        val += data[_vects_per_row * (row + 1) - 1][elem] * *(var_t*)that.getSIMD(_vects_per_row - 1)[elem];
+        val += data[_vects_per_row * (row + 1) - 1][elem] * (*(var_t*)that.getSIMD(_vects_per_row - 1))[elem];
       }
 
       val += _reduce(sum);

@@ -19,7 +19,7 @@ const Vector<type, vectorize> Vector<type, vectorize>::matmul(const DenseMatrix<
   }
 
   if (!is_symmetric) {
-    DenseMatrix that_T = that.T();
+    DenseMatrix<type, vectorize> that_T = that.T();
     return that_T.matmul(*this);
   }
 
