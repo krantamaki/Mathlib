@@ -165,11 +165,13 @@ DenseMatrix<type, vectorize>& DenseMatrix<type, vectorize>::operator+= (const De
 
   if constexpr (vectorize) {
     #pragma omp parallel for schedule(dynamic, 1)
-    for (int vect = 0; vect < _total_vects - 1; vect++) {
-      data[vect] = data[vect] + that.data[vect];
-    }
-    for (int elem = 0; elem < (_nrows * _ncols) % var_size; elem++) {
-      data[_total_vects - 1][elem] = data[_total_vects - 1][elem] + that.data[_total_vects - 1][elem];
+    for (int row = 0; row < _nrows; row++) {
+      for (int vect = 0; vect < _vects_per_row - 1; vect++) {
+        data[vect] = data[vect] + that.data[vect];
+      }
+      for (int elem = 0; elem < _ncols % var_size; elem++) {
+        data[(row + 1) * _vects_per_row - 1][elem] = data[(row + 1) * _vects_per_row - 1][elem] + that.data[(row + 1) * _vects_per_row - 1][elem];
+      }
     }
   }
   else {
@@ -201,11 +203,13 @@ DenseMatrix<type, vectorize>& DenseMatrix<type, vectorize>::operator-= (const De
 
   if constexpr (vectorize) {
     #pragma omp parallel for schedule(dynamic, 1)
-    for (int vect = 0; vect < _total_vects - 1; vect++) {
-      data[vect] = data[vect] - that.data[vect];
-    }
-    for (int elem = 0; elem < (_nrows * _ncols) % var_size; elem++) {
-      data[_total_vects - 1][elem] = data[_total_vects - 1][elem] - that.data[_total_vects - 1][elem];
+    for (int row = 0; row < _nrows; row++) {
+      for (int vect = 0; vect < _vects_per_row - 1; vect++) {
+        data[vect] = data[vect] - that.data[vect];
+      }
+      for (int elem = 0; elem < _ncols % var_size; elem++) {
+        data[(row + 1) * _vects_per_row - 1][elem] = data[(row + 1) * _vects_per_row - 1][elem] - that.data[(row + 1) * _vects_per_row - 1][elem];
+      }
     }
   }
   else {
@@ -237,11 +241,13 @@ DenseMatrix<type, vectorize>& DenseMatrix<type, vectorize>::operator*= (const De
 
   if constexpr (vectorize) {
     #pragma omp parallel for schedule(dynamic, 1)
-    for (int vect = 0; vect < _total_vects - 1; vect++) {
-      data[vect] = data[vect] * that.data[vect];
-    }
-    for (int elem = 0; elem < (_nrows * _ncols) % var_size; elem++) {
-      data[_total_vects - 1][elem] = data[_total_vects - 1][elem] * that.data[_total_vects - 1][elem];
+    for (int row = 0; row < _nrows; row++) {
+      for (int vect = 0; vect < _vects_per_row - 1; vect++) {
+        data[vect] = data[vect] * that.data[vect];
+      }
+      for (int elem = 0; elem < _ncols % var_size; elem++) {
+        data[(row + 1) * _vects_per_row - 1][elem] = data[(row + 1) * _vects_per_row - 1][elem] * that.data[(row + 1) * _vects_per_row - 1][elem];
+      }
     }
   }
   else {
@@ -275,11 +281,13 @@ DenseMatrix<type, vectorize>& DenseMatrix<type, vectorize>::operator*= (type tha
     var_t mult = _fill(that);
 
     #pragma omp parallel for schedule(dynamic, 1)
-    for (int vect = 0; vect < _total_vects - 1; vect++) {
-      data[vect] = data[vect] * mult;
-    }
-    for (int elem = 0; elem < (_nrows * _ncols) % var_size; elem++) {
-      data[_total_vects - 1][elem] = data[_total_vects - 1][elem] * that;
+    for (int row = 0; row < _nrows; row++) {
+      for (int vect = 0; vect < _vects_per_row - 1; vect++) {
+        data[vect] = data[vect] * mult;
+      }
+      for (int elem = 0; elem < _ncols % var_size; elem++) {
+        data[(row + 1) * _vects_per_row - 1][elem] = data[(row + 1) * _vects_per_row - 1][elem] * that;
+      }
     }
   }
   else {
@@ -318,11 +326,13 @@ DenseMatrix<type, vectorize>& DenseMatrix<type, vectorize>::operator/= (const De
 
   if constexpr (vectorize) {
     #pragma omp parallel for schedule(dynamic, 1)
-    for (int vect = 0; vect < _total_vects - 1; vect++) {
-      data[vect] = data[vect] / that.data[vect];
-    }
-    for (int elem = 0; elem < (_nrows * _ncols) % var_size; elem++) {
-      data[_total_vects - 1][elem] = data[_total_vects - 1][elem] / that.data[_total_vects - 1][elem];
+    for (int row = 0; row < _nrows; row++) {
+      for (int vect = 0; vect < _vects_per_row - 1; vect++) {
+        data[vect] = data[vect] / that.data[vect];
+      }
+      for (int elem = 0; elem < _ncols % var_size; elem++) {
+        data[(row + 1) * _vects_per_row - 1][elem] = data[(row + 1) * _vects_per_row - 1][elem] / that.data[(row + 1) * _vects_per_row - 1][elem];
+      }
     }
   }
   else {
@@ -359,11 +369,13 @@ DenseMatrix<type, vectorize>& DenseMatrix<type, vectorize>::operator/= (type tha
     var_t div = _fill(that);
 
     #pragma omp parallel for schedule(dynamic, 1)
-    for (int vect = 0; vect < _total_vects - 1; vect++) {
-      data[vect] = data[vect] / div;
-    }
-    for (int elem = 0; elem < (_nrows * _ncols) % var_size; elem++) {
-      data[_total_vects - 1][elem] = data[_total_vects - 1][elem] / that;
+    for (int row = 0; row < _nrows; row++) {
+      for (int vect = 0; vect < _vects_per_row - 1; vect++) {
+        data[vect] = data[vect] / div;
+      }
+      for (int elem = 0; elem < _ncols % var_size; elem++) {
+        data[(row + 1) * _vects_per_row - 1][elem] = data[(row + 1) * _vects_per_row - 1][elem] / that;
+      }
     }
   }
   else {
