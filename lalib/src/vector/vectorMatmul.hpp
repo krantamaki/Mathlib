@@ -3,7 +3,7 @@
 
 
 #include "vector_impl.hpp"
-#include "../dense/DenseMatrix.hpp"
+#include "../matrix/Matrix.hpp"
 #include "../declare_lalib.hpp"
 
 
@@ -12,19 +12,21 @@ using namespace utils;
 
 
 // Dense vector-matrix multiplication
-template <class type, bool vectorize> 
-const Vector<type, vectorize> Vector<type, vectorize>::matmul(const DenseMatrix<type, vectorize>& that, bool is_symmetric) const {
+/*
+template <class type, bool vectorize, bool sparse> 
+const Vector<type, vectorize> Vector<type, vectorize>::matmul(const Matrix<type, vectorize, sparse>& that, bool is_symmetric) const {
   if (_len != that.nrows()) {
     _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   if (!is_symmetric) {
-    DenseMatrix<type, vectorize> that_T = that.T();
+    Matrix that_T = that.T();
     return that_T.matmul(*this);
   }
 
   return that.matmul(*this);
 }
+*/
 
 
 // Dot (inner) product

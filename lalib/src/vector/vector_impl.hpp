@@ -139,6 +139,65 @@ Vector<type, vectorize>::Vector(int len, std::vector<type>& elems) {
 }
 
 
+// Load from file constructor
+template <class type, bool vectorize>
+Vector<type, vectorize>::Vector(const std::string& path, int offset, std::string format) {
+  // Variables to read the line contents to
+  int row, col;
+  type val;
+  
+  // Read the last line of the file to get the dimensions of the matrix
+  std::stringstream lastLine = _lastLine(path);
+
+  int nTokens = _numTokens(lastLine.str());
+
+  if (format != ".dat") {
+    _errorMsg("Support for other formats than .dat not implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
+  
+  if (nTokens == 3) {
+    lastLine >> row >> col >> val;
+
+    if (col > 1 && row > 1) {
+      _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    }
+
+    _len = row * col + 1 - offset;
+
+    data = std::vector<var_t>(_len, v_zero);
+
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
+
+    while (file >> row >> col >> val) {
+      this->place(row > col ? row - offset : col - offset, val);
+    }
+    
+    file.close();
+  }
+
+  else if (nTokens == 2) {
+    lastLine >> row  >> val;
+    
+    _len = row + 1 - offset;
+
+    data = std::vector<var_t>(_len, v_zero);
+
+    // Start reading the lines from the beginning of the file
+    std::ifstream file(path);
+
+    while (file >> row >> val) {
+      this->place(row - offset, val);
+    }
+
+    file.close();
+  }
+  else {
+    _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
+}
+
+
 // ---------------------OVERLOADED BASIC MATH OPERATORS------------------------
 
 
@@ -172,7 +231,7 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator+= (const Vector<type,
 // Element-wise addition
 template <class type, bool vectorize> 
 const Vector<type, vectorize> Vector<type, vectorize>::operator+ (const Vector<type, vectorize>& that) const {
-  return Vector(*this) += that;
+  return Vector<type, vectorize>(*this) += that;
 }
 
 
@@ -206,7 +265,7 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator-= (const Vector<type,
 // Element-wise subtraction
 template <class type, bool vectorize> 
 const Vector<type, vectorize> Vector<type, vectorize>::operator- (const Vector<type, vectorize>& that) const {
-  return Vector(*this) -= that;
+  return Vector<type, vectorize>(*this) -= that;
 }
 
 
@@ -240,7 +299,7 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator*= (const Vector<type,
 // Element-wise multiplication
 template <class type, bool vectorize> 
 const Vector<type, vectorize> Vector<type, vectorize>::operator* (const Vector<type, vectorize>& that) const {
-  return Vector(*this) *= that;
+  return Vector<type, vectorize>(*this) *= that;
 }
 
 
@@ -276,14 +335,14 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator*= (type that) {
 // Scalar (right) multiplication
 template <class type, bool vectorize> 
 const Vector<type, vectorize> Vector<type, vectorize>::operator* (const type that) const {
-  return Vector(*this) *= that;  
+  return Vector<type, vectorize>(*this) *= that;  
 }
 
 
 // Scalar (left) multiplication
 template <class type, bool vectorize> 
-const Vector<type, vectorize> operator* (type scalar, const Vector<type, vectorize>& vector) {
-  return Vector(vector) *= scalar;
+const Vector<type, vectorize> lalib::operator* (type scalar, const Vector<type, vectorize>& vector) {
+  return Vector<type, vectorize>(vector) *= scalar;
 }
 
 
@@ -317,7 +376,7 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator/= (const Vector<type,
 // Element-wise division
 template <class type, bool vectorize> 
 const Vector<type, vectorize> Vector<type, vectorize>::operator/ (const Vector<type, vectorize>& that) const {
-  return Vector(*this) /= that;
+  return Vector<type, vectorize>(*this) /= that;
 }
 
 
@@ -356,7 +415,7 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator/= (type that) {
 // Scalar division
 template <class type, bool vectorize>  
 const Vector<type, vectorize> Vector<type, vectorize>::operator/ (const type that) const {
-  return Vector(*this) /= that;
+  return Vector<type, vectorize>(*this) /= that;
 }
 
 
@@ -441,7 +500,7 @@ const Vector<type, vectorize> Vector<type, vectorize>::operator() (int start, in
     end = _len;
   }
 
-  Vector ret = Vector(end - start);
+  Vector ret = Vector<type, vectorize>(end - start);
 
   #pragma omp parallel for schedule(dynamic, 1)
   for (int i = 0; i < end - start; i++) {

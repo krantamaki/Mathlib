@@ -10,9 +10,8 @@ using namespace utils;
 
 namespace lalib {
 
-  class CRSMatrix;  // To avoid circular dependencies
-  template <class type, bool vectorize> 
-  class DenseMatrix;  // To avoid circular dependencies
+  template <class type, bool vectorize, bool sparse> 
+  class Matrix;  // To avoid circular dependencies
 
   /**
    * @brief General vector class 
@@ -558,7 +557,7 @@ namespace lalib {
        *
        * @return The resulting Vector object
        */
-      const Vector matmul(const DenseMatrix<type, vectorize>& that, bool is_symmetric=false) const;
+      // const Vector matmul(const Matrix<type, vectorize>& that, bool is_symmetric=false) const;
 
       /**
        * @brief Dot (inner) product
