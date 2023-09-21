@@ -3,6 +3,8 @@
 
 
 #include "declare_lalib.hpp"
+#include "vector/Vector.hpp"
+#include "matrix/Matrix.hpp"
 
 
 #ifndef BASE_TOL
@@ -46,7 +48,8 @@ namespace lalib {
     the traditional formulation for conjugate gradient method [2].
   */
 
-  template<class Matrix, class Vector> Vector cgSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
+  template<class type, bool vectorize, bool sparse> 
+  Vector<type, vectorize> cgSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -58,35 +61,35 @@ namespace lalib {
 
     if (check_symmetric) {
       for (int row = 0; row < A.nrows(); row++) {
-	for (int col = 0; col < A.ncols(); col++) {
-	  if (A(row, col) != A(col, row)) {
-	    _errorMsg("Coefficient matrix must be symmetric!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	  }
-	}
+	      for (int col = 0; col < A.ncols(); col++) {
+	        if (A(row, col) != A(col, row)) {
+	          _errorMsg("Coefficient matrix must be symmetric!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	        }
+	      } 
       }
     }
 
-    Vector x_k = Vector(x_0);
+    Vector x_k = Vector<type, vectorize>(x_0);
     Vector r = b - A.matmul(x_k);
-    Vector p = Vector(r);
+    Vector p = Vector<type, vectorize>(r);
 
-    double rsold = r.dot(r);
+    type rsold = r.dot(r);
 
     for (int iter = 1; iter <= max_iter; iter++) {
 
       Vector Ap = A.matmul(p);
       
-      double alpha = rsold / (p.dot(Ap));
+      type alpha = rsold / (p.dot(Ap));
 
       x_k += alpha * p;
       r -= alpha * Ap;
 
-      double norm = r.norm();
-      double rsnew = norm * norm;
+      type norm = r.norm();
+      type rsnew = norm * norm;
       
       if (norm < tol) {
-	_iterMsg(iter, norm, __func__);
-	return x_k;
+	      _iterMsg(iter, norm, __func__);
+	      return x_k;
       }
 
       p *= (rsnew / rsold);

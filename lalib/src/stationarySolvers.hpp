@@ -3,6 +3,8 @@
 
 
 #include "declare_lalib.hpp"
+#include "vector/Vector.hpp"
+#include "matrix/Matrix.hpp"
 
 
 #ifndef BASE_TOL
@@ -58,7 +60,8 @@ namespace lalib {
     Which is implemented below
   */
 
-  template<class Matrix, class Vector> Vector jacobiSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
+  template<class type, bool vectorize, bool sparse>
+  Vector<type, vectorize> jacobiSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -68,41 +71,41 @@ namespace lalib {
       _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
-    Vector x_k = Vector(x_0);
+    Vector x_k = Vector<type, vectorize>(x_0);
 
     for (int iter = 1; iter <= max_iter; iter++) {
-      Vector x_temp = Vector(A.nrows());
+      Vector x_temp = Vector<type, vectorize>(A.nrows());
 
       // Go over all i in {0, ..., nrows}
       for (int row = 0; row < A.nrows(); row++) {
 
-	// Compute the sum s = sum_{j != i} a_{i, j} * x_j
-	double s = 0.0;
-	for (int col = 0; col < A.ncols(); col++) {
-	  if (col == row) continue;
-	  s += A(row, col) * x_k(col);
-	}
+        // Compute the sum s = sum_{j != i} a_{i, j} * x_j
+        type s = { };
+        for (int col = 0; col < A.ncols(); col++) {
+          if (col == row) continue;
+          s += A(row, col) * x_k(col);
+        }
 
-	// Compute the new value of x_i = (b_i - s) / a_{i, i}
-	double a_ii = A(row, row);
-	if (a_ii != 0.0) {
-	  s = (b(row) - s) / a_ii;
-	}
-	else {
-	  _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+        // Compute the new value of x_i = (b_i - s) / a_{i, i}
+        type a_ii = A(row, row);
+        if (a_ii != 0.0) {
+          s = (b(row) - s) / a_ii;
+        }
+        else {
+          _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
 
-	// Update the vector x
-	x_temp.place(row, s);
+        // Update the vector x
+        x_temp.place(row, s);
       }
 
       x_k = x_temp;
 
-      double norm = (A.matmul(x_k) - b).norm();
+      type norm = (A.matmul(x_k) - b).norm();
 
       if (norm < tol) {
-	_iterMsg(iter, norm, __func__);
-	return x_k;
+        _iterMsg(iter, norm, __func__);
+        return x_k;
       }
 
       if (iter % PRINT_INTERVAL == 0) {
@@ -127,7 +130,8 @@ namespace lalib {
     fundamentally serial nature.
   */
 
-  template<class Matrix, class Vector> Vector gsSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
+  template<class type, bool vectorize, bool sparse>
+  Vector<type, vectorize> gsSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -137,45 +141,45 @@ namespace lalib {
       _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
-    Vector x_k = Vector(x_0);
+    Vector x_k = Vector<type, vectorize>(x_0);
 
     for (int iter = 1; iter <= max_iter; iter++) {
 
       // Go over all i in {0, ..., nrows}
       for (int row = 0; row < A.nrows(); row++) {
 
-	// Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
-	double s_l = 0.0;
-	for (int col = 0; col < row; col++) {
-	  s_l += A(row, col) * x_k(col);
-	}
+        // Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
+        type s_l = { };
+        for (int col = 0; col < row; col++) {
+          s_l += A(row, col) * x_k(col);
+        }
 
-	// Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
-	double s_g = 0.0;
-	for (int col = row + 1; col < A.ncols(); col++) {
-	  s_g += A(row, col) * x_k(col);
-	}
+        // Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
+        type s_g = { };
+        for (int col = row + 1; col < A.ncols(); col++) {
+          s_g += A(row, col) * x_k(col);
+        }
 
-	double s = s_l + s_g;
+        type s = s_l + s_g;
 
-	// Compute the new value of x_i = (b_i - s) / a_{i, i}
-	double a_ii = A(row, row);
-	if (a_ii != 0.0) {
-	  s = (b(row) - s) / a_ii;
-	}
-	else {
-	  _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+        // Compute the new value of x_i = (b_i - s) / a_{i, i}
+        type a_ii = A(row, row);
+        if (a_ii != 0.0) {
+          s = (b(row) - s) / a_ii;
+        }
+        else {
+          _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
 
-	// Update the vector x
-	x_k.place(row, s);
+        // Update the vector x
+        x_k.place(row, s);
       }
 
-      double norm = (A.matmul(x_k) - b).norm();
+      type norm = (A.matmul(x_k) - b).norm();
 
       if (norm < tol) {
-	_iterMsg(iter, norm, __func__);
-	return x_k;
+        _iterMsg(iter, norm, __func__);
+        return x_k;
       }
 
       if (iter % PRINT_INTERVAL == 0) {
@@ -203,7 +207,8 @@ namespace lalib {
     less certain, but required number of iterations is decreased.
   */
 
-  template<class Matrix, class Vector> Vector sorSolve(const Matrix& A, const Vector& x_0, const Vector& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
+  template<class type, bool vectorize, bool sparse>
+  Vector<type, vectorize> sorSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -213,49 +218,49 @@ namespace lalib {
       _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
-    Vector x_k = Vector(x_0);
+    Vector x_k = Vector<type, vectorize>(x_0);
 
     for (int iter = 1; iter <= max_iter; iter++) {
 
       // Go over all i in {0, ..., nrows}
       for (int row = 0; row < A.nrows(); row++) {
 
-	// Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
-	double s_l = 0.0;
-	for (int col = 0; col < row; col++) {
-	  s_l += A(row, col) * x_k(col);
-	}
+        // Compute the sum s_l = sum_{j < i} a_{i, j} * x_j^{(k)}
+        type s_l = { };
+        for (int col = 0; col < row; col++) {
+          s_l += A(row, col) * x_k(col);
+        }
 
-	// Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
-	double s_g = 0.0;
-	for (int col = row + 1; col < A.ncols(); col++) {
-	  s_g += A(row, col) * x_k(col);
-	}
+        // Compute the sum s_g = sum_{j > i} a_{i, j} * x_j^{(k-1)}
+        type s_g = { };
+        for (int col = row + 1; col < A.ncols(); col++) {
+          s_g += A(row, col) * x_k(col);
+        }
 
-	// Compute the new value of x_i = x_i^{(k-1)} + w(s - x_i^{(k-1)})
-	double a_ii = A(row, row);
-	double x_i = x_k(row);
-	double s = (b(row) - s_l - s_g) / a_ii;
-	if (a_ii != 0.0) {
-	  x_i = x_i + w * (s - x_i);
-	}
-	else {
-	  _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+        // Compute the new value of x_i = x_i^{(k-1)} + w(s - x_i^{(k-1)})
+        type a_ii = A(row, row);
+        type x_i = x_k(row);
+        type s = (b(row) - s_l - s_g) / a_ii;
+        if (a_ii != (type){ }) {
+          x_i = x_i + w * (s - x_i);
+        }
+        else {
+          _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
 
-	// Update the vector x
-	x_k.place(row, x_i);
+        // Update the vector x
+        x_k.place(row, x_i);
       }
 
-      double norm = (A.matmul(x_k) - b).norm();
+      type norm = (A.matmul(x_k) - b).norm();
       
       if (norm < tol) {
-	_iterMsg(iter, norm, __func__);
-	return x_k;
+        _iterMsg(iter, norm, __func__);
+        return x_k;
       }
 
       if (iter % PRINT_INTERVAL == 0) {
-	_iterMsg(iter, norm, __func__);
+	      _iterMsg(iter, norm, __func__);
       }
     }
 
