@@ -107,7 +107,7 @@ namespace lalib {
        *
        * @param that A reference to a dense Matrix object wanted to be copied
        */
-      Matrix(const Matrix& that) {
+      Matrix(const Matrix<type, vectorize, false>& that) {
 
         if (that._ncols < 1 || that._nrows < 1) {
           _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -332,7 +332,7 @@ namespace lalib {
        * @return A dense Matrix object
        */
       const Matrix operator+ (const Matrix& that) const {
-        return Matrix(*this) += that;
+        return Matrix<type, vectorize, false>(*this) += that;
       }
 
 
@@ -387,7 +387,7 @@ namespace lalib {
        * @return A dense Matrix object
        */
       const Matrix operator- (const Matrix& that) const {
-        return Matrix(*this) -= that;
+        return Matrix<type, vectorize, false>(*this) -= that;
       }
 
 
@@ -442,7 +442,7 @@ namespace lalib {
        * @return A dense Matrix object
        */
       const Matrix operator* (const Matrix& that) const {
-        return Matrix(*this) *= that;
+        return Matrix<type, vectorize, false>(*this) *= that;
       }
 
 
@@ -497,7 +497,7 @@ namespace lalib {
        * @return A dense Matrix object
        */
       const Matrix operator* (const type that) const {
-        return Matrix(*this) *= that;
+        return Matrix<type, vectorize, false>(*this) *= that;
       }
 
 
@@ -552,7 +552,7 @@ namespace lalib {
        * @return A dense Matrix object
        */
       const Matrix operator/ (const Matrix& that) const {
-        Matrix(*this) /= that;
+        Matrix<type, vectorize, false>(*this) /= that;
       }
 
 
@@ -610,7 +610,7 @@ namespace lalib {
        * @return A dense Matrix object
        */
       const Matrix operator/ (const type that) const {
-        return Matrix(*this) /= that;
+        return Matrix<type, vectorize, false>(*this) /= that;
       }
 
       
@@ -655,7 +655,7 @@ namespace lalib {
        * @param colEnd The ending column index for the placement
        * @param matrix A reference to the dense Matrix object of which values are to be placed
        */
-      void place(int rowStart, int rowEnd, int colStart, int colEnd, const Matrix& matrix) {
+      void place(int rowStart, int rowEnd, int colStart, int colEnd, const Matrix<type, vectorize, false>& matrix) {
 
         if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
           _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -778,7 +778,7 @@ namespace lalib {
         int _colEnd = colEnd > _ncols ? _ncols : colEnd;
 
         // Allocate memory for a new matrix
-        Matrix ret = Matrix(_rowEnd - rowStart, _colEnd - colStart);
+        Matrix ret = Matrix<type, vectorize, false>(_rowEnd - rowStart, _colEnd - colStart);
 
         #pragma omp parallel for schedule(dynamic, 1)
         for (int row0 = 0; row0 < _rowEnd - rowStart; row0++) {
@@ -998,7 +998,7 @@ namespace lalib {
         }
 
         // Allocate memory for needed sized matrix
-        Matrix ret = Matrix(_ncols, _nrows);
+        Matrix ret = Matrix<type, vectorize, false>(_ncols, _nrows);
 
         #pragma omp parallel for schedule(dynamic, 1)
         for (int row = 0; row < _nrows; row++) {
@@ -1048,7 +1048,7 @@ namespace lalib {
           _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
         }
 
-        Matrix ret = Matrix(_nrows, that._ncols);
+        Matrix ret = Matrix<type, vectorize, false>(_nrows, that._ncols);
 
         // Transpose that for linear memory reads
         Matrix that_T = that.T();
@@ -1141,7 +1141,7 @@ namespace lalib {
           _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
         }
 
-        Vector<type, vectorize> ret = Vector<type, vectorize>(_nrows);
+        Vector ret = Vector<type, vectorize>(_nrows);
 
         if constexpr (vectorize) {
           #pragma omp parallel for schedule(dynamic, 1)
@@ -1241,7 +1241,7 @@ namespace lalib {
           _errorMsg("Matrix must be a 1 x n or n x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
         }
           
-        Vector ret = Vector(_nrows * _ncols);
+        Vector ret = Vector<type, vectorize>(_nrows * _ncols);
 
         for (int row = 0; row < _nrows; row++) {
           for (int col = 0; col < _ncols; col++) {

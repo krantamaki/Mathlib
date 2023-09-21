@@ -113,7 +113,7 @@ namespace lalib {
        *
        * @param that The object to be copied
        */
-      Matrix(const Matrix& that) {
+      Matrix(const Matrix<type, vectorize, true>& that) {
 
         if (that._ncols < 1 || that._nrows < 1) {
           _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -512,7 +512,7 @@ namespace lalib {
        * @return A sparse Matrix object
        */
       const Matrix operator+ (const Matrix& that) const {
-        return Matrix(*this) += that;
+        return Matrix<type, vectorize, true>(*this) += that;
       }
 
 
@@ -562,7 +562,7 @@ namespace lalib {
        * @return A sparse Matrix object
        */
       const Matrix operator- (const Matrix& that) const {
-        return Matrix(*this) -= that;
+        return Matrix<type, vectorize, true>(*this) -= that;
       }
 
 
@@ -609,7 +609,7 @@ namespace lalib {
        * @return A sparse Matrix object
        */
       const Matrix operator* (const Matrix& that) const {
-        return Matrix(*this) *= that;
+        return Matrix<type, vectorize, true>(*this) *= that;
       }
 
 
@@ -651,7 +651,7 @@ namespace lalib {
        * @return A sparse Matrix object
        */
       const Matrix operator* (const type that) const {
-        return Matrix(*this) *= that;
+        return Matrix<type, vectorize, true>(*this) *= that;
       }
 
 
@@ -698,7 +698,7 @@ namespace lalib {
        * @return A sparse Matrix object
        */
       const Matrix operator/ (const Matrix& that) const {
-        return Matrix(*this) /= that;
+        return Matrix<type, vectorize, true>(*this) /= that;
       }
 
 
@@ -746,7 +746,7 @@ namespace lalib {
        * @return A sparse Matrix object
        */
       const Matrix operator/ (const type that) const {
-        return Matrix(*this) /= that;
+        return Matrix<type, vectorize, true>(*this) /= that;
       }
 
 
@@ -885,7 +885,7 @@ namespace lalib {
        * @param colEnd The ending column index for the placement
        * @param matrix A reference to the sparse Matrix object of which values are to be placed
        */
-      void place(int rowStart, int rowEnd, int colStart, int colEnd, Matrix& matrix) {
+      void place(int rowStart, int rowEnd, int colStart, int colEnd, Matrix<type, vectorize, true>& matrix) {
 
         if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
           _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -1126,7 +1126,7 @@ namespace lalib {
         int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
         int _colEnd = colEnd > _ncols ? _ncols : colEnd;
 
-        Matrix ret = Matrix(_rowEnd - rowStart, _colEnd - colStart);
+        Matrix ret = Matrix<type, vectorize, true>(_rowEnd - rowStart, _colEnd - colStart);
 
         if constexpr (vectorize) {
           _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -1512,7 +1512,7 @@ namespace lalib {
         }
 
         // Initialize the transpose matrix
-        Matrix ret = Matrix(_ncols, _nrows);
+        Matrix ret = Matrix<type, vectorize, true>(_ncols, _nrows);
 
         if constexpr (vectorize) {
           _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -1547,7 +1547,7 @@ namespace lalib {
         }
 
         // Initialize the transpose matrix
-        Matrix ret = Matrix(_ncols, _nrows);
+        Matrix ret = Matrix<type, vectorize, true>(_ncols, _nrows);
 
         if constexpr (vectorize) {
           _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -1611,7 +1611,7 @@ namespace lalib {
         }
 
         // Create the matrix that will be filled
-        Matrix ret = Matrix(_nrows, that._ncols);
+        Matrix ret = Matrix<type, vectorize, true>(_nrows, that._ncols);
 
         // Transpose that to have constant time access to columns
         Matrix that_T = that.T();
@@ -1705,7 +1705,7 @@ namespace lalib {
           _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
         }
 
-        Vector ret = Vector(_nrows);
+        Vector ret = Vector<type, vectorize>(_nrows);
 
         if constexpr (vectorize) {
           _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -1804,7 +1804,7 @@ namespace lalib {
           _errorMsg("Matrix must be a 1 x n or n x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
         }
           
-        Vector ret = Vector(_nrows * _ncols);
+        Vector ret = Vector<type, vectorize>(_nrows * _ncols);
 
         for (int row = 0; row < _nrows; row++) {
           for (int col = 0; col < _ncols; col++) {
