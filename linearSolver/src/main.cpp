@@ -7,11 +7,6 @@
 */
 
 
-using namespace std;
-using namespace linearSolver;
-using namespace utils;
-
-
 void linearSolver::welcome(bool always_print) {
   _infoMsg("", __func__, always_print);
   _infoMsg("###########################################################", __func__, always_print);
@@ -54,7 +49,7 @@ int main(int argc, char* argv[]) {
     _errorMsg(errorMsg.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
-  welcome(true);
+  linearSolver::welcome(true);
 
   // Parse the configuration file
   string config_path = argv[1];
@@ -92,7 +87,7 @@ int main(int argc, char* argv[]) {
   // Solve the system
   _infoMsg("Parsing complete. Advancing to the linear solver ...", __func__);
 
-  bool converged = linearSolver::linearSolver(config_map);
+  bool converged = linearSolver::linearSolver<float, false>(config_map);
 
   // Check if convergence was reached
   if (converged) _infoMsg("Convergence to wanted tolerance reached", __func__);
