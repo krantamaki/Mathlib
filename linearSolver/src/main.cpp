@@ -1,10 +1,12 @@
 #include "declare_linearSolver.hpp"
 
 
-/*
-  Compile at root mathlib with: g++ -std=c++17 -mavx -fopenmp -Wall linearSolver/src/main.cpp utils/parser.cpp linearSolver/src/linearSolver.cpp lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsVector.cpp lalib/src/crs/crsMatmul.cpp -lm -o linearSolver.o
-  Run with: ./solver.o <config file>
-*/
+/**
+ * Compile at root mathlib with: 
+ * > g++ -std=c++17 -mavx -fopenmp -Wall linearSolver/src/main.cpp utils/parser.cpp -lm -o linearSolver.o
+ * Run with: 
+ * > ./solver.o <config file>
+ */
 
 
 void linearSolver::welcome(bool always_print) {
@@ -87,7 +89,7 @@ int main(int argc, char* argv[]) {
   // Solve the system
   _infoMsg("Parsing complete. Advancing to the linear solver ...", __func__);
 
-  bool converged = linearSolver::linearSolver<float, false>(config_map);
+  bool converged = linearSolver::linearSolver<double, false>(config_map);
 
   // Check if convergence was reached
   if (converged) _infoMsg("Convergence to wanted tolerance reached", __func__);
