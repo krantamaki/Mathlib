@@ -1439,7 +1439,7 @@ namespace lalib {
        * @param format OPTIONAL, DEFAULTS TO < std::string format ".dat" >. the extension
        * of the used format. Choices are ".dat" and ".mtx".
        */
-      bool save(std::string& path, int offset = 0, std::string format = ".dat") {
+      bool save(const std::string& path, int offset = 0, std::string format = ".dat") {
 
         if (_ncols <= 0 || _nrows <= 0) {
           _errorMsg("Cannot save an unitialized matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -1462,7 +1462,7 @@ namespace lalib {
               int col = colInds[row_p];
               double val = vals[row_p];
 
-              if (!(file << row + offset << " " << col + offset << " " << val << "\n")) {
+              if (!(file << row + offset << " " << col + offset << " " << val << "\n" << std::flush)) {
                 success = false;
               }
             }

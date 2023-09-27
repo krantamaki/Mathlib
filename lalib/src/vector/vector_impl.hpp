@@ -592,7 +592,7 @@ bool Vector<type, vectorize>::isclose(const Vector<type, vectorize>& that, type 
 
 // Vector saving
 template <class type, bool vectorize>
-bool Vector<type, vectorize>::save(std::string& path, int offset, std::string format) {
+bool Vector<type, vectorize>::save(const std::string& path, int offset, std::string format) {
   if (_len <= 0) {
     _errorMsg("Cannot save an unitialized vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }

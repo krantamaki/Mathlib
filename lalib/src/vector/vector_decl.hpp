@@ -513,7 +513,7 @@ namespace lalib {
        * @param format OPTIONAL, DEFAULTS TO < std::string format ".dat" >. the extension
        * of the used format. Choices are ".dat" and ".mtx".
        */
-      bool save(std::string& path, int offset = 0, std::string format = ".dat");
+      bool save(const std::string& path, int offset = 0, std::string format = ".dat");
 
       /**
        * @brief Size of the vector
