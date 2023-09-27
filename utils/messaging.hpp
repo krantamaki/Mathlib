@@ -45,9 +45,9 @@ namespace utils {
   inline void _errorMsg(const std::string& msg, const char* file, const char* func, int line) {
     std::ostringstream msgStream;
 
-    msgStream << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
+    msgStream << "\n" << "ERROR: In file " << file << " at function " << func << " on line " << line << " : " << msg;
     std::string msgString = msgStream.str();
-    std::cout << msgString << std::endl;
+    std::cout << msgString << "\n\n" << std::endl;
 
     throw std::runtime_error(msgString);
   }
