@@ -1,8 +1,12 @@
 #include <chrono>
 #include <cmath>
-#include "../lalib/src/crs/crsMatrix.hpp"
-#include "../lalib/src/crs/crsVector.hpp"
+#include <algorithm>
+#include "../lalib/src/vector/Vector.hpp"
+#include "../lalib/src/matrix/Matrix.hpp"
 #include "../lalib/src/nonstationarySolvers.hpp"
+#include "../lalib/src/stationarySolvers.hpp"
+#include "../utils/general.hpp"
+#include "../utils/messaging.hpp"
 
 
 /**
@@ -16,7 +20,7 @@
  * [1] Paul Wilmott. Paul Wilmott Introduces Quantitative Finance
  *
  * Compile at root mathlib directory with: 
- * > g++ -fopenmp -Wall lalib/src/crs/crsMatrix.cpp lalib/src/crs/crsVector.cpp lalib/src/crs/crsMatmul.cpp examples/black-scholes_fd.cpp -lm -o black-scholes_fd.o
+ * > g++ -fopenmp -std=c++17 -Wall examples/black-scholes_fd.cpp -lm -o black-scholes_fd.o
  *
  * Run with:
  * > ./black-scholes_fd.o
@@ -25,157 +29,202 @@
 
 #define r 0.05  // The risk-free rate
 #define vol 0.25  // The implied volatility of the underlying
+#define vol2 vol * vol
 #define E 100.0  // The strike price
 #define T_0 10.0  // Time until expiry (arbitrary unit)
+#define S_MAX_MULT 4  // The multiple used to define the upper boundary for asset price
 
 
 using namespace lalib;
 
 
-// Handy index map
-inline int ij(int i, int j, int N) {
-  return i * N + j;
+// Function that returns the set value for time step
+inline double dt(double _dt = 0.0) {
+  static double set_dt = _dt;
+  return set_dt;
 }
 
 
-// Coefficient for gamma without dividend
-inline double A(double S_i, double t_k) {
-  return 0.5 * vol * vol * S_i * S_i;
+// Function that returns the set value for underlying value step
+inline double dS(double _dS = 0.0) {
+  static double set_dS = _dS;
+  return set_dS;
 }
 
 
-// Coefficient for delta without dividend
-inline double B(double S_i, double t_k) {
-  return r * S_i;
+// Coefficient for V(S, t)
+double A(double S, double t) {
+  return (0.5 * vol2 * S * S * dt()) / (dS() * dS()) - (0.5 * r * S * dt()) / dS();
 }
 
 
-// Coefficient for option value without dividend
-inline double C(double S_i, double t_k) {
-  return -r;
+// Coefficient for V(S + dS, t)
+double B(double S, double t) {
+  return -(vol2 * S * S * dt()) / (dS() * dS()) - dt() * r;
 }
 
 
-// Boundary condition for S -> inf. Set up for standard European call
-double u(double S_i, double t_k) {
-  return S_i - E * std::exp(-r * (T_0 - t_k));
+// Coefficient for V(S - dS, t)
+double C(double S, double t) {
+  return (0.5 * vol2 * S * S * dt()) / (dS() * dS()) + (0.5 * r * S * dt()) / dS();
 }
 
 
 // Boundary condition for S = 0. Set up for standard European call
-double d(double S_i, double t_k) {
+double l(double t) {
   return 0.0;
 }
 
 
+// Boundary condition for S -> inf. Set up for European call
+double u(double t) {
+  return S_MAX_MULT * E - E * std::exp(-r * t);
+}
+
+
 // Final condition i.e. the payoff function. Set up for European call
-double P(double S_i) {
-  return S_i > E ? S_i - E : 0.0;
+double P(double S) {
+  return S > E ? S - E : 0.0;
+}
+
+
+template<class type, bool vectorize, bool sparse>
+void blackScholesFDM(int nT, int nS) {
+
+  // The time step. The domain is (0, T_0)
+  type _dt = T_0 / (type)nT;
+  dt(_dt);
+
+  // The step of the underlying. The domain is (0, 4E)
+  type _dS = (S_MAX_MULT * E) / (type)nS;
+  dS(_dS);
+
+
+  _infoMsg("Solving the Black-Scholes equation for a single option using Finite Difference Method", __func__);
+
+  std::ostringstream msg1;
+  msg1 << "Finite difference mesh consists of " << nT << " x " << nS << " points";
+  _infoMsg(msg1.str(), __func__);
+
+  _infoMsg("Solving for the system one time step at a time...", __func__);
+
+
+  // Time the total solver
+  auto start = std::chrono::high_resolution_clock::now();
+
+  // Define the solution vector
+  Vector v = Vector<type, vectorize>(nT * nS);
+
+
+  // Solve the system at payoff
+  _infoMsg("Solving the system at payoff...", __func__);
+  for (int i = 0; i < nS; i++) {
+    type s_i = i * _dS;
+    v.place(i, P(s_i));
+  }
+
+
+  // Solve the system at each subsequent timepoint
+  for (int k = 1; k < nT; k++) {
+    type t_k = T_0 - k * _dt;  // Time at which the system is to be solved
+
+    std::ostringstream msg2;
+    msg2 << "Solving the system at time: " << t_k << " ...";
+    _infoMsg(msg2.str(), __func__);
+
+    // Form the linear system
+
+    // Required arrays for the CRS structure
+    std::vector<type> vals;
+    std::vector<int> colInds;
+    std::vector<int> rowPtrs;
+    rowPtrs.push_back(0);
+
+    // Loop over the asset price. Note that at boundaries the coefficient matrix and 
+    // the right hand side matrix will just have zeros so those can be ignored in the loop
+    for (int i = 1; i < nS - 1; i++) {
+      type s_i = i * _dS;
+
+      if (i == 1) {
+        vals.insert(vals.end(), {B(s_i, t_k),
+                                 C(s_i, t_k)});
+
+        colInds.insert(colInds.end(), {i,
+                                       i + 1});
+
+        rowPtrs.push_back(rowPtrs.back() + 2);
+      }
+      else if (i == nS - 2) {
+        vals.insert(vals.end(), {A(s_i, t_k),
+                                 B(s_i, t_k)});
+
+        colInds.insert(colInds.end(), {i - 1,
+                                       i});
+
+        rowPtrs.push_back(rowPtrs.back() + 2);
+      }
+      else {
+        vals.insert(vals.end(), {A(s_i, t_k),
+                                 B(s_i, t_k),
+                                 C(s_i, t_k)});
+
+        colInds.insert(colInds.end(), {i - 1,
+                                       i, 
+                                       i + 1});
+
+        rowPtrs.push_back(rowPtrs.back() + 3);
+      }
+    }
+
+    // The coefficient matrix is then
+    Matrix A = Matrix<type, vectorize, sparse>(nS, nS, vals, colInds, rowPtrs);
+    A.save("tmp.dat");
+
+
+    // The right hand side vector will be the solution to previous time point
+    Vector v_tmp = v((k - 1) * nS, k * nS);
+
+
+    // The solution for time point t_k would be  v_k = A^(-1)v_(k - 1) + b
+    // and is solved by first numerically solving for x in Ax = v_(k - 1) 
+    // and then adding our vector b.
+
+    // Define the initial quess as the zero vector
+    Vector x_0 = Vector<type, vectorize>(nS);
+
+    // Solve for x
+    Vector x = cgSolve<type, vectorize, sparse>(A, x_0, v_tmp);
+
+    // Place to solution vector
+    v.place(k * nT, (k + 1) * nT, x);
+
+    // Place the boundary conditions
+    v.place(k * nT, l(t_k));
+    v.place((k + 1) * nT, u(t_k));
+  }
+
+  auto end = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+  std::ostringstream msg3;
+  msg3 << "Time taken  to find the solution: " << duration.count() << " milliseconds";
+  _infoMsg(msg3.str(), __func__);
+
+  // Save the solution as black_scholes_sol.dat
+  _infoMsg("Saving the solution as black_scholes_sol.dat", __func__);
+  v.save("black_scholes_sol.dat");
 }
 
 
 int main() {
-  
-  int nT = 100;  // Number of grid points in time dimension
-  double dt = T_0 / (double)nT;  // The time step. The domain is (0, T_0)
-  double inv_dt = 1.0 / dt;
 
-  int nS = 100;  // Number of grid points in underlying value dimension
-  double dS = (4 * E) / (double)nS;  // The step of the underlying. The domain is (0, 4E)
-  double inv_dS = 1.0 / dS;
-  double dS_square = dS * dS;
-  double inv_dS_square = 1.0 / dS_square;
+  int nS = 100;
+  int nT = 100;
 
-  int dim = nS * nT;
+  blackScholesFDM<double, false, true>(nT, nS);
 
-  std::cout << "\n" << "Solving the Black-Scholes equation for single option using Finite Difference Method" << "\n";
-  std::cout << "Finite difference mesh consists of " << nT << " x " << nS << " points" << "\n";
-  
-  std::cout << "\n" << "Initializing the coefficient matrix and RHS vector. This may take a while..." << "\n";
-
-  auto init_start = std::chrono::high_resolution_clock::now();
-  
-  // Arrays that will define the CRS structure of the coefficient matrix
-  std::vector<double> vals;
-  std::vector<int> colInds;
-  std::vector<int> rowPtrs;
-  rowPtrs.push_back(0);
-
-  // The RHS vector
-  CRSVector b = CRSVector(dim);
-  
-  // Form the coefficient matrix
-  for (int i = 0; i < nT; i++) {
-    for (int j = 0; j < nS; j++) {      
-      int row = ij(i, j, nT);
-      double t_i = i * dt;
-      double s_j = j * dS;
-
-      if ((i > 0) && (i < nT - 1) && (j > 0) && (j < nS - 1)) {  // Point in the interior
-        vals.insert(vals.end(), {A(s_j, t_i) * inv_dS_square - B(s_j, t_i) * (inv_dS / 2.0),
-				 inv_dt - 2 * A(s_j, t_i) * inv_dS_square + C(s_j, t_i),
-				 A(s_j, t_i) * inv_dS_square + B(s_j, t_i) * (inv_dS / 2.0),
-				 -inv_dt});
-	colInds.insert(colInds.end(), {ij(i, j - 1, nT), row, ij(i, j + 1, nT), ij(i + 1, j, nT)});
-	rowPtrs.push_back(rowPtrs.back() + 4);
-      }
-      else if (i == nT - 1) { // Point at final condition
-        vals.push_back(1.0);
-	colInds.push_back(row);
-	rowPtrs.push_back(rowPtrs.back() + 1);
-	
-	b.place(row, P(s_j));
-      }
-      else if (j == nS - 1) {  // Point at upper boundary
-	vals.push_back(1.0);
-	colInds.push_back(row);
-	rowPtrs.push_back(rowPtrs.back() + 1);
-	
-	b.place(row, u(s_j, t_i));
-      }
-      else if (j == 0) {  // Point at lower boundary
-	vals.push_back(1.0);
-	colInds.push_back(row);
-	rowPtrs.push_back(rowPtrs.back() + 1);
-	
-	b.place(row, d(s_j, t_i));
-      }
-      else {  // The initial boundary needs to be specifically considered. Ignore it for now
-	vals.push_back(1.0);
-	colInds.push_back(row);
-	rowPtrs.push_back(rowPtrs.back() + 1);
-	
-	b.place(row, 1.0);
-      }
-    }
-  }
-
-  CRSMatrix A = CRSMatrix(dim, dim, vals, colInds, rowPtrs);
-
-  auto init_end = std::chrono::high_resolution_clock::now();
-
-  auto init_duration = std::chrono::duration_cast<std::chrono::milliseconds>(init_end - init_start);
-
-  std::cout << "\n" << "Time taken in preprocessing: " << init_duration.count() << " milliseconds" << "\n";
-  
-  std::cout << "\n" << "Using a zero vector as the initial guess..." << "\n";
-  CRSVector x0 = CRSVector(dim);
-
-  std::cout << "\n" << "Solving a " << dim << " dimensional system with conjugate gradient method. This may take a while..." << "\n";
-
-  CRSVector ret;
-
-  auto solve_start = std::chrono::high_resolution_clock::now();
-  ret = cgSolve(A, x0, b, 10 * nS);  // 10 * nS chosen as an arbitrary maximum number of iterations
-  auto solve_end = std::chrono::high_resolution_clock::now();
-
-  auto solve_duration = std::chrono::duration_cast<std::chrono::milliseconds>(solve_end - solve_start);
-
-  std::cout << "\n" << "Time taken by the solver: " << solve_duration.count() << " milliseconds" << "\n";
-  
-  std::cout << "Residual norm: " << (A.matmul(ret) - b).norm() << "\n\n";
-
-  std::cout << "DONE" << "\n";
+  _infoMsg("DONE", __func__);
 
   return 0;
 }
