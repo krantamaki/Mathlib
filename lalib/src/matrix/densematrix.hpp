@@ -842,9 +842,32 @@ namespace lalib {
       }
       
       
-      // TODO: const Vector getCol(int col) const;
+      /**
+       * @brief Access a column
+       *
+       * Method that retrieves a wanted column of a dense Matrix object
+       *
+       * @param col The index of the wanted column
+       *
+       * @return The wanted column as a Vector object
+       */
+      const<type, vectorize> Vector getCol(int col) const {
+        _errorMsg("Not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      }
 
-      // TODO: const Vector getRow(int row) const;
+
+      /**
+       * @brief Access a row
+       *
+       * Method that retrieves a wanted row of a dense Matrix object
+       *
+       * @param row The index of the wanted row
+       *
+       * @return The wanted row as a Vector object
+       */
+      const<type, vectorize> Vector getRow(int row) const {
+        _errorMsg("Not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      }
 
       
       // -------- Other overloaded operators ----------
@@ -1175,6 +1198,36 @@ namespace lalib {
 
             ret.place(row, val);
           }
+        }
+
+        return ret;
+      }
+
+
+      /**
+       * @brief Dot product between a row and given vector
+       * 
+       * Method that computes the dot product between a given row of a dense Matrix object
+       * and passed Vector object.
+       * 
+       * @param row Index of the row used for the calculation
+       * @param that Vector with which the computation is carried
+       * @return The dot product
+       */
+      const type rowDot(int row, const Vector<type, vectorize>& that) const {
+
+        if (_ncols != that.len()) {
+          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
+
+        if (row < 0 || row >= _nrows) {
+          _errorMsg("Improper row index!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
+
+        type ret = t_zero;
+
+        for (int col = 0; col < _ncols; col++) {
+          ret += this->operator() (row, col) * that(col);
         }
 
         return ret;

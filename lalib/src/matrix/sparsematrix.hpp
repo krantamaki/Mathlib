@@ -1733,6 +1733,43 @@ namespace lalib {
 
 
       /**
+       * @brief Dot product between a row and given vector
+       * 
+       * Method that computes the dot product between a given row of a sparse Matrix object
+       * and passed Vector object.
+       * 
+       * @param row Index of the row used for the calculation
+       * @param that Vector with which the computation is carried
+       * @return The dot product
+       */
+      const type rowDot(int row, const Vector<type, vectorize>& that) const {
+
+        if (_ncols != that.len()) {
+          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
+
+        if (row < 0 || row >= _nrows) {
+          _errorMsg("Improper row index!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        }
+
+        type ret = t_zero;
+
+        int n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
+        if (n_row_elems != 0) {
+          for (int col_i = rowPtrs[row]; col_i < rowPtrs[row + 1]; col_i++) {
+            int col = colInds[col_i];
+            type val = vals[col_i];
+
+            ret += val * that(col);
+          }
+          ret.place(row, sum);
+        }
+
+        return ret;
+      }
+
+
+      /**
        * @brief Convert a sparse Matrix object into std::vector
        *
        * Method that returns the matrix elements in a std::vector.
