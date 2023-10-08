@@ -1762,7 +1762,6 @@ namespace lalib {
 
             ret += val * that(col);
           }
-          ret.place(row, sum);
         }
 
         return ret;

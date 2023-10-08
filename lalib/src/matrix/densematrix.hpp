@@ -851,7 +851,7 @@ namespace lalib {
        *
        * @return The wanted column as a Vector object
        */
-      const<type, vectorize> Vector getCol(int col) const {
+      const Vector<type, vectorize> getCol(int col) const {
         _errorMsg("Not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
       }
 
@@ -865,7 +865,7 @@ namespace lalib {
        *
        * @return The wanted row as a Vector object
        */
-      const<type, vectorize> Vector getRow(int row) const {
+      const Vector<type, vectorize> getRow(int row) const {
         _errorMsg("Not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
       }
 
