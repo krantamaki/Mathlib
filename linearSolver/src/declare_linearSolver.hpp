@@ -104,6 +104,12 @@ namespace linearSolver {
       ret = cgSolve<type, vectorize, true>(A, x0, b, max_iter, convergence_tolerance, check_symmetric);
       _infoMsg("", __func__);
     }
+    else if (method == "cgnr") {
+      _infoMsg("Calling the Conjugate Gradient on normal equations method", __func__);
+      _infoMsg("", __func__);
+      ret = cgnrSolve<type, vectorize, true>(A, x0, b, max_iter, convergence_tolerance);
+      _infoMsg("", __func__);
+    }
     else if (method == "jacobi") {
       _infoMsg("Calling the Jacobi method", __func__);
       _infoMsg("", __func__);

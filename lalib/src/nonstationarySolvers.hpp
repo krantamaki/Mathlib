@@ -49,7 +49,8 @@ namespace lalib {
   */
 
   template<class type, bool vectorize, bool sparse> 
-  Vector<type, vectorize> cgSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
+  Vector<type, vectorize> cgSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, 
+                                  int max_iter=MAX_ITER, type tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
       _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -92,7 +93,9 @@ namespace lalib {
 	      return x_k;
       }
 
-      p *= (rsnew / rsold);
+      type beta = rsnew / rsold;
+
+      p *= beta;
       p += r;
       
       rsold = rsnew;
@@ -107,7 +110,73 @@ namespace lalib {
     
     return x_k;
   }
-  
+
+
+  /*
+    Conjugate gradient on the normal equations
+
+    Conjugate gradient (CG) method requires that the coefficient matrix A is symmetric and positive definite.
+    While there is many variants of the CG method to overcome this challenge the simplest would be 
+    conjugate gradient on the normal equations (CGNR). CGNR doesn't solve the system Ax = b, but an
+    equivalent one A^T Ax = A^T b. It can be shown that for any matrix A the corresponding matrix 
+    A^T A is symmetric and positive definite and thus solvable via CG method.
+
+    The issue with CGNR is that the number of iterations taken by the CG method is bounded by the condition
+    number of the matrix and the condition number of the normal equations would be the square of the original
+    ones. Thus, the algorithm can be very slow to converge. 
+  */
+  template<class type, bool vectorize, bool sparse> 
+  Vector<type, vectorize> cgnrSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, 
+                                    int max_iter=MAX_ITER, type tol=BASE_TOL) {
+
+    if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
+      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    }
+
+    Matrix A_T = A.T();
+
+    Vector x_k = Vector<type, vectorize>(x_0);
+    Vector r = A_T.matmul(b) - A_T.matmul(A.matmul(x_k));
+    Vector p = Vector<type, vectorize>(r);
+
+    type rsold = r.dot(r);
+
+    for (int iter = 1; iter <= max_iter; iter++) {
+
+      Vector Ap = A.matmul(p);
+      
+      type alpha = rsold / (Ap.dot(Ap));
+
+      x_k += alpha * p;
+      r -= alpha * A_T.matmul(Ap);
+
+      type norm = r.norm();
+      type rsnew = norm * norm;
+      
+      if (norm < tol) {
+	      _iterMsg(iter, norm, __func__);
+	      return x_k;
+      }
+
+      type beta = rsnew / rsold;
+
+      p *= beta;
+      p += r;
+      
+      rsold = rsnew;
+
+      if (iter % (PRINT_INTERVAL * 5) == 0) {
+        _iterMsg(iter, norm, __func__);
+      }
+    }
+
+    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+
+    
+    return x_k;
+  }
+
 }
+
 
 #endif
