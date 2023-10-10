@@ -1,14 +1,14 @@
 # This is an example config file for the 2D heat equation solver
 ### Required information
 lower_bound = float 2.0
-upper_bound = float -2.0
-left_bound = float 0.0
-right_bound = float 0.0
+upper_bound = float 2.0
+left_bound = float 1.0
+right_bound = float 1.0
 height = float 10
 width = float 5
 duration = float 1
-n_height_points = int 50
-n_width_points = int 25
+n_height_points = int 100
+n_width_points = int 50
 
 ### Optional information
 method = string cg
@@ -18,5 +18,5 @@ max_iter = int 100000
 save_dir = string tmp
 save_name = string heat_eq
 stop_unconverged = bool false
-initial_temp = float 0.0
-thermal_diffusivity = float 6.0
+initial_temp = float -1.0
+thermal_diffusivity = float 12.0
