@@ -27,12 +27,12 @@
  */
 
 
-#define r 0.05  // The risk-free rate
-#define vol 0.25  // The implied volatility of the underlying
-#define vol2 vol * vol
+#define RF 0.05  // The risk-free rate
+#define VOL 0.25  // The implied volatility of the underlying
+#define SQVOL VOL * VOL
 #define E 100.0  // The strike price
-#define T_0 10.0  // Time until expiry (arbitrary unit)
-#define S_MAX_MULT 4  // The multiple used to define the upper boundary for asset price
+#define T_0 1.0  // Time until expiry (arbitrary unit)
+#define S_MAX_MULT 4.0  // The multiple used to define the upper boundary for asset price
 
 
 using namespace lalib;
@@ -53,20 +53,23 @@ inline double dS(double _dS = 0.0) {
 
 
 // Coefficient for V(S, t)
-double A(double S, double t) {
-  return (0.5 * vol2 * S * S * dt()) / (dS() * dS()) - (0.5 * r * S * dt()) / dS();
+double A(int i) {
+  // return ((SQVOL * S * S) / dS() - RF * S) * (dt() / (2.0 * dS()));
+  return 0.5 * dt() * (RF * i - SQVOL * i * i);
 }
 
 
-// Coefficient for V(S + dS, t)
-double B(double S, double t) {
-  return -(vol2 * S * S * dt()) / (dS() * dS()) - dt() * r;
+// Coefficient for V(S, t + dt)
+double B(int i) {
+  // return 1 - ((SQVOL * S * S) / (dS() * dS()) + RF) * dt();
+  return 1.0 + dt() * (SQVOL * i * i + RF);
 }
 
 
 // Coefficient for V(S - dS, t)
-double C(double S, double t) {
-  return (0.5 * vol2 * S * S * dt()) / (dS() * dS()) + (0.5 * r * S * dt()) / dS();
+double C(int i) {
+  // return (RF * S + (SQVOL * S * S) / dS()) * (dt() / (2.0 * dS()));
+  return -0.5 * dt() * (RF * i + SQVOL * i * i);
 }
 
 
@@ -78,7 +81,7 @@ double l(double t) {
 
 // Boundary condition for S -> inf. Set up for European call
 double u(double t) {
-  return S_MAX_MULT * E - E * std::exp(-r * t);
+  return S_MAX_MULT * E - E * std::exp(-RF * (T_0 - t));
 }
 
 
@@ -89,22 +92,38 @@ double P(double S) {
 
 
 template<class type, bool vectorize, bool sparse>
-void blackScholesFDM(int nT, int nS) {
+void blackScholesFDM(int nS) {
 
-  // The time step. The domain is (0, T_0)
-  type _dt = T_0 / (type)nT;
-  dt(_dt);
+  _infoMsg("Solving the Black-Scholes equation for a single (European) option using Finite Difference Method", __func__);
 
   // The step of the underlying. The domain is (0, 4E)
-  type _dS = (S_MAX_MULT * E) / (type)nS;
+  type _dS = (S_MAX_MULT * E) / (type)(nS - 1);
   dS(_dS);
 
 
-  _infoMsg("Solving the Black-Scholes equation for a single option using Finite Difference Method", __func__);
+  // The time step. The domain is (0, T_0)
+  // Chosen to retain stability
+  int nT = nS;
+  type _dt = T_0 / (nT);
+
+  std::cout << _dt / (_dS * _dS) << "\n";
+
+  dt(_dt);
+
 
   std::ostringstream msg1;
   msg1 << "Finite difference mesh consists of " << nT << " x " << nS << " points";
   _infoMsg(msg1.str(), __func__);
+
+  _infoMsg("Are you sure you want to continue? (yes/no)", __func__);
+
+  std::string input;
+  std::cin >> input;
+
+  if (_tolower(input) != "yes") {
+    _errorMsg("Exiting program!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
+
 
   _infoMsg("Solving for the system one time step at a time...", __func__);
 
@@ -113,14 +132,14 @@ void blackScholesFDM(int nT, int nS) {
   auto start = std::chrono::high_resolution_clock::now();
 
   // Define the solution vector
-  Vector v = Vector<type, vectorize>(nT * nS);
+  Vector V = Vector<type, vectorize>(nT * nS);
 
 
   // Solve the system at payoff
   _infoMsg("Solving the system at payoff...", __func__);
   for (int i = 0; i < nS; i++) {
     type s_i = i * _dS;
-    v.place(i, P(s_i));
+    V.place(i, P(s_i));
   }
 
 
@@ -142,31 +161,26 @@ void blackScholesFDM(int nT, int nS) {
 
     // Loop over the asset price. Note that at boundaries the coefficient matrix and 
     // the right hand side matrix will just have zeros so those can be ignored in the loop
-    for (int i = 1; i < nS - 1; i++) {
-      type s_i = i * _dS;
+    for (int i = 0; i < nS; i++) {
 
-      if (i == 1) {
-        vals.insert(vals.end(), {B(s_i, t_k),
-                                 C(s_i, t_k)});
+      if (i == 0) {
+        vals.push_back(1.0);
 
-        colInds.insert(colInds.end(), {i,
-                                       i + 1});
+        colInds.push_back(i);
 
-        rowPtrs.push_back(rowPtrs.back() + 2);
+        rowPtrs.push_back(rowPtrs.back() + 1);
       }
-      else if (i == nS - 2) {
-        vals.insert(vals.end(), {A(s_i, t_k),
-                                 B(s_i, t_k)});
+      else if (i == nS - 1) {
+        vals.push_back(1.0);
 
-        colInds.insert(colInds.end(), {i - 1,
-                                       i});
+        colInds.push_back(i);
 
-        rowPtrs.push_back(rowPtrs.back() + 2);
+        rowPtrs.push_back(rowPtrs.back() + 1);
       }
       else {
-        vals.insert(vals.end(), {A(s_i, t_k),
-                                 B(s_i, t_k),
-                                 C(s_i, t_k)});
+        vals.insert(vals.end(), {A(i),
+                                 B(i),
+                                 C(i)});
 
         colInds.insert(colInds.end(), {i - 1,
                                        i, 
@@ -177,30 +191,23 @@ void blackScholesFDM(int nT, int nS) {
     }
 
     // The coefficient matrix is then
-    Matrix A = Matrix<type, vectorize, sparse>(nS, nS, vals, colInds, rowPtrs);
-    A.save("tmp.dat");
+    Matrix O = Matrix<type, vectorize, sparse>(nS, nS, vals, colInds, rowPtrs);
 
+    // The right hand side vector will be the solution at previous time point
+    Vector v_tmp = V((k - 1) * nS, k * nS);
 
-    // The right hand side vector will be the solution to previous time point
-    Vector v_tmp = v((k - 1) * nS, k * nS);
-
-
-    // The solution for time point t_k would be  v_k = A^(-1)v_(k - 1) + b
-    // and is solved by first numerically solving for x in Ax = v_(k - 1) 
-    // and then adding our vector b.
+    // Place the boundary conditions
+    v_tmp.place(0, l(t_k));
+    v_tmp.place(nS - 1, u(t_k));
 
     // Define the initial quess as the zero vector
     Vector x_0 = Vector<type, vectorize>(nS);
 
     // Solve for x
-    Vector x = cgSolve<type, vectorize, sparse>(A, x_0, v_tmp);
+    Vector x = cgnrSolve<type, vectorize, sparse>(O, x_0, v_tmp, 1000, 1e-9);
 
     // Place to solution vector
-    v.place(k * nT, (k + 1) * nT, x);
-
-    // Place the boundary conditions
-    v.place(k * nT, l(t_k));
-    v.place((k + 1) * nT, u(t_k));
+    V.place(k * nS, (k + 1) * nS, x);
   }
 
   auto end = std::chrono::high_resolution_clock::now();
@@ -213,16 +220,17 @@ void blackScholesFDM(int nT, int nS) {
 
   // Save the solution as black_scholes_sol.dat
   _infoMsg("Saving the solution as black_scholes_sol.dat", __func__);
-  v.save("black_scholes_sol.dat");
+  V.save("black_scholes_sol.dat");
 }
 
 
 int main() {
 
   int nS = 100;
-  int nT = 100;
 
-  blackScholesFDM<double, false, true>(nT, nS);
+  verbosity(3);
+
+  blackScholesFDM<double, false, true>(nS);
 
   _infoMsg("DONE", __func__);
 
