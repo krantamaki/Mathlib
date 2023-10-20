@@ -120,11 +120,20 @@ namespace poissonFDM2D {
     int n_time_points = any_cast<int>(config_map["n_time_points"]);
     type alpha = any_cast<double>(config_map["thermal_diffusivity"]);
 
+
+    // Check if the directory in which solutions are to be stored exists
+    // and if not create it
+    if (!fs::exists(save_dir)) {
+      fs::create_directories(save_dir);
+    } 
+
+
     int dim = n_height_points * n_width_points;
     bool success = true;
     
     type dH = height / ((type)n_height_points);  // Step size height-wise
     type dW = width / ((type)n_width_points);  // Step size width-wise
+
 
     type dt;
 
@@ -143,6 +152,7 @@ namespace poissonFDM2D {
       n_time_points = (int)(duration / dt);
     }
 
+
     ostringstream step_info;
     step_info << "Using time step of: " << dt << " with total of: " << n_time_points << " time points";
     _infoMsg(step_info.str(), __func__);
@@ -150,6 +160,7 @@ namespace poissonFDM2D {
     ostringstream dim_info;
     dim_info << "Dimension of the linear systems will be: " << dim << " x " << dim;
     _infoMsg(dim_info.str(), __func__);
+
 
     // Set up the initial solution
     Vector<type, vectorize> init = Vector<type, vectorize>(dim, initial_temp);
@@ -169,17 +180,19 @@ namespace poissonFDM2D {
       init.place(ij(n_height_points - 1, j, n_width_points), upperBound);
     }
 
+
     // Save the initial solution
     ostringstream save_msg;
     save_msg << "Solutions will be saved in directory " << save_dir << " using name(s) " << save_name << "_ti.dat where i is the time step.";
     _infoMsg(save_msg.str(), __func__);
 
     ostringstream init_save;
-    // init_save << save_dir << "/" << save_name << "_t0.dat";
-    init_save << save_name << "_t0.dat";
+    init_save << save_dir << "/" << save_name << "_t0.dat";
+  
     if (!init.save(init_save.str())) {
       _warningMsg("Couldn't save the result vector!", __func__);
     }
+
 
     // Define the inital RHS vector
     Vector<type, vectorize> b = Vector<type, vectorize>(init);
@@ -187,6 +200,7 @@ namespace poissonFDM2D {
     // Form the coefficient matrix. This needs to be done only once
     _infoMsg("Forming the coefficient matrix. This needs to be done only once...", __func__);
     Matrix<type, vectorize, sparse> A = formSystem<type, vectorize, sparse>(height, width, n_height_points, n_width_points, dt, alpha);
+
 
     // Time the solution
     auto start = chrono::high_resolution_clock::now();
@@ -242,7 +256,7 @@ namespace poissonFDM2D {
       // Save the solution
       ostringstream save_path;
       // save_path << save_dir << "/" << save_name << "_t" << t_i << ".dat";
-      save_path << save_name << "_t" << t_i << ".dat";
+      save_path << save_dir << "/" << save_name << "_t" << t_i << ".dat";
       if (!ret.save(save_path.str())) {
         _warningMsg("Couldn't save the result vector!", __func__);
       }
@@ -252,6 +266,7 @@ namespace poissonFDM2D {
     }
 
     auto end = chrono::high_resolution_clock::now();
+
 
     // Compute the passed time
     auto time = chrono::duration_cast<chrono::milliseconds>(end - start);

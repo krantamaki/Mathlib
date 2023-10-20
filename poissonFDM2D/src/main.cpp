@@ -39,7 +39,7 @@ void poissonFDM2D::welcome(bool always_print) {
 int main(int argc, char* argv[]) {
 
   // Write output into a log file
-  // freopen("log.txt", "w", stdout);
+  freopen("tmp/log.txt", "w", stdout);
 
   if (argc != 2) {
     _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);

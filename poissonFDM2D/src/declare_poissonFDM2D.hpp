@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <map>
 #include <chrono>
+#include <filesystem>
 #include <float.h>
 #include <time.h>
 #include <math.h>
@@ -28,6 +29,7 @@
 using namespace utils;
 using namespace lalib;
 using namespace std;
+namespace fs = std::filesystem;
 
 
 namespace poissonFDM2D {
