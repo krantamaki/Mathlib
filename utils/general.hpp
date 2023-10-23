@@ -59,6 +59,18 @@ namespace utils {
   }
 
 
+  // Function that joins multiple strings together by a delimeter
+  inline std::string _join(const std::vector<std::string> strs, char delim=' ') {
+    std::ostringstream stream;
+
+    for (const std::string str : strs) {
+      stream << delim << str;
+    }
+
+    return stream.str();
+  }
+
+
   // Convert a given string to lowercase
   inline std::string _tolower(const std::string& str) {
     std::string ret;

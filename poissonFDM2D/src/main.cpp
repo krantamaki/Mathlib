@@ -38,11 +38,25 @@ void poissonFDM2D::welcome(bool always_print) {
 
 int main(int argc, char* argv[]) {
 
-  // Write output into a log file
-  freopen("tmp/log.txt", "w", stdout);
+  if (argc == 3) {
+    // Check if the directory in which the log is to be stored exists
+    // If not create it
+    vector<string> path_vector = _split(argv[2], '/');
+    string dir_path = _join(vector<string>(path_vector.begin(), path_vector.end() - 1), '/');
+    
+    if (!fs::exists(dir_path)) {
+      fs::create_directories(dir_path);
+    } 
 
-  if (argc != 2) {
+    // Write output into a log file
+    freopen(argv[2], "w", stdout);
+  }
+  else if (argc != 2) {
     _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
+  else {
+    // Write output into a log file
+    freopen("log.txt", "w", stdout);
   }
 
   // Verify that the C++ standard is compatible
