@@ -190,7 +190,7 @@ namespace poissonFDM2D {
     init_save << save_dir << "/" << save_name << "_t0.dat";
   
     if (!init.save(init_save.str())) {
-      _warningMsg("Couldn't save the result vector!", __func__);
+      _errorMsg("Couldn't save the result vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
     }
 
 
@@ -210,7 +210,7 @@ namespace poissonFDM2D {
 
       ostringstream msg;
       msg << "Solving the system at time: " << t_i * dt << " (" << t_i << "/" << n_time_points << " done)";
-      _infoMsg(msg.str(), __func__);
+      _lowPriorityMsg(msg.str(), __func__);
 
       // Form the initial guess. We will use a zero vector as initial guess
       Vector<type, vectorize> x0 = Vector<type, vectorize>(dim);
@@ -219,16 +219,16 @@ namespace poissonFDM2D {
 
       // Solve the system
       if (method == "cg") {
-        _infoMsg("Calling the Conjugate Gradient method", __func__);
-        _infoMsg("", __func__);
+        _lowPriorityMsg("Calling the Conjugate Gradient method", __func__);
+        _lowPriorityMsg("", __func__);
         ret = cgSolve<type, vectorize, sparse>(A, x0, b, max_iter, convergence_tolerance);
-        _infoMsg("", __func__);
+        _lowPriorityMsg("", __func__);
       }
       else if (method == "cgnr") {
-        _infoMsg("Calling the Conjugate Gradient on normal equations method", __func__);
-        _infoMsg("", __func__);
+        _lowPriorityMsg("Calling the Conjugate Gradient on normal equations method", __func__);
+        _lowPriorityMsg("", __func__);
         ret = cgnrSolve<type, vectorize, sparse>(A, x0, b, max_iter, convergence_tolerance);
-        _infoMsg("", __func__);
+        _lowPriorityMsg("", __func__);
       }
       else {
         _errorMsg("Improper solver provided!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -238,10 +238,10 @@ namespace poissonFDM2D {
       type res_norm = (A.matmul(ret) - b).norm();
       std::ostringstream msg2;
       msg2 << "Residual norm: " << res_norm;
-      _infoMsg(msg2.str(), __func__);
+      _lowPriorityMsg(msg2.str(), __func__);
 
       if (res_norm < convergence_tolerance) {
-        _infoMsg("Residual within tolerance. Continuing to next time step", __func__);
+        _lowPriorityMsg("Residual within tolerance. Continuing to next time step", __func__);
       }
       else {
         if (stop_unconverged) {
@@ -258,7 +258,7 @@ namespace poissonFDM2D {
       // save_path << save_dir << "/" << save_name << "_t" << t_i << ".dat";
       save_path << save_dir << "/" << save_name << "_t" << t_i << ".dat";
       if (!ret.save(save_path.str())) {
-        _warningMsg("Couldn't save the result vector!", __func__);
+        _errorMsg("Couldn't save the result vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
       }
 
       // Update RHS vector

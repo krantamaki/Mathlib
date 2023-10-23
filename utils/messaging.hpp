@@ -23,11 +23,13 @@ namespace utils {
   * Function that defines and returns the verbosity level
   * Note that verbosity will have 3 levels:
   *   1: Error messages
-  *   2: Error and warning messages
-  *   3: Everything
+  *   2: 1 warning messages
+  *   3: 2 and base info messages
+  *   4: 3 and iteration messages
+  *   5: Everything
   */
   inline int verbosity(int _verbosity = BASE_VERBOSITY) {
-    if (_verbosity < 0 || _verbosity > 3) {
+    if (_verbosity < 0 || _verbosity > 5) {
       _verbosity = 1;
     }
     static int set_verbosity = _verbosity;
@@ -75,7 +77,7 @@ namespace utils {
 
   // Function that forms and prints an iteration message
   inline void _iterMsg(int iter, double norm, const char* func) {
-    if (verbosity() > 2) {
+    if (verbosity() > 3) {
       std::cout << func << ": " << "Iter " << iter << " - Norm " << norm << std::endl;
     }
   }
@@ -88,6 +90,14 @@ namespace utils {
       return;
     }
     if (verbosity() > 2) {
+      std::cout << func << ": " << msg << std::endl;
+    }
+  }
+
+
+  // Function that forms and prints a low priority info message
+  inline void _lowPriorityMsg(const std::string& msg, const char* func) {
+    if (verbosity() > 4) {
       std::cout << func << ": " << msg << std::endl;
     }
   }

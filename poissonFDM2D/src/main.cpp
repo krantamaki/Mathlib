@@ -50,6 +50,10 @@ int main(int argc, char* argv[]) {
 
     // Write output into a log file
     freopen(argv[2], "w", stdout);
+
+    ostringstream msg1;
+    msg1 << "Writing output into log file: " << argv[2];
+    _infoMsg(msg1.str(), __func__, true);
   }
   else if (argc != 2) {
     _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -71,9 +75,9 @@ int main(int argc, char* argv[]) {
   // Parse the configuration file
   string config_path = argv[1];
 
-  ostringstream msg1;
-  msg1 << "Configuration file " << config_path << " passed. Parsing it ...";
-  _infoMsg(msg1.str(), __func__, true);
+  ostringstream msg2;
+  msg2 << "Configuration file " << config_path << " passed. Parsing it ...";
+  _infoMsg(msg2.str(), __func__, true);
 
   // Define the mandatory keywords for the parser
   vector<string> req_keys = {"lower_bound",
@@ -106,9 +110,9 @@ int main(int argc, char* argv[]) {
   // Set the verbosity
   int _verbosity = any_cast<int>(config_map["verbosity"]);
 
-  ostringstream msg2;
-  msg2 << "Setting verbosity to: " << _verbosity;
-  _infoMsg(msg2.str(), __func__, true);
+  ostringstream msg3;
+  msg3 << "Setting verbosity to: " << _verbosity;
+  _infoMsg(msg3.str(), __func__, true);
 
   verbosity(_verbosity);
 
