@@ -130,7 +130,7 @@ def main():
   # Solve the problem
   print("Solving the problem. This may take a while...\n")
 
-  completedProc = subprocess.run(["./poissonFDM2D.o", config_filename], capture_output=True)
+  completedProc = subprocess.run(["./poissonFDM2D.o", config_filename, f"{SAVE_DIR}/log.txt"], capture_output=True)
   success = True
 
   if completedProc.returncode == 0:
@@ -149,7 +149,16 @@ def main():
     print("Exiting program...")
     exit()
 
-  # Otherwise continue to animation
+  # Otherwise output the log and continue to animation
+
+  print()
+
+  if (get_input("Do you want to print the solver log file? (yes/no)", str, choices=["yes", "no"]) == "yes"):
+    with open(f"{SAVE_DIR}/log.txt", "r") as f:
+      for line in f:
+        print(line, end='')
+
+  print()
 
   # Find the matrix files
   matrix_name = SAVE_NAME + "_t"
