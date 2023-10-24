@@ -34,7 +34,7 @@ N_TIME_POINTS = -1
 
 
 # Other constant variables
-FRAME_INTERVAL = 10
+FRAME_INTERVAL = 5
 FPS = 30
 
 
@@ -176,7 +176,7 @@ def main():
       TIMES.append(i * time_step)
 
   # Define figure size as a sensible multiple of width and height
-  fig_mult = height / 10.0
+  fig_mult = 10.0 / height
   figsize = (int(fig_mult * width), int(fig_mult * height))
 
   # Animate!

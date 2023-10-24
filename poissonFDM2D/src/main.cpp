@@ -51,6 +51,8 @@ int main(int argc, char* argv[]) {
     // Write output into a log file
     freopen(argv[2], "w", stdout);
 
+    poissonFDM2D::welcome(true);
+
     ostringstream msg1;
     msg1 << "Writing output into log file: " << argv[2];
     _infoMsg(msg1.str(), __func__, true);
@@ -61,6 +63,8 @@ int main(int argc, char* argv[]) {
   else {
     // Write output into a log file
     freopen("log.txt", "w", stdout);
+
+    poissonFDM2D::welcome(true);
   }
 
   // Verify that the C++ standard is compatible
@@ -69,8 +73,6 @@ int main(int argc, char* argv[]) {
     errorMsg << "Incompatible C++ version: " << _getcppStandard() << " used! Required C++17 or later.";
     _errorMsg(errorMsg.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
-
-  poissonFDM2D::welcome(true);
 
   // Parse the configuration file
   string config_path = argv[1];
