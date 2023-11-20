@@ -57,14 +57,12 @@ int main(int argc, char* argv[]) {
     msg1 << "Writing output into log file: " << argv[2];
     _infoMsg(msg1.str(), __func__, true);
   }
-  else if (argc != 2) {
-    _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  else if (argc == 2) {
+    // Don't redirect the std::cout
+    poissonFDM2D::welcome(true);
   }
   else {
-    // Write output into a log file
-    freopen("log.txt", "w", stdout);
-
-    poissonFDM2D::welcome(true);
+    _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
   }
 
   // Verify that the C++ standard is compatible

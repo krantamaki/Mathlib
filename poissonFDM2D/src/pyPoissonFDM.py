@@ -1,13 +1,13 @@
 """
 MAIN PYTHON SOURCE
 """
+import os
 import shutil
 import atexit
 import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.animation import FuncAnimation
 from tools import *
 
 
