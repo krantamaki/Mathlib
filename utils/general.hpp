@@ -26,6 +26,17 @@ namespace utils {
   }
 
 
+  // Function that forms a string from the given (arbitrary) arguments. Note that the function
+  // does not add any whitespaces and these are up to the user
+  template<class... Args>
+  std::string _format(Args... args) {
+    std::ostringstream msg;
+    (msg << ... << args);
+
+    return msg.str();
+  }
+
+
   // Function that counts the number of tokens in a string as divided by a delimeter
   inline int _numTokens(const std::string& str, char delim=' ') {
     std::istringstream stream(str);
