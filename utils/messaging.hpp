@@ -17,6 +17,34 @@
 #endif
 
 
+// Define macros for easier usage of the messaging functions
+
+// For error messages. Not to be mistaken with #error macro
+#ifndef ERROR
+#define ERROR(msg) { utils::_errorMsg(msg, __FILE__, __PRETTY_FUNCTION__, __LINE__); }
+#endif
+
+// For warning messages. Not to be mistaken with #warning macro
+#ifndef WARNING
+#define WARNING(msg) { utils::_warningMsg(msg, __func__); }
+#endif
+
+// For info messages
+#ifndef INFO
+#define INFO(msg) { utils::_infoMsg(msg, __func__); }
+#endif
+
+// For iteration info
+#ifndef ITER
+#define ITER(iter, norm) { utils::_iterMsg(iter, norm, __func__); }
+#endif
+
+// For low priority information
+#ifndef LOWPRIORITY
+#define LOWPRIORITY(msg) { utils::_lowPriorityMsg(msg, __func__); }
+#endif
+
+
 namespace utils {
 
   /*
