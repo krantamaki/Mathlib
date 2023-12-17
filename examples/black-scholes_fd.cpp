@@ -28,11 +28,11 @@
 
 
 #define RF 0.05  // The risk-free rate
-#define VOL 0.25  // The implied volatility of the underlying
+#define VOL 0.7  // The implied volatility of the underlying
 #define SQVOL VOL * VOL
 #define E 100.0  // The strike price
-#define T_0 1.0  // Time until expiry (arbitrary unit)
-#define S_MAX_MULT 4.0  // The multiple used to define the upper boundary for asset price
+#define T_0 100.0 / 365.0  // Time until expiry (as years)
+#define S_MAX_MULT 2.0  // The multiple used to define the upper boundary for asset price
 
 
 using namespace lalib;
@@ -94,7 +94,7 @@ double P(double S) {
 template<class type, bool vectorize, bool sparse>
 void blackScholesFDM(int nS) {
 
-  _infoMsg("Solving the Black-Scholes equation for a single (European) option using Finite Difference Method", __func__);
+  INFO("Solving the Black-Scholes equation for a single (European) option using Finite Difference Method");
 
   // The step of the underlying. The domain is (0, 4E)
   type _dS = (S_MAX_MULT * E) / (type)(nS - 1);
@@ -106,26 +106,22 @@ void blackScholesFDM(int nS) {
   int nT = nS;
   type _dt = T_0 / (nT);
 
-  std::cout << _dt / (_dS * _dS) << "\n";
-
   dt(_dt);
 
 
-  std::ostringstream msg1;
-  msg1 << "Finite difference mesh consists of " << nT << " x " << nS << " points";
-  _infoMsg(msg1.str(), __func__);
+  INFO(_format("Finite difference mesh consists of ", nT, " x ", nS, " points"));
 
-  _infoMsg("Are you sure you want to continue? (yes/no)", __func__);
+  INFO("Are you sure you want to continue? (yes/no)");
 
   std::string input;
   std::cin >> input;
 
   if (_tolower(input) != "yes") {
-    _errorMsg("Exiting program!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Exiting program!");
   }
 
 
-  _infoMsg("Solving for the system one time step at a time...", __func__);
+  INFO("Solving for the system one time step at a time...");
 
 
   // Time the total solver
@@ -136,7 +132,7 @@ void blackScholesFDM(int nS) {
 
 
   // Solve the system at payoff
-  _infoMsg("Solving the system at payoff...", __func__);
+  INFO("Solving the system at payoff...");
   for (int i = 0; i < nS; i++) {
     type s_i = i * _dS;
     V.place(i, P(s_i));
@@ -147,9 +143,7 @@ void blackScholesFDM(int nS) {
   for (int k = 1; k < nT; k++) {
     type t_k = T_0 - k * _dt;  // Time at which the system is to be solved
 
-    std::ostringstream msg2;
-    msg2 << "Solving the system at time: " << t_k << " ...";
-    _infoMsg(msg2.str(), __func__);
+    INFO(_format("Solving the system at time: ", t_k, " ..."));
 
     // Form the linear system
 
@@ -214,25 +208,24 @@ void blackScholesFDM(int nS) {
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  std::ostringstream msg3;
-  msg3 << "Time taken  to find the solution: " << duration.count() << " milliseconds";
-  _infoMsg(msg3.str(), __func__);
+
+  INFO(_format("Time taken  to find the solution: ", duration.count(), " milliseconds"));
 
   // Save the solution as black_scholes_sol.dat
-  _infoMsg("Saving the solution as black_scholes_sol.dat", __func__);
+  INFO("Saving the solution as black_scholes_sol.dat");
   V.save("black_scholes_sol.dat");
 }
 
 
 int main() {
 
-  int nS = 100;
+  int nS = 250;
 
   verbosity(3);
 
   blackScholesFDM<double, false, true>(nS);
 
-  _infoMsg("DONE", __func__);
+  INFO("DONE");
 
   return 0;
 }
