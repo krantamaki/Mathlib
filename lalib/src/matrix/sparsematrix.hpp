@@ -379,8 +379,6 @@ namespace lalib {
           // Read the last line of the file to get the dimensions of the matrix
           std::stringstream lastLine = _lastLine(path);
 
-          std::cout << "Last line: " << lastLine.str() << std::endl;
-
           int nTokens = _numTokens(lastLine.str());
           
           if (nTokens == 3) {
