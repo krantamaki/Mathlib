@@ -379,6 +379,8 @@ namespace lalib {
           // Read the last line of the file to get the dimensions of the matrix
           std::stringstream lastLine = _lastLine(path);
 
+          std::cout << "Last line: " << lastLine.str() << std::endl;
+
           int nTokens = _numTokens(lastLine.str());
           
           if (nTokens == 3) {
@@ -391,6 +393,10 @@ namespace lalib {
 
             // Start reading the lines from the beginning of the file
             std::ifstream file(path);
+
+            if (!file) {
+              ERROR("Couldn't open the given file!");
+            }
 
             if (safe_indexing) {
               int n_vals = 0;
@@ -430,6 +436,10 @@ namespace lalib {
 
             // Start reading the lines from the beginning of the file
             std::ifstream file(path);
+
+            if (!file) {
+              ERROR("Couldn't open the given file!");
+            }
 
             if (safe_indexing) {
               int n_vals = 0;
@@ -1482,9 +1492,9 @@ namespace lalib {
        *
        * FOR DEBUGGING PURPOSES ONLY!
        */
-      void _printArrays() {
+      void _printArrays() const {
         std::cout << "vals: [";
-        for (double val: vals) std::cout << val << " ";
+        for (type val: vals) std::cout << val << " ";
         std::cout << "]\n";
 
         std::cout << "col_i: [";
@@ -1727,7 +1737,7 @@ namespace lalib {
             }
           }
         }
-
+        
         return ret;
       }
 

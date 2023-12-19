@@ -31,6 +31,11 @@ inline int _ceil(int a, int b) {
 // Inspired by: https://stackoverflow.com/questions/11876290/c-fastest-way-to-read-only-last-line-of-text-file
 inline std::stringstream _lastLine(const std::string& filepath) {
   std::ifstream file(filepath);
+
+  if (!file) {
+    ERROR("Couldn't open the given file!");
+  }
+
   char c;
   file.seekg(-1, std::ios_base::end);  // Go to last non EOF char
 
