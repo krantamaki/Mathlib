@@ -1105,7 +1105,7 @@ namespace lalib {
 
               type val = t_zero;
 
-              for (int i = 0; i < _nrows; i++) {
+              for (int i = 0; i < _ncols; i++) {
                 val += this->operator() (row, i) * that(i, col);
               }
               
