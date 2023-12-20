@@ -49,9 +49,9 @@ namespace utils {
 
   /*
   * Function that defines and returns the verbosity level
-  * Note that verbosity will have 3 levels:
+  * Note that verbosity will have 5 levels:
   *   1: Error messages
-  *   2: 1 warning messages
+  *   2: 1 and warning messages
   *   3: 2 and base info messages
   *   4: 3 and iteration messages
   *   5: Everything
