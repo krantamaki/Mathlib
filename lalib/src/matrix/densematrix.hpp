@@ -5,9 +5,6 @@
 #include "matrix_decl.hpp"
 
 
-using namespace utils;
-
-
 namespace lalib {
 
   /**
@@ -27,7 +24,7 @@ namespace lalib {
     protected:
 
       // Alias the used variable type in computations
-      using var_t = decltype(_choose_simd<type, vectorize>());
+      using var_t = decltype(utils::_choose_simd<type, vectorize>());
 
 
       // Should define a SIMD vector of zeros or scalar zero depending on vectorization
@@ -110,7 +107,7 @@ namespace lalib {
       Matrix(const Matrix<type, vectorize, false>& that) {
 
         if (that._ncols < 1 || that._nrows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = that._ncols;
@@ -139,7 +136,7 @@ namespace lalib {
       Matrix(int rows, int cols) {
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = cols;
@@ -170,7 +167,7 @@ namespace lalib {
       Matrix(int rows, int cols, type init_val) {
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = cols;
@@ -204,10 +201,10 @@ namespace lalib {
        */
       Matrix(int rows, int cols, type* elems) {
 
-        _warningMsg("Initializing a matrix with double array might lead to undefined behaviour!", __func__);
+        WARNING("Initializing a matrix with double array might lead to undefined behaviour!");
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = cols;
@@ -249,11 +246,11 @@ namespace lalib {
       Matrix(int rows, int cols, std::vector<type>& elems) {
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         if (rows * cols != (int)elems.size()) {
-          _warningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
+          WARNING("Given dimensions don't match with the size of the std::vector!");
         } 
 
         _ncols = cols;
@@ -294,7 +291,7 @@ namespace lalib {
       Matrix& operator+= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         } 
 
         if constexpr (vectorize) {
@@ -349,7 +346,7 @@ namespace lalib {
       Matrix& operator-= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         } 
 
         if constexpr (vectorize) {
@@ -404,7 +401,7 @@ namespace lalib {
       Matrix& operator*= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         } 
 
         if constexpr (vectorize) {
@@ -514,7 +511,7 @@ namespace lalib {
       Matrix& operator/= (const Matrix& that) {
 
         if (ncols() != that._ncols || nrows() != that._ncols) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         } 
 
         if constexpr (vectorize) {
@@ -568,7 +565,7 @@ namespace lalib {
       Matrix& operator/= (type that) {
 
         if (that == t_zero) {
-          _errorMsg("Division by zero undefined!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Division by zero undefined!");
         }
         if (_nrows < 1 || _ncols < 1) {
           return *this;
@@ -628,7 +625,7 @@ namespace lalib {
       void place(int row, int col, type val) {
 
         if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-          _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given dimensions out of bounds!");
         }
 
         if constexpr (vectorize) {
@@ -658,7 +655,7 @@ namespace lalib {
       void place(int rowStart, int rowEnd, int colStart, int colEnd, const Matrix<type, vectorize, false>& matrix) {
 
         if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
-          _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given dimensions out of bounds!");
         }
 
         #pragma omp parallel for schedule(dynamic, 1)
@@ -692,7 +689,7 @@ namespace lalib {
       type operator() (int row, int col) const {
 
         if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-          _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given dimensions out of bounds!");
         }
 
         if constexpr (vectorize) {
@@ -739,7 +736,7 @@ namespace lalib {
       type operator[] (int num) const {
 
         if (num >= _ncols * _nrows) {
-          _errorMsg("Given index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given index out of bounds!");
         }
 
         const int row = num / _ncols;
@@ -767,11 +764,11 @@ namespace lalib {
       const Matrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
         
         if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
-          _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions given!");
         }
 
         if (rowEnd > _nrows || colEnd > _ncols) {
-          _warningMsg("End index out of bounds", __func__);
+          WARNING("End index out of bounds");
         }
 
         int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
@@ -831,11 +828,11 @@ namespace lalib {
       type* getSIMD(int num) const {
 
         if (!vectorize) {
-          _errorMsg("To access SIMD vectors implementation must be vectorized", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("To access SIMD vectors implementation must be vectorized");
         }
 
         if (num >= _total_vects) {
-          _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Index out of bounds!");
         }
 
         return (type*)&data.data()[num];
@@ -852,7 +849,7 @@ namespace lalib {
        * @return The wanted column as a Vector object
        */
       const Vector<type, vectorize> getCol(int col) const {
-        _errorMsg("Not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        ERROR("Not yet implemented!");
       }
 
 
@@ -866,7 +863,7 @@ namespace lalib {
        * @return The wanted row as a Vector object
        */
       const Vector<type, vectorize> getRow(int row) const {
-        _errorMsg("Not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        ERROR("Not yet implemented!");
       }
 
       
@@ -1068,7 +1065,7 @@ namespace lalib {
       const Matrix matmulNaive(const Matrix& that) const {
         
         if (_ncols != that._nrows) {
-          _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions given!");
         }
 
         Matrix ret = Matrix<type, vectorize, false>(_nrows, that._ncols);
@@ -1136,7 +1133,7 @@ namespace lalib {
       const Matrix matmul(const Matrix& that) const {
 
         if (_ncols != that._nrows) {
-          _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions given!");
         }
 
         // 100 chosen as arbitrary threshold
@@ -1161,7 +1158,7 @@ namespace lalib {
       const Vector<type, vectorize> matmul(const Vector<type, vectorize>& that) const {
 
         if (_ncols != that.len()) {
-          _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions given!");
         }
 
         Vector ret = Vector<type, vectorize>(_nrows);
@@ -1217,11 +1214,11 @@ namespace lalib {
       const type rowDot(int row, const Vector<type, vectorize>& that) const {
 
         if (_ncols != that.len()) {
-          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions!");
         }
 
         if (row < 0 || row >= _nrows) {
-          _errorMsg("Improper row index!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper row index!");
         }
 
         type ret = t_zero;
@@ -1244,7 +1241,7 @@ namespace lalib {
       std::vector<type> tovector() const {
 
         if (_ncols <= 0 || _nrows <= 0) {
-          _errorMsg("Matrix must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be initialized!");
         }
 
         std::vector<type> ret;
@@ -1272,7 +1269,7 @@ namespace lalib {
       type asScalar() const {
 
         if (_ncols != 1 || _nrows != 1) {
-          _errorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be a 1 x 1 matrix!");
         }
 
         return this->operator() (0, 0);
@@ -1291,7 +1288,7 @@ namespace lalib {
       const Vector<type, vectorize> asVector() const {
 
         if (_ncols != 1 && _nrows != 1) {
-          _errorMsg("Matrix must be a 1 x n or n x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be a 1 x n or n x 1 matrix!");
         }
           
         Vector ret = Vector<type, vectorize>(_nrows * _ncols);
@@ -1319,7 +1316,7 @@ namespace lalib {
       type norm(type (*pow_func)(type, type) = &std::pow) const {
 
         if (_ncols <= 0 || _nrows <= 0) {
-          _errorMsg("Matrix must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be initialized!");
         }
 
         type ret = t_zero;

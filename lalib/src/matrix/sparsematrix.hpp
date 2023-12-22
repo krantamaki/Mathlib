@@ -5,9 +5,6 @@
 #include "matrix_decl.hpp"
 
 
-using namespace utils;
-
-
 namespace lalib {
 
   /**
@@ -32,7 +29,7 @@ namespace lalib {
     protected:
 
       // Alias the used variable type in computations
-      using var_t = decltype(_choose_simd<type, vectorize>());
+      using var_t = decltype(utils::_choose_simd<type, vectorize>());
 
 
       // Should define a SIMD vector of zeros or scalar zero depending on vectorization
@@ -116,14 +113,14 @@ namespace lalib {
       Matrix(const Matrix<type, vectorize, true>& that) {
 
         if (that._ncols < 1 || that._nrows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = that._ncols;
         _nrows = that._nrows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {  
           vals = that.vals;
@@ -145,14 +142,14 @@ namespace lalib {
       Matrix(int rows, int cols) {
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = cols;
         _nrows = rows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           rowPtrs = std::vector<int>(rows + 1, 0);
@@ -178,21 +175,21 @@ namespace lalib {
       Matrix(int rows, int cols, type init_val) {
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = cols;
         _nrows = rows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           if (init_val == t_zero) {
             rowPtrs = std::vector<int>(rows + 1, 0);
           }
           else {
-            _warningMsg("Full matrix allocation is not memory efficient! Consider using a dense Matrix object instead.", __func__);
+            WARNING("Full matrix allocation is not memory efficient! Consider using a dense Matrix object instead.");
 
             vals.reserve(_ncols * _nrows);
             colInds.reserve(_ncols * _nrows);
@@ -226,17 +223,17 @@ namespace lalib {
        */
       Matrix(int rows, int cols, type* elems) {
 
-        _warningMsg("Initializing a matrix with double array might lead to undefined behaviour!", __func__);
+        WARNING("Initializing a matrix with double array might lead to undefined behaviour!");
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         _ncols = cols;
         _nrows = rows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           rowPtrs.push_back(0);
@@ -275,18 +272,18 @@ namespace lalib {
       Matrix(int rows, int cols, const std::vector<type>& elems) {
 
         if (cols < 1 || rows < 1) {
-          _errorMsg("Matrix dimensions must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must be positive!");
         }
 
         if (rows * cols != (int)elems.size()) {
-          _warningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
+          WARNING("Given dimensions don't match with the size of the std::vector!");
         } 
 
         _ncols = cols;
         _nrows = rows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           rowPtrs.push_back(0);
@@ -324,14 +321,14 @@ namespace lalib {
       Matrix(int rows, int cols, const std::vector<type>& new_vals, const std::vector<int>& new_colInds, const std::vector<int>& new_rowPtrs) {
         
         if (*std::max_element(new_colInds.begin(), new_colInds.end()) >= cols || *std::max_element(new_rowPtrs.begin(), new_rowPtrs.end()) > (int)new_colInds.size() || *std::min_element(new_colInds.begin(), new_colInds.end()) < 0 || *std::min_element(new_rowPtrs.begin(), new_rowPtrs.end()) < 0) {
-          _errorMsg("Matrix dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions out of bounds!");
         }
         
         _ncols = cols;
         _nrows = rows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           vals = new_vals;
@@ -365,7 +362,7 @@ namespace lalib {
       Matrix(const std::string& path, int offset = 0, const std::string format = ".dat", bool safe_indexing = false) {
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           // Variables to read the line contents to
@@ -373,13 +370,13 @@ namespace lalib {
           type val;
 
           if (format != ".dat") {
-            _errorMsg("Support for other formats than .dat not implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+            ERROR("Support for other formats than .dat not implemented!");
           }
 
           // Read the last line of the file to get the dimensions of the matrix
           std::stringstream lastLine = _lastLine(path);
 
-          int nTokens = _numTokens(lastLine.str());
+          int nTokens = utils::_numTokens(lastLine.str());
           
           if (nTokens == 3) {
             lastLine >> row >> col >> val;
@@ -464,7 +461,7 @@ namespace lalib {
             file.close();
           }
           else {
-            _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+            ERROR("Improper data file!");
           }
         }
       }
@@ -487,11 +484,11 @@ namespace lalib {
       Matrix& operator+= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -537,11 +534,11 @@ namespace lalib {
       Matrix& operator-= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -587,11 +584,11 @@ namespace lalib {
       Matrix& operator*= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -637,7 +634,7 @@ namespace lalib {
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int i = 0; i < (int)vals.size(); i++) {
@@ -676,11 +673,11 @@ namespace lalib {
       Matrix& operator/= (const Matrix& that) {
 
         if (_ncols != that._ncols || _nrows != that._nrows) {
-          _errorMsg("Matrix dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix dimensions must match!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -722,14 +719,14 @@ namespace lalib {
       Matrix& operator/= (type that) {
 
         if (that == t_zero) {
-          _errorMsg("Division by zero undefined!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+         ERROR("Division by zero undefined!");
         }
         if (_nrows < 1 || _ncols < 1) {
           return *this;
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -772,11 +769,11 @@ namespace lalib {
       void place(int row, int col, type val) {
 
         if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-          _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given dimensions out of bounds!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           // If value is not zero it needs to be placed into the matrix
@@ -896,11 +893,11 @@ namespace lalib {
       void place(int rowStart, int rowEnd, int colStart, int colEnd, Matrix<type, vectorize, true>& matrix) {
 
         if (_nrows < rowEnd - rowStart || _ncols < colEnd - colStart || matrix._nrows < rowEnd - rowStart || matrix._ncols < colEnd - colStart) {
-          _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given dimensions out of bounds!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row0 = 0; row0 < rowEnd - rowStart; row0++) {
@@ -936,15 +933,15 @@ namespace lalib {
       void placeCol(int col, Vector<type, vectorize>& vector) {
 
         if (col >= _ncols) {
-          _errorMsg("Given column out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given column out of bounds!");
         }
 
         if (vector.len() > _nrows) {
-          _warningMsg("End index out of bounds", __func__);
+          WARNING("End index out of bounds");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -976,15 +973,15 @@ namespace lalib {
       void placeRow(int row, Vector<type, vectorize>& vector) {
 
         if (row >= _nrows) {
-          _errorMsg("Given column out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given column out of bounds!");
         }
 
         if (vector.len() > _ncols) {
-          _warningMsg("End index out of bounds", __func__);
+          ERROR("End index out of bounds");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           int old_n_row_elems = rowPtrs[row + 1] - rowPtrs[row];
@@ -1036,11 +1033,11 @@ namespace lalib {
       type operator() (int row, int col) const {
 
         if (row < 0 || col < 0 || row >= _nrows || col >= _ncols) {
-          _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given dimensions out of bounds!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+         ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           int rowPtr = rowPtrs[row];
@@ -1124,11 +1121,11 @@ namespace lalib {
       const Matrix operator() (int rowStart, int rowEnd, int colStart, int colEnd) const {
 
         if (rowStart >= rowEnd || rowStart < 0 || colStart >= colEnd || colStart < 0) {
-          _errorMsg("Improper dimensions given!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions given!");
         }
 
         if (rowEnd > _nrows || colEnd > _ncols) {
-          _warningMsg("End index out of bounds", __func__);
+          WARNING("End index out of bounds");
         }
 
         int _rowEnd = rowEnd > _nrows ? _nrows : rowEnd;
@@ -1137,7 +1134,7 @@ namespace lalib {
         Matrix ret = Matrix<type, vectorize, true>(_rowEnd - rowStart, _colEnd - colStart);
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row0 = 0; row0 < _rowEnd - rowStart; row0++) {
@@ -1188,13 +1185,13 @@ namespace lalib {
       const Vector<type, vectorize> getCol(int col) const {
 
         if (col >= _ncols) {
-          _errorMsg("Given column out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given column out of bounds!");
         }
 
         Vector ret = Vector<type, vectorize>(_nrows);
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           // As there is no efficient way to access the column elements of a CRSMatrix the implementation is naive
@@ -1219,13 +1216,13 @@ namespace lalib {
       const Vector<type, vectorize> getRow(int row) const {
 
         if (row >= _nrows) {
-          _errorMsg("Given row out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Given row out of bounds!");
         }
 
         Vector ret = Vector<type, vectorize>(_ncols);
         
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int i = rowPtrs[row]; i < rowPtrs[row + 1]; i++) {
@@ -1258,11 +1255,11 @@ namespace lalib {
       type* getSIMD(int num) const {
 
         if (!vectorize) {
-          _errorMsg("To access SIMD vectors implementation must be vectorized", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("To access SIMD vectors implementation must be vectorized");
         }
 
         if (num >= _total_vects) {
-          _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Index out of bounds!");
         }
 
         return (type*)&vals.data()[num];
@@ -1290,7 +1287,7 @@ namespace lalib {
         _nrows = that._nrows;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           vals = that.vals;
@@ -1323,7 +1320,7 @@ namespace lalib {
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           int this_num_non_zeros = vals.size();
@@ -1411,7 +1408,7 @@ namespace lalib {
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           int this_num_non_zeros = vals.size();
@@ -1450,17 +1447,17 @@ namespace lalib {
       bool save(const std::string& path, int offset = 0, std::string format = ".dat") {
 
         if (_ncols <= 0 || _nrows <= 0) {
-          _errorMsg("Cannot save an unitialized matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Cannot save an unitialized matrix!");
         }
 
         if (format != ".dat") {
-          _errorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Support for other formats than .dat not yet implemented!");
         }
 
         bool success = true;
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           std::ofstream file(path);
@@ -1523,7 +1520,7 @@ namespace lalib {
         Matrix ret = Matrix<type, vectorize, true>(_ncols, _nrows);
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -1558,7 +1555,7 @@ namespace lalib {
         Matrix ret = Matrix<type, vectorize, true>(_ncols, _nrows);
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int col = 0; col < _ncols; col++) {
@@ -1615,7 +1612,7 @@ namespace lalib {
       const Matrix matmulNaive(const Matrix& that) const {
 
         if (_ncols != that._nrows) {
-          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions!");
         }
 
         // Create the matrix that will be filled
@@ -1625,7 +1622,7 @@ namespace lalib {
         Matrix that_T = that.T();
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -1686,7 +1683,7 @@ namespace lalib {
       const Matrix matmul(const Matrix& that) const {
 
         if (_ncols != that._nrows) {
-          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions!");
         }
 
         if (_ncols > STRASSEN_THRESHOLD && _nrows > STRASSEN_THRESHOLD && that._ncols > STRASSEN_THRESHOLD) {
@@ -1710,13 +1707,13 @@ namespace lalib {
       const Vector<type, vectorize> matmul(const Vector<type, vectorize>& that) const {
 
         if (_ncols != that.len()) {
-          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions!");
         }
 
         Vector ret = Vector<type, vectorize>(_nrows);
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           #pragma omp parallel for schedule(dynamic, 1)
@@ -1753,11 +1750,11 @@ namespace lalib {
       const type rowDot(int row, const Vector<type, vectorize>& that) const {
 
         if (_ncols != that.len()) {
-          _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper dimensions!");
         }
 
         if (row < 0 || row >= _nrows) {
-          _errorMsg("Improper row index!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Improper row index!");
         }
 
         type ret = t_zero;
@@ -1786,14 +1783,14 @@ namespace lalib {
       std::vector<type> tovector() const {
 
         if (_ncols <= 0 || _nrows <= 0) {
-          _errorMsg("Matrix must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be initialized!");
         }
 
         std::vector<type> ret;
         ret.reserve(_ncols * _nrows);
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           for (int row = 0; row < _nrows; row++) {
@@ -1819,11 +1816,11 @@ namespace lalib {
       double asDouble() const {
 
         if (_ncols != 1 || _nrows != 1) {
-          _errorMsg("Matrix must be a 1 x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be a 1 x 1 matrix!");
         }
 
         if constexpr (vectorize) {
-          _errorMsg("Vectorized version of sparse matrix not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Vectorized version of sparse matrix not yet implemented!");
         }
         else {
           if (vals.size() > 0) return vals[0];
@@ -1845,7 +1842,7 @@ namespace lalib {
       const Vector<type, vectorize> asVector() const {
 
         if (_ncols != 1 && _nrows != 1) {
-          _errorMsg("Matrix must be a 1 x n or n x 1 matrix!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be a 1 x n or n x 1 matrix!");
         }
           
         Vector ret = Vector<type, vectorize>(_nrows * _ncols);
@@ -1873,7 +1870,7 @@ namespace lalib {
       double norm(type (*pow_func)(type, type) = &std::pow) const {
 
         if (_ncols <= 0 || _nrows <= 0) {
-          _errorMsg("Matrix must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Matrix must be initialized!");
         }
 
         type ret = t_zero;
