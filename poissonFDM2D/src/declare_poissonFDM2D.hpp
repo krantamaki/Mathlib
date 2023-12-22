@@ -1,4 +1,5 @@
-#ifndef DECL_POISSON2D_HPP
+#ifndef DECLARE_POISSON2D_HPP
+#define DECLARE_POISSON2D_HPP
 
 
 #include <cstdio>
@@ -26,9 +27,6 @@
 #include "../../lalib/src/matrix/Matrix.hpp"
 
 
-using namespace utils;
-using namespace lalib;
-using namespace std;
 namespace fs = std::filesystem;
 
 

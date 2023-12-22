@@ -40,10 +40,10 @@ namespace poissonFDM2D {
   // time t_i is the temperature at time t_{i-1}. As that is known we only need
   // to form the coefficient matrix here
   template<class type, bool vectorize, bool sparse>
-  Matrix<type, vectorize, sparse> formSystem(type height, type width, int nH, int nW, type dt, type alpha) {
+  lalib::Matrix<type, vectorize, sparse> formSystem(type height, type width, int nH, int nW, type dt, type alpha) {
 
     if (height <= (type)0.0 || width <= (type)0.0 || nH <= 0 || nW <= 0 || dt <= (type)0.0) {
-      _errorMsg("The parameter values need to be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("The parameter values need to be positive!");
     }
 
     type dH = height / ((type)nH);  // Step size height-wise
@@ -89,16 +89,18 @@ namespace poissonFDM2D {
     }
 
     int dim = nH * nW;
-    Matrix<type, vectorize, sparse> A = Matrix<type, vectorize, sparse>(dim, dim, vals, colInds, rowPtrs);
+    lalib::Matrix<type, vectorize, sparse> A = lalib::Matrix<type, vectorize, sparse>(dim, dim, vals, colInds, rowPtrs);
 
-    _infoMsg("Successfully formed the linear system", __func__);
+    INFO("Successfully formed the linear system");
 
     return A;
   }
 
 
   template<class type, bool vectorize, bool sparse>
-  bool poissonFDM2D(map<string, any> config_map) {
+  bool poissonFDM2D(std::map<std::string, std::any> config_map) {
+
+    using namespace std;
 
     // Get required values from configuration map
     string save_dir = any_cast<string>(config_map["save_dir"]);
@@ -141,7 +143,7 @@ namespace poissonFDM2D {
       // Check that the time step is stable
       dt = duration / n_time_points;
       if (dt > (dH * dH + dW * dW) / (4 * alpha)) {
-        _warningMsg("The given number of points might not lead to a stable solution!", __func__);
+        WARNING("The given number of points might not lead to a stable solution!");
       }
     }
     else {
@@ -152,18 +154,11 @@ namespace poissonFDM2D {
       n_time_points = (int)(duration / dt);
     }
 
-
-    ostringstream step_info;
-    step_info << "Using time step of: " << dt << " with total of: " << n_time_points << " time points";
-    _infoMsg(step_info.str(), __func__);
-
-    ostringstream dim_info;
-    dim_info << "Dimension of the linear systems will be: " << dim << " x " << dim;
-    _infoMsg(dim_info.str(), __func__);
-
+    INFO(utils::_format("Using time step of: ", dt, " with total of: ", n_time_points, " time points"));
+    INFO(utils::_format("Dimension of the linear systems will be: ", dim, " x ", dim));
 
     // Set up the initial solution
-    Vector<type, vectorize> init = Vector<type, vectorize>(dim, initial_temp);
+    lalib::Vector<type, vectorize> init = lalib::Vector<type, vectorize>(dim, initial_temp);
 
     // Add boundary conditions to it
     for (int i = 0; i < n_height_points; i++) {
@@ -182,24 +177,19 @@ namespace poissonFDM2D {
 
 
     // Save the initial solution
-    ostringstream save_msg;
-    save_msg << "Solutions will be saved in directory " << save_dir << " using name(s) " << save_name << "_ti.dat where i is the time step.";
-    _infoMsg(save_msg.str(), __func__);
+    INFO(utils::_format("Solutions will be saved in directory ", save_dir, " using name(s) ", save_name, "_ti.dat where i is the time step."));
 
-    ostringstream init_save;
-    init_save << save_dir << "/" << save_name << "_t0.dat";
-  
-    if (!init.save(init_save.str())) {
-      _errorMsg("Couldn't save the result vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    if (!init.save(utils::_format(save_dir, "/", save_name, "_t0.dat"))) {
+      ERROR("Couldn't save the result vector!");
     }
 
 
     // Define the inital RHS vector
-    Vector<type, vectorize> b = Vector<type, vectorize>(init);
+    lalib::Vector<type, vectorize> b = lalib::Vector<type, vectorize>(init);
 
     // Form the coefficient matrix. This needs to be done only once
-    _infoMsg("Forming the coefficient matrix. This needs to be done only once...", __func__);
-    Matrix<type, vectorize, sparse> A = formSystem<type, vectorize, sparse>(height, width, n_height_points, n_width_points, dt, alpha);
+    INFO("Forming the coefficient matrix. This needs to be done only once...");
+    lalib::Matrix<type, vectorize, sparse> A = formSystem<type, vectorize, sparse>(height, width, n_height_points, n_width_points, dt, alpha);
 
 
     // Time the solution
@@ -208,57 +198,50 @@ namespace poissonFDM2D {
     // Loop over the timesteps, form linear systems and solve them
     for (int t_i = 1; t_i <= n_time_points; t_i++) {
 
-      ostringstream msg;
-      msg << "Solving the system at time: " << t_i * dt << " (" << t_i << "/" << n_time_points << " done)";
-      _lowPriorityMsg(msg.str(), __func__);
+      LOWPRIORITY(utils::_format("Solving the system at time: ", t_i * dt, " (", t_i, "/", n_time_points, " done)"));
 
       // Form the initial guess. We will use a zero vector as initial guess
-      Vector<type, vectorize> x0 = Vector<type, vectorize>(dim);
+      lalib::Vector<type, vectorize> x0 = lalib::Vector<type, vectorize>(dim);
 
-      Vector<type, vectorize> ret;
+      lalib::Vector<type, vectorize> ret;
 
       // Solve the system
       if (method == "cg") {
-        _lowPriorityMsg("Calling the Conjugate Gradient method", __func__);
-        _lowPriorityMsg("", __func__);
-        ret = cgSolve<type, vectorize, sparse>(A, x0, b, max_iter, convergence_tolerance);
-        _lowPriorityMsg("", __func__);
+        LOWPRIORITY("Calling the Conjugate Gradient method");
+        LOWPRIORITY("");
+        ret = lalib::cgSolve<type, vectorize, sparse>(A, x0, b, max_iter, convergence_tolerance);
+        LOWPRIORITY("");
       }
       else if (method == "cgnr") {
-        _lowPriorityMsg("Calling the Conjugate Gradient on normal equations method", __func__);
-        _lowPriorityMsg("", __func__);
-        ret = cgnrSolve<type, vectorize, sparse>(A, x0, b, max_iter, convergence_tolerance);
-        _lowPriorityMsg("", __func__);
+        LOWPRIORITY("Calling the Conjugate Gradient on normal equations method");
+        LOWPRIORITY("");
+        ret = lalib::cgnrSolve<type, vectorize, sparse>(A, x0, b, max_iter, convergence_tolerance);
+        LOWPRIORITY("");
       }
       else {
-        _errorMsg("Improper solver provided!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+       ERROR("Improper solver provided!");
       }
 
       // Compute the residual norm
       type res_norm = (A.matmul(ret) - b).norm();
-      std::ostringstream msg2;
-      msg2 << "Residual norm: " << res_norm;
-      _lowPriorityMsg(msg2.str(), __func__);
+      LOWPRIORITY(utils::_format("Residual norm: ", res_norm));
 
       if (res_norm < convergence_tolerance) {
-        _lowPriorityMsg("Residual within tolerance. Continuing to next time step", __func__);
+        LOWPRIORITY("Residual within tolerance. Continuing to next time step");
       }
       else {
         if (stop_unconverged) {
-          _errorMsg("Solver did not converge to wanted tolerance. Stopping execution...", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Solver did not converge to wanted tolerance. Stopping execution...");
         }
         else {
-          _warningMsg("Solver did not converge to wanted tolerance. Continuing...", __func__);
+          WARNING("Solver did not converge to wanted tolerance. Continuing...");
           success = false;
         }
       }
 
       // Save the solution
-      ostringstream save_path;
-      // save_path << save_dir << "/" << save_name << "_t" << t_i << ".dat";
-      save_path << save_dir << "/" << save_name << "_t" << t_i << ".dat";
-      if (!ret.save(save_path.str())) {
-        _errorMsg("Couldn't save the result vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      if (!ret.save(utils::_format(save_dir, "/", save_name, "_t", t_i, ".dat"))) {
+        ERROR("Couldn't save the result vector!");
       }
 
       // Update RHS vector
@@ -271,9 +254,7 @@ namespace poissonFDM2D {
     // Compute the passed time
     auto time = chrono::duration_cast<chrono::milliseconds>(end - start);
 
-    std::ostringstream msg;
-    msg << "Time taken to form the solution: " << time.count() << " milliseconds";
-    _infoMsg(msg.str(), __func__);
+    INFO(utils::_format("Time taken to form the solution: ", time.count(), " milliseconds"));
 
     return success;
   }

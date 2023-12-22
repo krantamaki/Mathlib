@@ -11,28 +11,20 @@
 
 
 void poissonFDM2D::welcome(bool always_print) {
-  _infoMsg("", __func__, always_print);
-  _infoMsg("###########################################################", __func__, always_print);
-  _infoMsg("# You are using a FDM software for the 2D heat equation!  #", __func__, always_print);
+  utils::_infoMsg("", __func__, always_print);
+  utils::_infoMsg("###########################################################", __func__, always_print);
+  utils::_infoMsg("# You are using a FDM software for the 2D heat equation!  #", __func__, always_print);
+  utils::_infoMsg(utils::_format("# This program was compiled on ", __DATE__, std::setw(17), "#"), __func__, always_print);
+  utils::_infoMsg(utils::_format("# Using C++ standard ", utils::_getcppStandard(), " (req. C++17 or later)", std::setw(11), "#"), __func__, always_print);
 
-  ostringstream msgStream1;
-  msgStream1 << "# This program was compiled on " << __DATE__ << std::setw(17) << "#";
-  _infoMsg(msgStream1.str(), __func__, always_print);
-
-  ostringstream msgStream2;
-  msgStream2 << "# Using C++ standard " << _getcppStandard() << " (req. C++17 or later)" << std::setw(11) << "#";
-  _infoMsg(msgStream2.str(), __func__, always_print);
-
-  ostringstream msgStream3;
   int thread_int = omp_get_max_threads();
-  string thread_str = to_string(thread_int);
+  std::string thread_str = std::to_string(thread_int);
   int n_chars = thread_str.size();
-  msgStream3 << "# Running with " << thread_str << " openMP threads" << std::setw(29 - n_chars) << "#";
-  _infoMsg(msgStream3.str(), __func__, always_print);
+  utils::_infoMsg(utils::_format("# Running with ", thread_str, " openMP threads", std::setw(29 - n_chars), "#"), __func__, always_print);
 
-  _infoMsg("# Starting the program!                                   #", __func__, always_print);
-  _infoMsg("###########################################################", __func__, always_print);
-  _infoMsg("", __func__, always_print);
+  utils::_infoMsg("# Starting the program!                                   #", __func__, always_print);
+  utils::_infoMsg("###########################################################", __func__, always_print);
+  utils::_infoMsg("", __func__, always_print);
 }
 
 
@@ -41,8 +33,8 @@ int main(int argc, char* argv[]) {
   if (argc == 3) {
     // Check if the directory in which the log is to be stored exists
     // If not create it
-    vector<string> path_vector = _split(argv[2], '/');
-    string dir_path = _join(vector<string>(path_vector.begin(), path_vector.end() - 1), '/');
+    std::vector<std::string> path_vector = utils::_split(argv[2], '/');
+    std::string dir_path = utils::_join(std::vector<std::string>(path_vector.begin(), path_vector.end() - 1), '/');
     
     if (!fs::exists(dir_path)) {
       fs::create_directories(dir_path);
@@ -53,45 +45,35 @@ int main(int argc, char* argv[]) {
 
     poissonFDM2D::welcome(true);
 
-    ostringstream msg1;
-    msg1 << "Writing output into log file: " << argv[2];
-    _infoMsg(msg1.str(), __func__, true);
+    utils::_infoMsg(utils::_format("Writing output into log file: ", argv[2]), __func__, true);
   }
-  else if (argc == 2) {
-    // Don't redirect the std::cout
-    poissonFDM2D::welcome(true);
-  }
-  else {
-    _errorMsg("Improper number of arguments passed!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  else if (argc != 2) {
+    ERROR("Improper number of arguments passed!");
   }
 
   // Verify that the C++ standard is compatible
   if (__cplusplus < 201703L) {
-    ostringstream errorMsg;
-    errorMsg << "Incompatible C++ version: " << _getcppStandard() << " used! Required C++17 or later.";
-    _errorMsg(errorMsg.str(), __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR(utils::_format("Incompatible C++ version: ", utils::_getcppStandard(), " used! Required C++17 or later."));
   }
 
   // Parse the configuration file
-  string config_path = argv[1];
+  std::string config_path = argv[1];
 
-  ostringstream msg2;
-  msg2 << "Configuration file " << config_path << " passed. Parsing it ...";
-  _infoMsg(msg2.str(), __func__, true);
+  utils::_infoMsg(utils::_format("Configuration file ", config_path, " passed. Parsing it ..."), __func__, true);
 
   // Define the mandatory keywords for the parser
-  vector<string> req_keys = {"lower_bound",
-                             "upper_bound",
-                             "left_bound",
-                             "right_bound",
-                             "height",
-                             "width",
-                             "duration",
-                             "n_height_points",
-                             "n_width_points"};
+  std::vector<std::string> req_keys = {"lower_bound",
+                                       "upper_bound",
+                                       "left_bound",
+                                       "right_bound",
+                                       "height",
+                                       "width",
+                                       "duration",
+                                       "n_height_points",
+                                       "n_width_points"};
 
   // Define the optional keywords for the parser and their associated default values
-  map<string, any> opt_keys;
+  std::map<std::string, std::any> opt_keys;
 
   opt_keys = {{"method", "cg"},
               {"verbosity", 3},
@@ -105,27 +87,23 @@ int main(int argc, char* argv[]) {
               {"thermal_diffusivity", 1.0}};
 
   // Parse the input
-  map<string, any> config_map = parser::parser(config_path, req_keys, opt_keys);
+  std::map<std::string, std::any> config_map = parser::parser(config_path, req_keys, opt_keys);
 
   // Set the verbosity
-  int _verbosity = any_cast<int>(config_map["verbosity"]);
-
-  ostringstream msg3;
-  msg3 << "Setting verbosity to: " << _verbosity;
-  _infoMsg(msg3.str(), __func__, true);
-
-  verbosity(_verbosity);
+  int _verbosity = std::any_cast<int>(config_map["verbosity"]);
+  utils::_infoMsg(utils::_format("Setting verbosity to: ", _verbosity), __func__, true);
+  utils::verbosity(_verbosity);
 
   // Solve the system
-  _infoMsg("Parsing complete. Advancing to the finite difference method ...", __func__);
+  INFO("Parsing complete. Advancing to the finite difference method ...");
 
   bool converged = poissonFDM2D::poissonFDM2D<double, false, true>(config_map);
 
   // Check if convergence was reached
-  if (converged) _infoMsg("Successfully solved the wanted problem!", __func__);
-  else _infoMsg("There was some issue with the problem!", __func__);
+  if (converged) { INFO("Successfully solved the wanted problem!"); }
+  else { INFO("There was some issue with the problem!"); }
 
-  _infoMsg("DONE", __func__, true);
+  utils::_infoMsg("DONE", __func__, true);
 
   return converged ? 0 : 1;
 }
