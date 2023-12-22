@@ -21,9 +21,6 @@
 #endif
 
 
-using namespace utils;
-
-
 /*
   Methods that use values that change in each iteration, e.g. the residuals, are 
   nonstationary. Some such methods are implemented here.
@@ -40,7 +37,7 @@ namespace lalib {
 
 
   /*
-    Conjugate gradient method doesn't solve the system of linear equations Ax = b  explicitly, but finds the minimizer
+    Conjugate gradient method doesn't solve the system of linear equations Ax = b per se, but finds the minimizer
     for an auxiliary problem x^T Ax - x^T b. The equality between the solutions of these problems holds 
     only in the case that A is symmetric and positive definite. If that is the case we can note that the
     auxiliary problem is quadratic in nature and thus can be solved as an unconstrained nonlinear optimization 
@@ -53,18 +50,18 @@ namespace lalib {
                                   int max_iter=MAX_ITER, type tol=BASE_TOL, bool check_symmetric=CHECK_SYMMETRIC) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (A.nrows() != A.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     if (check_symmetric) {
       for (int row = 0; row < A.nrows(); row++) {
 	      for (int col = 0; col < A.ncols(); col++) {
 	        if (A(row, col) != A(col, row)) {
-	          _errorMsg("Coefficient matrix must be symmetric!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	          ERROR("Coefficient matrix must be symmetric!");
 	        }
 	      } 
       }
@@ -89,7 +86,7 @@ namespace lalib {
       type rsnew = norm * norm;
       
       if (norm < tol) {
-	      _iterMsg(iter, norm, __func__);
+	      ITER(iter, norm);
 	      return x_k;
       }
 
@@ -101,11 +98,11 @@ namespace lalib {
       rsold = rsnew;
 
       if (iter % PRINT_INTERVAL == 0) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
       }
     }
 
-    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    WARNING("Solver did not converge to the wanted tolerance!");
 
     
     return x_k;
@@ -130,7 +127,7 @@ namespace lalib {
                                     int max_iter=MAX_ITER, type tol=BASE_TOL) {
 
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     Matrix A_T = A.T();
@@ -154,7 +151,7 @@ namespace lalib {
       type rsnew = norm * norm;
       
       if (norm < tol) {
-	      _iterMsg(iter, norm, __func__);
+	      ITER(iter, norm);
 	      return x_k;
       }
 
@@ -166,11 +163,11 @@ namespace lalib {
       rsold = rsnew;
 
       if (iter % (PRINT_INTERVAL * 5) == 0) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
       }
     }
 
-    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    WARNING("Solver did not converge to the wanted tolerance!");
 
     
     return x_k;

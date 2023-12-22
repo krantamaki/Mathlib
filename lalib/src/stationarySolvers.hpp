@@ -24,9 +24,6 @@
 #endif
 
 
-using namespace utils;
-
-
 /*
   Stationary methods are iterative methods that can be expressed as [1]:
     
@@ -64,11 +61,11 @@ namespace lalib {
   Vector<type, vectorize> jacobiSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (A.nrows() != A.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     Vector x_k = Vector<type, vectorize>(x_0);
@@ -92,7 +89,7 @@ namespace lalib {
           s = (b(row) - s) / a_ii;
         }
         else {
-          _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Coefficient matrix must have a non-zero diagonal!");
         }
 
         // Update the vector x
@@ -104,16 +101,16 @@ namespace lalib {
       type norm = (A.matmul(x_k) - b).norm();
 
       if (norm < tol) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
         return x_k;
       }
 
       if (iter % PRINT_INTERVAL == 0) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
       }
     }
 
-    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    WARNING("Solver did not converge to the wanted tolerance!");
     
     return x_k;
   }
@@ -134,11 +131,11 @@ namespace lalib {
   Vector<type, vectorize> gsSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (A.nrows() != A.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     Vector x_k = Vector<type, vectorize>(x_0);
@@ -168,7 +165,7 @@ namespace lalib {
           s = (b(row) - s) / a_ii;
         }
         else {
-          _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Coefficient matrix must have a non-zero diagonal!");
         }
 
         // Update the vector x
@@ -178,16 +175,16 @@ namespace lalib {
       type norm = (A.matmul(x_k) - b).norm();
 
       if (norm < tol) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
         return x_k;
       }
 
       if (iter % PRINT_INTERVAL == 0) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
       }
     }
 
-    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+    WARNING("Solver did not converge to the wanted tolerance!");
     
     return x_k;
   }
@@ -211,11 +208,11 @@ namespace lalib {
   Vector<type, vectorize> sorSolve(const Matrix<type, vectorize, sparse>& A, const Vector<type, vectorize>& x_0, const Vector<type, vectorize>& b, int max_iter=MAX_ITER, double tol=BASE_TOL, double w=OMEGA) {
     
     if (A.nrows() != x_0.len() || A.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (A.nrows() != A.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     Vector x_k = Vector<type, vectorize>(x_0);
@@ -245,7 +242,7 @@ namespace lalib {
           x_i = x_i + w * (s - x_i);
         }
         else {
-          _errorMsg("Coefficient matrix must have a non-zero diagonal!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+          ERROR("Coefficient matrix must have a non-zero diagonal!");
         }
 
         // Update the vector x
@@ -255,16 +252,16 @@ namespace lalib {
       type norm = (A.matmul(x_k) - b).norm();
       
       if (norm < tol) {
-        _iterMsg(iter, norm, __func__);
+        ITER(iter, norm);
         return x_k;
       }
 
       if (iter % PRINT_INTERVAL == 0) {
-	      _iterMsg(iter, norm, __func__);
+	      ITER(iter, norm);
       }
     }
 
-    _warningMsg("Solver did not converge to the wanted tolerance!", __func__);
+   WARNING("Solver did not converge to the wanted tolerance!");
         
     return x_k;
   }

@@ -20,9 +20,6 @@
  */
 
 
-using namespace utils;
-
-
 namespace lalib {
 
 
@@ -33,11 +30,11 @@ namespace lalib {
   Vector<type, vectorize> trilSolve(Matrix<type, vectorize, sparse> L, Vector<type, vectorize> b) {
 
     if (L.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (L.nrows() != L.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     /*
@@ -67,11 +64,11 @@ namespace lalib {
   Vector<type, vectorize> triuSolve(Matrix<type, vectorize, sparse> U, Vector<type, vectorize> b) {
     
     if (U.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (U.nrows() != U.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     /*
@@ -104,17 +101,17 @@ namespace lalib {
   Vector<type, vectorize> luSolve(Matrix<type, vectorize, sparse> A, Vector<type, vectorize> b) {
 
     if (A.nrows() != b.len()) {
-      _errorMsg("Improper dimensions!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper dimensions!");
     }
 
     if (A.nrows() != A.ncols()) {
-      _errorMsg("Coefficient matrix must be square!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Coefficient matrix must be square!");
     }
 
     std::tuple<Matrix<type, vectorize, sparse>, Matrix<type, vectorize, sparse>, Matrix<type, vectorize, sparse>> plu_tup = plu(A);
 
     Vector y = trilSolve<type, vectorize, sparse>(plu_tup[1], b);
-    Vector x = trilSolve<type, vectorize, sparse>(plu_tup[2], y);
+    Vector x = triuSolve<type, vectorize, sparse>(plu_tup[2], y);
     
     Vector ret = plu_tup[0].matmul(x);
 
