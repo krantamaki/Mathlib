@@ -7,10 +7,6 @@
 #include "../declare_lalib.hpp"
 
 
-using namespace lalib;
-using namespace utils;
-
-
 // Dense vector-matrix multiplication
 /*
 template <class type, bool vectorize, bool sparse> 
@@ -31,9 +27,9 @@ const Vector<type, vectorize> Vector<type, vectorize>::matmul(const Matrix<type,
 
 // Dot (inner) product
 template <class type, bool vectorize>
-type Vector<type, vectorize>::dot(const Vector<type, vectorize>& that) const {
+type lalib::Vector<type, vectorize>::dot(const lalib::Vector<type, vectorize>& that) const {
   if (_len != that._len) {
-    _errorMsg("Vector dimensions must match!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector dimensions must match!");
   }
 
   type ret = t_zero;

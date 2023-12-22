@@ -6,21 +6,17 @@
 #include "../declare_lalib.hpp"
 
 
-using namespace lalib;
-using namespace utils;
-
-
 // -------------------CONSTRUCTORS AND DESTRUCTORS--------------------------
 
 
 // Default constructor
 template <class type, bool vectorize> 
-Vector<type, vectorize>::Vector(void) { }
+lalib::Vector<type, vectorize>::Vector(void) { }
 
 
 // Copying constructor
 template <class type, bool vectorize> 
-Vector<type, vectorize>::Vector(const Vector& that) {
+lalib::Vector<type, vectorize>::Vector(const Vector& that) {
 
   if (that._len > 0) {
 
@@ -39,10 +35,10 @@ Vector<type, vectorize>::Vector(const Vector& that) {
 
 // Zeros constructor
 template <class type, bool vectorize> 
-Vector<type, vectorize>::Vector(int len) {
+lalib::Vector<type, vectorize>::Vector(int len) {
 
   if (len < 1) {
-    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector length must be positive!");
   }
 
   _len = len;
@@ -59,10 +55,10 @@ Vector<type, vectorize>::Vector(int len) {
 
 // Default value constructor
 template <class type, bool vectorize> 
-Vector<type, vectorize>::Vector(int len, type init_val) {
+lalib::Vector<type, vectorize>::Vector(int len, type init_val) {
 
   if (len < 1) {
-    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector length must be positive!");
   }
 
   _len = len;
@@ -81,12 +77,12 @@ Vector<type, vectorize>::Vector(int len, type init_val) {
 
 // Array copying constructor
 template <class type, bool vectorize>
-Vector<type, vectorize>::Vector(int len, type* elems) {
+lalib::Vector<type, vectorize>::Vector(int len, type* elems) {
 
-  _warningMsg("Initializing a vector with double array might lead to undefined behaviour!", __func__);
+  WARNING("Initializing a vector with double array might lead to undefined behaviour!");
 
   if (len < 1) {
-    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector length must be positive!");
   }
 
   _len = len;
@@ -110,14 +106,14 @@ Vector<type, vectorize>::Vector(int len, type* elems) {
 
 // Vector copying constructor
 template <class type, bool vectorize>
-Vector<type, vectorize>::Vector(int len, std::vector<type>& elems) {
+lalib::Vector<type, vectorize>::Vector(int len, std::vector<type>& elems) {
 
   if (len < 1) {
-    _errorMsg("Vector length must be positive!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector length must be positive!");
   }
     
   if (len != (int)elems.size()) {
-    _warningMsg("Given dimensions don't match with the size of the std::vector!", __func__);
+    WARNING("Given dimensions don't match with the size of the std::vector!");
   } 
 
   _len = len;
@@ -141,7 +137,7 @@ Vector<type, vectorize>::Vector(int len, std::vector<type>& elems) {
 
 // Load from file constructor
 template <class type, bool vectorize>
-Vector<type, vectorize>::Vector(const std::string& path, int offset, std::string format) {
+lalib::Vector<type, vectorize>::Vector(const std::string& path, int offset, std::string format) {
   // Variables to read the line contents to
   int row, col;
   type val;
@@ -149,17 +145,17 @@ Vector<type, vectorize>::Vector(const std::string& path, int offset, std::string
   // Read the last line of the file to get the dimensions of the matrix
   std::stringstream lastLine = _lastLine(path);
 
-  int nTokens = _numTokens(lastLine.str());
+  int nTokens = utils::_numTokens(lastLine.str());
 
   if (format != ".dat") {
-    _errorMsg("Support for other formats than .dat not implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Support for other formats than .dat not implemented!");
   }
   
   if (nTokens == 3) {
     lastLine >> row >> col >> val;
 
     if (col > 1 && row > 1) {
-      _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      ERROR("Improper data file!");
     }
 
     _len = row * col + 1 - offset;
@@ -193,7 +189,7 @@ Vector<type, vectorize>::Vector(const std::string& path, int offset, std::string
     file.close();
   }
   else {
-    _errorMsg("Improper data file!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Improper data file!");
   }
 }
 
@@ -203,9 +199,9 @@ Vector<type, vectorize>::Vector(const std::string& path, int offset, std::string
 
 // Element-wise addition assignment
 template <class type, bool vectorize> 
-Vector<type, vectorize>& Vector<type, vectorize>::operator+= (const Vector<type, vectorize>& that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator+= (const lalib::Vector<type, vectorize>& that) {
   if (_len != that._len) {
-    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__);
+    ERROR("Vectors must have equal amount of elements!");
   } 
 
   if constexpr (vectorize) {
@@ -230,16 +226,16 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator+= (const Vector<type,
 
 // Element-wise addition
 template <class type, bool vectorize> 
-const Vector<type, vectorize> Vector<type, vectorize>::operator+ (const Vector<type, vectorize>& that) const {
-  return Vector<type, vectorize>(*this) += that;
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator+ (const lalib::Vector<type, vectorize>& that) const {
+  return lalib::Vector<type, vectorize>(*this) += that;
 }
 
 
 // Element-wise subtraction assignment
 template <class type, bool vectorize> 
-Vector<type, vectorize>& Vector<type, vectorize>::operator-= (const Vector<type, vectorize>& that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator-= (const lalib::Vector<type, vectorize>& that) {
   if (_len != that._len) {
-    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__);
+    ERROR("Vectors must have equal amount of elements!");
   } 
 
   if constexpr (vectorize) {
@@ -264,16 +260,16 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator-= (const Vector<type,
 
 // Element-wise subtraction
 template <class type, bool vectorize> 
-const Vector<type, vectorize> Vector<type, vectorize>::operator- (const Vector<type, vectorize>& that) const {
-  return Vector<type, vectorize>(*this) -= that;
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator- (const lalib::Vector<type, vectorize>& that) const {
+  return lalib::Vector<type, vectorize>(*this) -= that;
 }
 
 
 // Element-wise multiplication assignment
 template <class type, bool vectorize> 
-Vector<type, vectorize>& Vector<type, vectorize>::operator*= (const Vector<type, vectorize>& that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator*= (const lalib::Vector<type, vectorize>& that) {
   if (_len != that._len) {
-    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __func__, __LINE__);
+    ERROR("Vectors must have equal amount of elements!");
   } 
 
   if constexpr (vectorize) {
@@ -298,14 +294,14 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator*= (const Vector<type,
 
 // Element-wise multiplication
 template <class type, bool vectorize> 
-const Vector<type, vectorize> Vector<type, vectorize>::operator* (const Vector<type, vectorize>& that) const {
-  return Vector<type, vectorize>(*this) *= that;
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator* (const lalib::Vector<type, vectorize>& that) const {
+  return lalib::Vector<type, vectorize>(*this) *= that;
 }
 
 
 // Scalar (right) multiplication assignment
 template <class type, bool vectorize> 
-Vector<type, vectorize>& Vector<type, vectorize>::operator*= (type that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator*= (type that) {
   if (_len < 1) {
     return *this;
   }
@@ -334,23 +330,23 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator*= (type that) {
 
 // Scalar (right) multiplication
 template <class type, bool vectorize> 
-const Vector<type, vectorize> Vector<type, vectorize>::operator* (const type that) const {
-  return Vector<type, vectorize>(*this) *= that;  
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator* (const type that) const {
+  return lalib::Vector<type, vectorize>(*this) *= that;  
 }
 
 
 // Scalar (left) multiplication
 template <class type, bool vectorize> 
-const Vector<type, vectorize> lalib::operator* (type scalar, const Vector<type, vectorize>& vector) {
-  return Vector<type, vectorize>(vector) *= scalar;
+const lalib::Vector<type, vectorize> lalib::operator* (type scalar, const lalib::Vector<type, vectorize>& vector) {
+  return lalib::Vector<type, vectorize>(vector) *= scalar;
 }
 
 
 // Element-wise division assignment
 template <class type, bool vectorize> 
-Vector<type, vectorize>& Vector<type, vectorize>::operator/= (const Vector<type, vectorize>& that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator/= (const lalib::Vector<type, vectorize>& that) {
   if (_len != that._len) {
-    _errorMsg("Vectors must have equal amount of elements!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vectors must have equal amount of elements!");
   } 
 
   if constexpr (vectorize) {
@@ -375,16 +371,16 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator/= (const Vector<type,
 
 // Element-wise division
 template <class type, bool vectorize> 
-const Vector<type, vectorize> Vector<type, vectorize>::operator/ (const Vector<type, vectorize>& that) const {
-  return Vector<type, vectorize>(*this) /= that;
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator/ (const lalib::Vector<type, vectorize>& that) const {
+  return lalib::Vector<type, vectorize>(*this) /= that;
 }
 
 
 // Scalar division assignment
 template <class type, bool vectorize> 
-Vector<type, vectorize>& Vector<type, vectorize>::operator/= (type that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator/= (type that) {
   if (that == t_zero) {
-    _errorMsg("Division by zero undefined!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Division by zero undefined!");
   }
   if (_len < 1) {
     return *this;
@@ -414,8 +410,8 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator/= (type that) {
 
 // Scalar division
 template <class type, bool vectorize>  
-const Vector<type, vectorize> Vector<type, vectorize>::operator/ (const type that) const {
-  return Vector<type, vectorize>(*this) /= that;
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator/ (const type that) const {
+  return lalib::Vector<type, vectorize>(*this) /= that;
 }
 
 
@@ -424,9 +420,9 @@ const Vector<type, vectorize> Vector<type, vectorize>::operator/ (const type tha
 
 // Standard single value placement
 template <class type, bool vectorize>
-void Vector<type, vectorize>::place(int num, type val) {
+void lalib::Vector<type, vectorize>::place(int num, type val) {
   if (num < 0 || num >= _len) {
-    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Index out of bounds!");
   }
 
   if constexpr (vectorize) {
@@ -443,9 +439,9 @@ void Vector<type, vectorize>::place(int num, type val) {
 
 // Standard vector placement
 template <class type, bool vectorize>
-void Vector<type, vectorize>::place(int start, int end, Vector<type, vectorize>& vector) {
+void lalib::Vector<type, vectorize>::place(int start, int end, lalib::Vector<type, vectorize>& vector) {
   if (_len < end - start || start < 0 || start >= end) {
-    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Given dimensions out of bounds!");
   }
 
   #pragma omp parallel for schedule(dynamic, 1)
@@ -457,9 +453,9 @@ void Vector<type, vectorize>::place(int start, int end, Vector<type, vectorize>&
 
 // Standard indexing method
 template <class type, bool vectorize>
-type Vector<type, vectorize>::operator() (int num) const {
+type lalib::Vector<type, vectorize>::operator() (int num) const {
   if (num < 0 || num >= _len) {
-    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Index out of bounds!");
   }
 
   if constexpr (vectorize) {
@@ -476,27 +472,27 @@ type Vector<type, vectorize>::operator() (int num) const {
 
 // Squared bracket indexing method
 template <class type, bool vectorize>
-type Vector<type, vectorize>::operator[] (int num) const {
+type lalib::Vector<type, vectorize>::operator[] (int num) const {
   return this->operator() (num);
 }
 
 
 // Named indexing method
 template <class type, bool vectorize>
-type Vector<type, vectorize>::get(int num) const {
+type lalib::Vector<type, vectorize>::get(int num) const {
   return this->operator() (num);
 }
 
 
 // Standard slicing method
 template <class type, bool vectorize>
-const Vector<type, vectorize> Vector<type, vectorize>::operator() (int start, int end) const {
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::operator() (int start, int end) const {
   if (_len < end - start || start < 0 || start >= end) {
-    _errorMsg("Given dimensions out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Given dimensions out of bounds!");
   }
 
   if (end >= _len) {
-    _warningMsg("End index out of bounds", __func__);
+    WARNING("End index out of bounds");
     end = _len;
   }
 
@@ -513,20 +509,20 @@ const Vector<type, vectorize> Vector<type, vectorize>::operator() (int start, in
 
 // Named slicing method
 template <class type, bool vectorize>
-const Vector<type, vectorize> Vector<type, vectorize>::get(int start, int end) const {
+const lalib::Vector<type, vectorize> lalib::Vector<type, vectorize>::get(int start, int end) const {
   return this->operator() (start, end);
 }
 
 
 // SIMD accessing method
 template <class type, bool vectorize>
-type* Vector<type, vectorize>::getSIMD(int num) const {
+type* lalib::Vector<type, vectorize>::getSIMD(int num) const {
   if (!vectorize) {
-    _errorMsg("To access SIMD vectors implementation must be vectorized", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("To access SIMD vectors implementation must be vectorized");
   }
 
   if (num >= _total_vects) {
-    _errorMsg("Index out of bounds!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Index out of bounds!");
   }
 
   return (type*)&data.data()[num];
@@ -538,7 +534,7 @@ type* Vector<type, vectorize>::getSIMD(int num) const {
 
 // Default assignment operator
 template <class type, bool vectorize>
-Vector<type, vectorize>& Vector<type, vectorize>::operator= (const Vector<type, vectorize>& that) {
+lalib::Vector<type, vectorize>& lalib::Vector<type, vectorize>::operator= (const lalib::Vector<type, vectorize>& that) {
   // Check for self-assignment ie. case where a = a is called by comparing the pointers of the objects
   if (this == &that) return *this;
 
@@ -552,7 +548,7 @@ Vector<type, vectorize>& Vector<type, vectorize>::operator= (const Vector<type, 
 
 // Default (equality) comparison operator
 template <class type, bool vectorize>
-bool Vector<type, vectorize>::operator== (const Vector<type, vectorize>& that) {
+bool lalib::Vector<type, vectorize>::operator== (const lalib::Vector<type, vectorize>& that) {
   if (_len != that._len) return false;
 
   for (int i = 0; i < _len; i++) {
@@ -567,7 +563,7 @@ bool Vector<type, vectorize>::operator== (const Vector<type, vectorize>& that) {
 
 // Default (inequality) comparison operator
 template <class type, bool vectorize>
-bool Vector<type, vectorize>::operator!= (const Vector<type, vectorize>& that) {
+bool lalib::Vector<type, vectorize>::operator!= (const lalib::Vector<type, vectorize>& that) {
   return !(*this == that);
 }
 
@@ -577,7 +573,7 @@ bool Vector<type, vectorize>::operator!= (const Vector<type, vectorize>& that) {
 
 // Approximative equality comparison
 template <class type, bool vectorize>
-bool Vector<type, vectorize>::isclose(const Vector<type, vectorize>& that, type tol, type (*abs_func)(type)) {
+bool lalib::Vector<type, vectorize>::isclose(const lalib::Vector<type, vectorize>& that, type tol, type (*abs_func)(type)) {
   if (_len != that._len) return false;
 
   for (int i = 0; i < _len; i++) {
@@ -592,13 +588,13 @@ bool Vector<type, vectorize>::isclose(const Vector<type, vectorize>& that, type 
 
 // Vector saving
 template <class type, bool vectorize>
-bool Vector<type, vectorize>::save(const std::string& path, int offset, std::string format) {
+bool lalib::Vector<type, vectorize>::save(const std::string& path, int offset, std::string format) {
   if (_len <= 0) {
-    _errorMsg("Cannot save an unitialized vector!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Cannot save an unitialized vector!");
   }
 
   if (format != ".dat") {
-    _errorMsg("Support for other formats than .dat not yet implemented!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Support for other formats than .dat not yet implemented!");
   }
 
   std::ofstream file(path);
@@ -619,9 +615,9 @@ bool Vector<type, vectorize>::save(const std::string& path, int offset, std::str
 
 // Convert Vector into std::vector
 template <class type, bool vectorize>
-std::vector<type> Vector<type, vectorize>::tovector() const {
+std::vector<type> lalib::Vector<type, vectorize>::tovector() const {
   if (_len < 1) {
-    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector must be initialized!");
   }
 
   std::vector<type> ret;
@@ -636,9 +632,9 @@ std::vector<type> Vector<type, vectorize>::tovector() const {
 
 // Convert Vector into a double
 template <class type, bool vectorize>
-type Vector<type, vectorize>::asScalar() const {
+type lalib::Vector<type, vectorize>::asScalar() const {
   if (_len != 1) {
-    _errorMsg("Vector must have just a single element!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector must have just a single element!");
   }
 
   return this->operator() (0);
@@ -647,9 +643,9 @@ type Vector<type, vectorize>::asScalar() const {
 
 // The l_p norm
 template <class type, bool vectorize>
-type Vector<type, vectorize>::norm(type p, type (*pow_func)(type, type)) const {
+type lalib::Vector<type, vectorize>::norm(type p, type (*pow_func)(type, type)) const {
   if (_len < 1) {
-    _errorMsg("Vector must be initialized!", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    ERROR("Vector must be initialized!");
   }
 
   type ret = t_zero;
@@ -665,7 +661,7 @@ type Vector<type, vectorize>::norm(type p, type (*pow_func)(type, type)) const {
 
 // Default insertion operator
 template <class type, bool vectorize>
-std::ostream& lalib::operator<<(std::ostream& os, Vector<type, vectorize>& v) {
+std::ostream& lalib::operator<<(std::ostream& os, lalib::Vector<type, vectorize>& v) {
   if (v.len() == 0) {
     os << "[]" << std::endl;  // Signifies uninitialized vector
         

@@ -5,9 +5,6 @@
 #include "../declare_lalib.hpp"
 
 
-using namespace utils;
-
-
 namespace lalib {
 
   template <class type, bool vectorize, bool sparse> 
@@ -30,7 +27,7 @@ namespace lalib {
     protected:
 
       // Alias the used variable type in computations
-      using var_t = decltype(_choose_simd<type, vectorize>());
+      using var_t = decltype(utils::_choose_simd<type, vectorize>());
 
 
       // Should define a SIMD vector of zeros or scalar zero depending on vectorization
@@ -532,19 +529,6 @@ namespace lalib {
        * @return The number of elements as const
        */
       const int len() const { return _len; }
-
-      /**
-       * @brief Dense vector-matrix multiplication
-       *
-       * Method that computes the vector-matrix multiplication in a (relatively) efficient way.
-       *
-       * @param that A reference to the CRSMatrix object used in multiplication
-       * @param is_symmetric OPTIONAL, DEFAULTS TO < bool is_symmetric = ".dat" > Boolean flag
-       * telling if the CRSMatrix is symmetric
-       *
-       * @return The resulting Vector object
-       */
-      // const Vector matmul(const CRSMatrix<vect_type, vect_size>& that, bool is_symmetric=false) const;
 
       /**
        * @brief Dense vector-matrix multiplication
